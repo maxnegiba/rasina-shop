@@ -121,7 +121,6 @@ class OrderResource extends Resource
                     ->money('RON')
                     ->sortable(),
 
-                // FIX: Folosim TextColumn cu proprietatea ->badge()
                 TextColumn::make('payment_status')
                     ->label('Plată')
                     ->badge()
