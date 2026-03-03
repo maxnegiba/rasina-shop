@@ -4,36 +4,36 @@
 <div class="max-w-7xl mx-auto px-4 py-12 md:py-24">
     
     <div class="text-center mb-16 md:mb-24">
-        <h1 class="font-serif text-4xl md:text-5xl italic mb-4 text-espresso">
+        <h1 class="font-serif text-4xl md:text-5xl italic mb-4 text-smoked-black">
             {{ isset($category) ? $category->name : 'Galeria de Artă' }}
         </h1>
-        <p class="text-espresso/70 font-light max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
+        <p class="text-smoked-black/70 font-light max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
             {{ isset($category) && $category->description 
                 ? $category->description 
                 : 'Explorează colecția noastră de piese unicat, create manual cu pasiune și atenție la detalii.' }}
         </p>
-        <div class="w-24 h-px bg-brass mx-auto mt-8"></div>
+        <div class="w-24 h-px bg-vintage-gold mx-auto mt-8"></div>
     </div>
 
     <div class="flex flex-col md:flex-row gap-12 items-start">
         
         <aside class="w-full md:w-1/4 sticky top-32">
-            <h3 class="font-serif text-xl mb-6 uppercase tracking-widest border-b border-brass/20 pb-4 text-espresso">
+            <h3 class="font-serif text-xl mb-6 uppercase tracking-widest border-b border-vintage-gold/20 pb-4 text-smoked-black">
                 Colecții
             </h3>
             <ul class="space-y-4 font-light text-sm tracking-wide">
                 <li>
                     <a href="{{ route('shop.index') }}" 
-                       class="{{ !isset($category) ? 'text-brass font-medium' : 'text-espresso/70 hover:text-brass' }} transition flex items-center">
+                       class="{{ !isset($category) ? 'text-vintage-gold font-medium' : 'text-smoked-black/70 hover:text-vintage-gold' }} transition flex items-center">
                         Toate Piesele
                     </a>
                 </li>
                 @foreach($categories as $cat)
                     <li>
                         <a href="{{ route('shop.category', $cat->slug) }}" 
-                           class="flex justify-between items-center {{ isset($category) && $category->id === $cat->id ? 'text-brass font-medium' : 'text-espresso/70 hover:text-brass' }} transition">
+                           class="flex justify-between items-center {{ isset($category) && $category->id === $cat->id ? 'text-vintage-gold font-medium' : 'text-smoked-black/70 hover:text-vintage-gold' }} transition">
                             <span>{{ $cat->name }}</span>
-                            <span class="text-[10px] bg-brass/10 text-brass px-2 py-0.5 rounded-full">
+                            <span class="text-[10px] bg-vintage-gold/10 text-vintage-gold px-2 py-0.5 rounded-full">
                                 {{ $cat->products_count }}
                             </span>
                         </a>
@@ -47,7 +47,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     @foreach($products as $product)
                         <a href="{{ route('shop.show', $product->slug) }}" class="group block">
-                            <div class="aspect-[4/5] bg-white overflow-hidden relative mb-4 border border-brass/5 group-hover:border-brass/30 transition duration-500 shadow-sm group-hover:shadow-md">
+                            <div class="aspect-[4/5] bg-white overflow-hidden relative mb-4 border border-vintage-gold/5 group-hover:border-vintage-gold/30 transition duration-500 shadow-sm group-hover:shadow-md">
                                 
                                 @php
                                     // Logica de imagini antiglonț
@@ -71,17 +71,17 @@
                                      class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
                                 
                                 @if($product->is_custom)
-                                    <div class="absolute top-4 left-4 bg-espresso/90 backdrop-blur-sm text-ivory text-[9px] px-3 py-1 uppercase tracking-widest">
+                                    <div class="absolute top-4 left-4 bg-smoked-black/90 backdrop-blur-sm text-ivory text-[9px] px-3 py-1 uppercase tracking-widest">
                                         La Comandă
                                     </div>
                                 @endif
                             </div>
                             
                             <div class="text-center px-2">
-                                <h2 class="font-serif text-lg uppercase tracking-wider text-espresso mb-1 truncate">
+                                <h2 class="font-serif text-lg uppercase tracking-wider text-smoked-black mb-1 truncate">
                                     {{ $product->name }}
                                 </h2>
-                                <p class="text-brass text-sm tracking-widest">
+                                <p class="text-vintage-gold text-sm tracking-widest">
                                     {{ $product->is_custom ? 'Preț la cerere' : $product->price . ' RON' }}
                                 </p>
                             </div>
@@ -93,10 +93,10 @@
                     {{ $products->links() }}
                 </div>
             @else
-                <div class="text-center py-32 border border-dashed border-brass/30 bg-white/50">
-                    <h3 class="font-serif text-2xl mb-2 text-espresso/50 italic">Nicio piesă găsită.</h3>
-                    <p class="font-light text-espresso/50 mb-8 text-sm">Această colecție nu conține momentan lucrări publicate.</p>
-                    <a href="{{ route('shop.index') }}" class="inline-block border border-brass text-brass px-8 py-3 uppercase tracking-widest text-xs hover:bg-brass hover:text-ivory transition duration-300">
+                <div class="text-center py-32 border border-dashed border-vintage-gold/30 bg-white/50">
+                    <h3 class="font-serif text-2xl mb-2 text-smoked-black/50 italic">Nicio piesă găsită.</h3>
+                    <p class="font-light text-smoked-black/50 mb-8 text-sm">Această colecție nu conține momentan lucrări publicate.</p>
+                    <a href="{{ route('shop.index') }}" class="inline-block border border-vintage-gold text-vintage-gold px-8 py-3 uppercase tracking-widest text-xs hover:bg-vintage-gold hover:text-ivory transition duration-300">
                         Vezi Toate Piesele
                     </a>
                 </div>
