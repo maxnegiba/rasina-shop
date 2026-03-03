@@ -7,24 +7,23 @@ use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Resources\Concerns\Translatable;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
 use Illuminate\Support\Str;
-use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProductResource extends Resource
 {
-    // Activăm funcționalitatea bilingvă pentru această resursă
-    use Translatable;
-
     protected static ?string $model = Product::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-sparkles';
+    protected static ?string $navigationIcon = 'heroicon-o-paint-brush';
     protected static ?string $navigationGroup = 'Catalog de Artă';
-    protected static ?string $modelLabel = 'Produs';
-    protected static ?string $pluralModelLabel = 'Produse';
+    protected static ?string $modelLabel = 'Produs / Operă';
+    protected static ?string $pluralModelLabel = 'Galerie Produse';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
@@ -33,13 +32,11 @@ class ProductResource extends Resource
                 Forms\Components\Group::make()->schema([
                     Forms\Components\Section::make('Detalii Principale')->schema([
                         Forms\Components\TextInput::make('name')
-                            ->label('Nume Produs (RO/EN)')
+                            ->label('Numele Piesei')
                             ->required()
                             ->maxLength(255)
-                            ->live(onBlur: true) // Când ieși din câmp, generează automat slug-ul
-                            ->afterStateUpdated(function (Set $set, ?string $state) {
-                                $set('slug', Str::slug($state));
-                            }),
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
 
                         Forms\Components\TextInput::make('slug')
                             ->label('URL Prietenos (Slug)')
@@ -47,68 +44,67 @@ class ProductResource extends Resource
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
 
-                        Forms\Components\Select::make('category_id')
-                            ->label('Categorie')
-                            ->relationship('category', 'name')
-                            ->required(),
-
                         Forms\Components\RichEditor::make('description')
-                            ->label('Descriere (RO/EN)')
+                            ->label('Povestea / Descrierea')
                             ->columnSpanFull(),
                     ])->columns(2),
 
-                    Forms\Components\Section::make('Galerie Foto')->schema([
-                        Forms\Components\Repeater::make('images')
-                            ->relationship('images')
-                            ->label('Imagini Produs')
-                            ->schema([
-                                Forms\Components\FileUpload::make('image_path')
-                                    ->label('Imagine')
-                                    ->image()
-                                    ->directory('products')
-                                    ->required()
-                                    ->columnSpan(3),
-                                Forms\Components\Toggle::make('is_featured')
-                                    ->label('Imagine Principală')
-                                    ->columnSpan(1),
-                            ])
-                            ->columns(4)
-                            ->defaultItems(1)
-                            ->reorderableWithButtons(),
+                    Forms\Components\Section::make('Imagini')->schema([
+                        // Aici presupunem că ai un câmp image direct pe produs 
+                        // sau folosești un tabel separat. Ca placeholder standard pentru Filament:
+                        Forms\Components\FileUpload::make('image')
+                            ->label('Imagine Principală')
+                            ->image()
+                            ->directory('products')
+                            ->columnSpanFull(),
                     ]),
                 ])->columnSpan(['lg' => 2]),
 
                 Forms\Components\Group::make()->schema([
-                    Forms\Components\Section::make('Tip Produs & Vânzare')->schema([
+                    Forms\Components\Section::make('Organizare')->schema([
+                        Forms\Components\Select::make('status')
+                            ->label('Status Vizibilitate')
+                            ->options([
+                                'draft' => 'Ciornă (Ascuns)',
+                                'published' => 'Publicat (Vizibil pe site)',
+                            ])
+                            ->default('draft')
+                            ->required()
+                            ->native(false),
+
+                        Forms\Components\Select::make('category_id')
+                            ->label('Categorie')
+                            // FIX-UL MAGIC PENTRU POSTGRESQL & JSON
+                            ->relationship(
+                                name: 'category', 
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn (Builder $query) => $query->orderBy('name->ro', 'asc')
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+                    ]),
+
+                    Forms\Components\Section::make('Comercial')->schema([
                         Forms\Components\Toggle::make('is_custom')
-                            ->label('Produs Unicat / Personalizat')
-                            ->helperText('Dacă bifezi, butonul de "Adaugă în coș" va fi înlocuit cu formularul "Cere Ofertă".')
-                            ->live() // Asta face ca interfața să reacționeze în timp real
-                            ->default(false),
+                            ->label('Piesă Unicat (La Comandă)')
+                            ->helperText('Dacă este activat, prețul va fi înlocuit cu "Preț la cerere", iar clientul va completa un formular în loc să cumpere direct.')
+                            ->default(false)
+                            ->live(),
 
                         Forms\Components\TextInput::make('price')
                             ->label('Preț (RON)')
                             ->numeric()
                             ->prefix('RON')
-                            ->hidden(fn (Get $get): bool => $get('is_custom') === true), // Se ascunde dacă e unicat
+                            ->hidden(fn (Forms\Get $get): bool => $get('is_custom') === true)
+                            ->required(fn (Forms\Get $get): bool => $get('is_custom') === false),
 
                         Forms\Components\TextInput::make('stock')
-                            ->label('Stoc Disponibil')
+                            ->label('Stoc disponibil')
                             ->numeric()
                             ->default(1)
-                            ->hidden(fn (Get $get): bool => $get('is_custom') === true), // Se ascunde dacă e unicat
-                    ]),
-
-                    Forms\Components\Section::make('Stare Produs')->schema([
-                        Forms\Components\Select::make('status')
-                            ->label('Status')
-                            ->options([
-                                'draft' => 'Ciornă (Ascuns)',
-                                'published' => 'Publicat (Vizibil pe site)',
-                                'archived' => 'Arhivat',
-                            ])
-                            ->default('draft')
-                            ->required(),
+                            ->hidden(fn (Forms\Get $get): bool => $get('is_custom') === true)
+                            ->required(fn (Forms\Get $get): bool => $get('is_custom') === false),
                     ]),
                 ])->columnSpan(['lg' => 1]),
             ])
@@ -119,38 +115,57 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->label('Nume Produs')
+                TextColumn::make('name')
+                    ->label('Numele Piesei')
                     ->searchable()
-                    ->sortable(),
+                    ->weight('bold'),
 
-                Tables\Columns\TextColumn::make('category.name')
+                // Dezactivăm sortarea pe categorie ca să evităm eroarea Postgres în tabel
+                TextColumn::make('category.name')
                     ->label('Categorie')
-                    ->sortable(),
+                    ->sortable(false),
 
-                Tables\Columns\TextColumn::make('price')
+                TextColumn::make('price')
                     ->label('Preț')
-                    ->formatStateUsing(function ($state, $record) {
-                        // Dacă e produs custom, afișăm "La cerere" în loc de preț
-                        return $record->is_custom ? 'La cerere' : $state . ' RON';
-                    })
-                    ->sortable(),
+                    ->money('RON')
+                    ->sortable()
+                    ->placeholder('La cerere'),
 
-                Tables\Columns\IconColumn::make('is_custom')
+                IconColumn::make('is_custom')
                     ->label('Unicat')
                     ->boolean(),
 
-                Tables\Columns\TextColumn::make('status')
+                TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->colors([
-                        'danger' => 'archived',
-                        'warning' => 'draft',
-                        'success' => 'published',
-                    ]),
+                    ->color(fn (string $state): string => match ($state) {
+                        'draft' => 'gray',
+                        'published' => 'success',
+                        default => 'primary',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'draft' => 'Ciornă',
+                        'published' => 'Publicat',
+                        default => $state,
+                    }),
+
+                TextColumn::make('created_at')
+                    ->label('Data Adăugării')
+                    ->dateTime('d M Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
-                // Aici vom putea adăuga filtre pe viitor
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        'draft' => 'Ciorne',
+                        'published' => 'Publicate',
+                    ]),
+                Tables\Filters\TernaryFilter::make('is_custom')
+                    ->label('Tip Produs')
+                    ->trueLabel('Doar Unicat / La Comandă')
+                    ->falseLabel('Doar Standard (În Stoc)'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -165,7 +180,7 @@ class ProductResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            // Aici vei putea adăuga RelationManager-ul pentru Galeria de Imagini (product_images)
         ];
     }
 

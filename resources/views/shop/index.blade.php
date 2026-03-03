@@ -48,12 +48,25 @@
                     @foreach($products as $product)
                         <a href="{{ route('shop.show', $product->slug) }}" class="group block">
                             <div class="aspect-[4/5] bg-white overflow-hidden relative mb-4 border border-brass/5 group-hover:border-brass/30 transition duration-500 shadow-sm group-hover:shadow-md">
+                                
                                 @php
-                                    // Căutăm imaginea principală, altfel o luăm pe prima găsită
-                                    $image = $product->images->where('is_featured', true)->first() ?? $product->images->first();
+                                    // Logica de imagini antiglonț
+                                    $imageUrl = null;
+                                    
+                                    if (!empty($product->image)) {
+                                        // Varianta 1: Dacă folosești câmpul simplu 'image'
+                                        $imageUrl = asset('storage/' . $product->image);
+                                    } elseif (isset($product->images) && $product->images->count() > 0) {
+                                        // Varianta 2: Dacă folosești relația cu mai multe imagini
+                                        $firstImage = $product->images->where('is_featured', true)->first() ?? $product->images->first();
+                                        $imageUrl = asset('storage/' . $firstImage->image_path);
+                                    } else {
+                                        // Varianta 3: Fallback local SVG (nu declanșează ad-blockerele)
+                                        $imageUrl = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iODAwIiBmaWxsPSIjRkRGQkY3Ij48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjgwMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiNDNUE4ODAiPkl2b3J5IFZpbnRhZ2U8L3RleHQ+PC9zdmc+';
+                                    }
                                 @endphp
                                 
-                                <img src="{{ $image ? asset('storage/' . $image->image_path) : 'https://via.placeholder.com/600x800' }}" 
+                                <img src="{{ $imageUrl }}" 
                                      alt="{{ $product->name }}" 
                                      class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
                                 
