@@ -1,26 +1,27 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 py-12 md:py-24">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
     
-    <nav class="mb-8 text-sm font-light text-smoked-black/60 tracking-wide">
-        <a href="{{ route('shop.index') }}" class="hover:text-vintage-gold transition">Galeria de Artă</a>
-        <span class="mx-2">/</span>
+    <!-- Breadcrumbs minimaliste -->
+    <nav class="mb-12 text-[10px] font-medium uppercase tracking-[0.2em] text-smoked-black/40 flex items-center gap-3">
+        <a href="{{ route('home') }}" class="hover:text-smoked-black transition-colors">Acasă</a>
+        <span class="w-1 h-1 rounded-full bg-black/10"></span>
+        <a href="{{ route('shop.index') }}" class="hover:text-smoked-black transition-colors">Galerie</a>
         @if($product->category)
-            <a href="{{ route('shop.category', $product->category->slug) }}" class="hover:text-vintage-gold transition">
+            <span class="w-1 h-1 rounded-full bg-black/10"></span>
+            <a href="{{ route('shop.category', $product->category->slug) }}" class="hover:text-smoked-black transition-colors">
                 {{ $product->category->name }}
             </a>
-            <span class="mx-2">/</span>
         @endif
-        <span class="text-smoked-black font-medium">{{ $product->name }}</span>
     </nav>
 
-    <div class="flex flex-col md:flex-row gap-12 lg:gap-20 items-start">
+    <div class="flex flex-col lg:flex-row gap-16 lg:gap-24 items-start">
         
-        <div class="w-full md:w-1/2">
-            <div class="aspect-[4/5] bg-white overflow-hidden relative border border-vintage-gold/10 shadow-lg">
+        <!-- Zona de Imagine -->
+        <div class="w-full lg:w-3/5">
+            <div class="aspect-[4/5] overflow-hidden bg-warm-beige/20 relative group">
                 @php
-                    // Aceeași logică antiglonț pentru imagine ca pe pagina principală
                     $imageUrl = null;
                     if (!empty($product->image)) {
                         $imageUrl = asset('storage/' . $product->image);
@@ -34,70 +35,90 @@
                 
                 <img src="{{ $imageUrl }}" 
                      alt="{{ $product->name }}" 
-                     class="w-full h-full object-cover">
+                     class="w-full h-full object-cover filter contrast-[0.95] group-hover:contrast-100 transition-all duration-700">
                      
                 @if($product->is_custom)
-                    <div class="absolute top-6 left-6 bg-smoked-black/90 backdrop-blur-sm text-ivory text-xs px-4 py-2 uppercase tracking-widest">
-                        Piesă Unicat / La Comandă
+                    <div class="absolute top-6 left-6 bg-white/90 backdrop-blur-sm text-smoked-black text-[10px] px-4 py-2 uppercase tracking-[0.2em] font-medium shadow-sm">
+                        Lucrare Unicat / Comandă
                     </div>
                 @endif
             </div>
+
+            <!-- Galerie secundară (dacă există alte imagini) -->
+            @if(isset($product->images) && $product->images->count() > 1)
+                <div class="grid grid-cols-3 gap-4 mt-4">
+                    @foreach($product->images->where('is_featured', false)->take(3) as $image)
+                        <div class="aspect-square bg-warm-beige/20 overflow-hidden cursor-pointer">
+                            <img src="{{ asset('storage/' . $image->image_path) }}" class="w-full h-full object-cover filter grayscale hover:grayscale-0 transition duration-500">
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         </div>
 
-        <div class="w-full md:w-1/2 py-4 md:py-8 md:sticky md:top-32">
+        <!-- Zona de Detalii -->
+        <div class="w-full lg:w-2/5 py-4 lg:sticky lg:top-32">
             
-            <h1 class="font-serif text-3xl md:text-5xl text-smoked-black mb-4 leading-tight">
-                {{ $product->name }}
-            </h1>
-            
-            <div class="text-2xl text-vintage-gold font-light tracking-wider mb-8">
-                @if($product->is_custom)
-                    Preț la cerere
-                @else
-                    {{ number_format($product->price, 2, ',', '.') }} RON
-                @endif
+            <div class="mb-8">
+                <h1 class="font-serif text-4xl lg:text-5xl text-smoked-black mb-6 leading-tight">
+                    {{ $product->name }}
+                </h1>
+
+                <div class="text-xl font-sans text-smoked-black/80 tracking-[0.1em] uppercase">
+                    @if($product->is_custom)
+                        Preț la cerere
+                    @else
+                        {{ number_format($product->price, 0, ',', '.') }} <span class="text-sm font-medium">RON</span>
+                    @endif
+                </div>
             </div>
 
-            <div class="prose prose-smoked-black prose-a:text-vintage-gold font-light leading-relaxed text-smoked-black/80 mb-10">
+            <div class="w-12 h-px bg-vintage-gold mb-8"></div>
+
+            <div class="prose prose-sm prose-smoked-black prose-a:text-vintage-gold font-light leading-relaxed text-smoked-black/70 mb-12">
                 {!! $product->description !!}
             </div>
 
-            <div class="border-t border-vintage-gold/20 pt-8 mt-8">
+            <div class="pt-8 border-t border-black/5">
                 @if($product->is_custom)
-                    <p class="text-sm font-light text-smoked-black/70 mb-6 italic">
-                        Această piesă este unicat sau se realizează pe comandă. Contactați-ne pentru a discuta dimensiunile, nuanțele de rășină dorite și timpul de execuție.
+                    <p class="text-xs font-light text-smoked-black/60 mb-6 leading-relaxed">
+                        * Această piesă este o lucrare unicat de referință. Putem realiza o operă similară, adaptată dimensiunilor și preferințelor dumneavoastră cromatice.
                     </p>
-                    <a href="#contact" class="block w-full text-center bg-smoked-black text-ivory px-8 py-4 uppercase tracking-widest text-sm hover:bg-vintage-gold transition duration-300">
-                        Solicită Detalii / Ofertă
+                    <a href="#contact" class="group relative flex items-center justify-center w-full bg-smoked-black text-white px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium hover:bg-vintage-gold transition-colors duration-500 overflow-hidden">
+                        <span class="relative z-10">Solicită o propunere</span>
                     </a>
                 @else
                     @if($product->stock > 0)
                         <form action="#" method="POST">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
-                            <button type="submit" class="w-full bg-vintage-gold text-ivory px-8 py-4 uppercase tracking-widest text-sm hover:bg-smoked-black transition duration-300 shadow-md">
-                                Adaugă în Coș
+                            <button type="submit" class="w-full bg-vintage-gold text-white px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium hover:bg-smoked-black transition-colors duration-500 shadow-sm">
+                                Adaugă în Colecție
                             </button>
                         </form>
-                        <p class="text-xs text-center text-smoked-black/50 mt-4 tracking-wide uppercase">
-                            ✓ În Stoc ({{ $product->stock }} buc.)
+                        <p class="text-[10px] text-center text-smoked-black/40 mt-4 tracking-[0.2em] uppercase font-medium">
+                            Disponibil pentru livrare
                         </p>
                     @else
-                        <button disabled class="w-full border border-smoked-black/20 text-smoked-black/40 px-8 py-4 uppercase tracking-widest text-sm cursor-not-allowed">
-                            Stoc Epuizat
+                        <button disabled class="w-full border border-smoked-black/20 text-smoked-black/30 bg-black/5 px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium cursor-not-allowed">
+                            Lucrare Achiziționată
                         </button>
                     @endif
                 @endif
             </div>
             
-            <div class="mt-12 space-y-4 text-xs font-light tracking-wide text-smoked-black/60 uppercase">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-vintage-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
-                    <span>Lucrat manual în România</span>
+            <div class="mt-16 space-y-5 text-[10px] font-medium tracking-[0.15em] text-smoked-black/50 uppercase border-t border-black/5 pt-8">
+                <div class="flex items-center gap-4">
+                    <span class="w-6 h-px bg-vintage-gold"></span>
+                    <span>Design și manufactură în România</span>
                 </div>
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-vintage-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                    <span>Plată securizată via Stripe</span>
+                <div class="flex items-center gap-4">
+                    <span class="w-6 h-px bg-vintage-gold"></span>
+                    <span>Procesare securizată (Stripe)</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="w-6 h-px bg-vintage-gold"></span>
+                    <span>Certificat de autenticitate inclus</span>
                 </div>
             </div>
 
