@@ -52,4 +52,22 @@ class PageController extends Controller
     {
         return view('pages.contact');
     }
+
+    /**
+     * Trimite mesajul din formularul generic de contact
+     */
+    public function submitContact(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'subject' => 'nullable|string|max:255',
+            'message' => 'required|string',
+        ]);
+
+        // Aici s-ar putea trimite un email. Pentru moment doar returnăm cu succes.
+        // Mail::to('contact@ivoryvintage.ro')->send(new ContactFormMail($validated));
+
+        return redirect()->back()->with('success', 'Vă mulțumim pentru mesaj! Vă vom contacta în curând.');
+    }
 }
