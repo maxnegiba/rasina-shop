@@ -82,7 +82,7 @@
                     <div class="group">
                         <a href="{{ route('shop.show', $product->slug) }}" class="block">
                             <div class="aspect-[3/4] overflow-hidden bg-ivory mb-6 relative">
-                                <img src="https://via.placeholder.com/500" class="w-full h-full object-cover filter brightness-90 group-hover:brightness-110 group-hover:scale-105 transition duration-700">
+                                <img src="{{ $product->image ? asset('storage/' . $product->image) : 'https://via.placeholder.com/500' }}" class="w-full h-full object-cover filter brightness-90 group-hover:brightness-110 group-hover:scale-105 transition duration-700">
                                 
                                 @if($product->is_custom)
                                     <span class="absolute top-4 left-4 bg-vintage-gold text-white text-[9px] px-3 py-1.5 uppercase tracking-[0.2em] font-medium shadow-sm">
