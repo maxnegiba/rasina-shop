@@ -5,6 +5,7 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CustomRequestController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CartController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,10 +37,16 @@ Route::group(['prefix' => 'jurnal', 'as' => 'blog.'], function () {
     Route::get('/{slug}', [BlogController::class, 'show'])->name('show');
 });
 
+// --- Cos de Cumparaturi (Cart) ---
+Route::group(['prefix' => 'cos', 'as' => 'cart.'], function () {
+    Route::get('/', [CartController::class, 'index'])->name('index');
+    Route::post('/adauga', [CartController::class, 'add'])->name('add');
+    Route::post('/sterge', [CartController::class, 'remove'])->name('remove');
+});
+
 // --- Checkout & Plăți (Stripe) ---
-// Aceste rute le vom activa complet când facem CheckoutController
 Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
-    Route::post('/create-session', [CheckoutController::class, 'createSession'])->name('session');
+    Route::match(['get', 'post'], '/create-session', [CheckoutController::class, 'createSession'])->name('session');
     Route::get('/succes', [CheckoutController::class, 'success'])->name('success');
     Route::get('/anulare', [CheckoutController::class, 'cancel'])->name('cancel');
 });
