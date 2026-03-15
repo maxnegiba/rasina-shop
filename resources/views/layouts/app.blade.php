@@ -58,7 +58,7 @@
                         <span class="absolute -top-1 -right-2 bg-vintage-gold text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity">0</span>
                     </button>
                     <!-- Mobile menu button -->
-                    <button class="md:hidden text-smoked-black">
+                    <button id="mobile-menu-btn" class="md:hidden text-smoked-black focus:outline-none">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
@@ -67,6 +67,29 @@
             </div>
         </div>
     </nav>
+
+    <!-- Mobile Sidebar Menu -->
+    <div id="mobile-sidebar" class="fixed inset-0 z-50 bg-smoked-black/50 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div id="mobile-sidebar-content" class="fixed top-0 right-0 bottom-0 w-64 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+            <div class="flex justify-between items-center p-6 border-b border-black/5">
+                <span class="font-serif text-lg tracking-[0.1em] uppercase text-smoked-black flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-vintage-gold"></span>
+                    Meniu
+                </span>
+                <button id="mobile-close-btn" class="text-smoked-black focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="flex-grow py-8 px-6 overflow-y-auto flex flex-col space-y-6">
+                <a href="{{ route('shop.index') }}" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-smoked-black/80 hover:text-vintage-gold transition-colors block">Galerie</a>
+                <a href="{{ route('blog.index') }}" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-smoked-black/80 hover:text-vintage-gold transition-colors block">Jurnal</a>
+                <a href="{{ route('about') }}" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-smoked-black/80 hover:text-vintage-gold transition-colors block">Poveste</a>
+                <a href="{{ route('contact') }}" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-smoked-black/80 hover:text-vintage-gold transition-colors block">Contact</a>
+            </div>
+        </div>
+    </div>
 
     <main class="flex-grow">
         @yield('content')
@@ -113,5 +136,63 @@
         </div>
     </footer>
 
+    <!-- Mobile Sidebar Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            const closeBtn = document.getElementById('mobile-close-btn');
+            const sidebar = document.getElementById('mobile-sidebar');
+            const sidebarContent = document.getElementById('mobile-sidebar-content');
+            const mobileLinks = document.querySelectorAll('.mobile-link');
+
+            function openSidebar() {
+                // Show the container
+                sidebar.classList.remove('hidden');
+
+                // Allow a tiny delay for display:block to apply before animating opacity/transform
+                setTimeout(() => {
+                    sidebar.classList.remove('opacity-0');
+                    sidebarContent.classList.remove('translate-x-full');
+                }, 10);
+
+                // Prevent background scrolling
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeSidebar() {
+                // Animate out
+                sidebar.classList.add('opacity-0');
+                sidebarContent.classList.add('translate-x-full');
+
+                // Hide after animation finishes
+                setTimeout(() => {
+                    sidebar.classList.add('hidden');
+                }, 300); // 300ms matches the transition duration
+
+                // Restore background scrolling
+                document.body.style.overflow = '';
+            }
+
+            if (menuBtn && closeBtn && sidebar && sidebarContent) {
+                // Open sidebar on hamburger click
+                menuBtn.addEventListener('click', openSidebar);
+
+                // Close sidebar on close button click
+                closeBtn.addEventListener('click', closeSidebar);
+
+                // Close sidebar on clicking outside the content area (on the backdrop)
+                sidebar.addEventListener('click', function(e) {
+                    if (e.target === sidebar) {
+                        closeSidebar();
+                    }
+                });
+
+                // Close sidebar when a link is clicked
+                mobileLinks.forEach(link => {
+                    link.addEventListener('click', closeSidebar);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
