@@ -80,21 +80,38 @@
             </div>
 
             <div class="pt-8 border-t border-black/5">
+                @if(session('success'))
+                    <div class="mb-6 p-4 bg-green-50/50 text-green-800 text-sm border-l border-green-500/30 font-light">
+                        {{ session('success') }}
+                        <a href="{{ route('cart.index') }}" class="underline ml-2 font-medium hover:text-vintage-gold">Vezi Colecția</a>
+                    </div>
+                @endif
+                @if(session('error'))
+                    <div class="mb-6 p-4 bg-red-50/50 text-red-800 text-sm border-l border-red-500/30 font-light">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 @if($product->is_custom)
                     <p class="text-xs font-light text-smoked-black/60 mb-6 leading-relaxed">
                         * Această piesă este o lucrare unicat de referință. Putem realiza o operă similară, adaptată dimensiunilor și preferințelor dumneavoastră cromatice.
                     </p>
-                    <a href="#contact" class="group relative flex items-center justify-center w-full bg-smoked-black text-white px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium hover:bg-vintage-gold transition-colors duration-500 overflow-hidden">
+                    <a href="{{ route('contact') }}#cerere-personalizata" class="group relative flex items-center justify-center w-full bg-smoked-black text-white px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium hover:bg-vintage-gold transition-colors duration-500 overflow-hidden">
                         <span class="relative z-10">Solicită o propunere</span>
                     </a>
                 @else
                     @if($product->stock > 0)
-                        <form action="#" method="POST">
+                        <form action="{{ route('cart.add') }}" method="POST" class="space-y-4">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
-                            <button type="submit" class="w-full bg-vintage-gold text-white px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium hover:bg-smoked-black transition-colors duration-500 shadow-sm">
-                                Adaugă în Colecție
-                            </button>
+                            <div class="flex gap-4">
+                                <button type="submit" name="redirect_to_checkout" value="0" class="flex-1 bg-white border border-smoked-black/20 text-smoked-black px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium hover:border-vintage-gold hover:text-vintage-gold transition-colors duration-500 shadow-sm">
+                                    Adaugă în Colecție
+                                </button>
+                                <button type="submit" name="redirect_to_checkout" value="1" class="flex-1 bg-vintage-gold text-white px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium hover:bg-smoked-black transition-colors duration-500 shadow-sm">
+                                    Cumpără Acum
+                                </button>
+                            </div>
                         </form>
                         <p class="text-[10px] text-center text-smoked-black/40 mt-4 tracking-[0.2em] uppercase font-medium">
                             Disponibil pentru livrare

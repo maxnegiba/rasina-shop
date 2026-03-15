@@ -51,12 +51,14 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-6">
-                    <button class="text-smoked-black/80 hover:text-vintage-gold transition duration-300 relative group">
+                    <a href="{{ route('cart.index') }}" class="text-smoked-black/80 hover:text-vintage-gold transition duration-300 relative group">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
-                        <span class="absolute -top-1 -right-2 bg-vintage-gold text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity">0</span>
-                    </button>
+                        <span class="absolute -top-1 -right-2 bg-vintage-gold text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full opacity-100 transition-opacity">
+                            {{ session('cart') ? count(session('cart')) : 0 }}
+                        </span>
+                    </a>
                     <!-- Mobile menu button -->
                     <button id="mobile-menu-btn" class="md:hidden text-smoked-black focus:outline-none">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
