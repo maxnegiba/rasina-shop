@@ -51,14 +51,14 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-6">
-                    <a href="{{ route('cart.index') }}" class="text-smoked-black/80 hover:text-vintage-gold transition duration-300 relative group">
+                    <button id="cart-menu-btn" class="text-smoked-black/80 hover:text-vintage-gold transition duration-300 relative group focus:outline-none">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
-                        <span class="absolute -top-1 -right-2 bg-vintage-gold text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full opacity-100 transition-opacity">
+                        <span id="cart-count-badge" class="absolute -top-1 -right-2 bg-vintage-gold text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full opacity-100 transition-opacity {{ session('cart') && count(session('cart')) > 0 ? '' : 'hidden' }}">
                             {{ session('cart') ? count(session('cart')) : 0 }}
                         </span>
-                    </a>
+                    </button>
                     <!-- Mobile menu button -->
                     <button id="mobile-menu-btn" class="md:hidden text-smoked-black focus:outline-none">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -92,6 +92,26 @@
             </div>
         </div>
     </div>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed inset-0 z-[60] bg-smoked-black/50 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div id="cart-sidebar-content" class="fixed top-0 right-0 bottom-0 w-full sm:w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out">
+            <!-- Conținutul va fi injectat aici (fie inițial, fie prin AJAX) -->
+            <div id="cart-sidebar-inner" class="h-full">
+                @include('cart._sidebar_content')
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Cart Icon -->
+    <button id="floating-cart-btn" class="fixed bottom-6 right-6 z-40 bg-smoked-black text-white p-4 rounded-full shadow-lg hover:bg-vintage-gold hover:-translate-y-1 transition-all duration-300 focus:outline-none {{ session('cart') && count(session('cart')) > 0 ? '' : 'hidden' }}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+        </svg>
+        <span id="floating-cart-count" class="absolute -top-1 -right-1 bg-vintage-gold text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-ivory font-bold">
+            {{ session('cart') ? count(session('cart')) : 0 }}
+        </span>
+    </button>
 
     <main class="flex-grow">
         @yield('content')
@@ -194,6 +214,171 @@
                     link.addEventListener('click', closeSidebar);
                 });
             }
+        });
+    </script>
+
+    <!-- Cart Sidebar & AJAX Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cartSidebar = document.getElementById('cart-sidebar');
+            const cartSidebarContent = document.getElementById('cart-sidebar-content');
+            const cartMenuBtn = document.getElementById('cart-menu-btn');
+            const floatingCartBtn = document.getElementById('floating-cart-btn');
+            const cartSidebarInner = document.getElementById('cart-sidebar-inner');
+
+            function openCartSidebar() {
+                cartSidebar.classList.remove('hidden');
+                setTimeout(() => {
+                    cartSidebar.classList.remove('opacity-0');
+                    cartSidebarContent.classList.remove('translate-x-full');
+                }, 10);
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeCartSidebar() {
+                cartSidebar.classList.add('opacity-0');
+                cartSidebarContent.classList.add('translate-x-full');
+                setTimeout(() => {
+                    cartSidebar.classList.add('hidden');
+                }, 300);
+                document.body.style.overflow = '';
+            }
+
+            // Bind click to the navbar icon and floating icon
+            if (cartMenuBtn) cartMenuBtn.addEventListener('click', openCartSidebar);
+            if (floatingCartBtn) floatingCartBtn.addEventListener('click', openCartSidebar);
+
+            // Bind click to the close button inside the sidebar (need event delegation because it can be replaced by AJAX)
+            document.body.addEventListener('click', function(e) {
+                // Close button
+                const closeBtn = e.target.closest('#cart-sidebar-close');
+                if (closeBtn) {
+                    closeCartSidebar();
+                }
+
+                // Close on backdrop click
+                if (e.target === cartSidebar) {
+                    closeCartSidebar();
+                }
+            });
+
+            // Update UI Counters and Visibility
+            function updateCartUI(cartCount, htmlContent) {
+                const navbarBadge = document.getElementById('cart-count-badge');
+                const floatingBtn = document.getElementById('floating-cart-btn');
+                const floatingCount = document.getElementById('floating-cart-count');
+
+                if (navbarBadge) {
+                    navbarBadge.textContent = cartCount;
+                    if (cartCount > 0) {
+                        navbarBadge.classList.remove('hidden');
+                    } else {
+                        navbarBadge.classList.add('hidden');
+                    }
+                }
+
+                if (floatingBtn && floatingCount) {
+                    floatingCount.textContent = cartCount;
+                    if (cartCount > 0) {
+                        floatingBtn.classList.remove('hidden');
+                    } else {
+                        floatingBtn.classList.add('hidden');
+                    }
+                }
+
+                if (cartSidebarInner && htmlContent) {
+                    cartSidebarInner.innerHTML = htmlContent;
+                }
+            }
+
+            // AJAX Adaugare in Cos (Intercept forms)
+            const addForms = document.querySelectorAll('.add-to-cart-ajax-form');
+            addForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    // Check which button was clicked
+                    const clickedButton = e.submitter;
+                    if (clickedButton && clickedButton.value === "1") {
+                        // "Cumpara Acum" was clicked, allow default submit
+                        return;
+                    }
+
+                    // Otherwise, "Adauga in Colectie" was clicked, use AJAX
+                    e.preventDefault();
+
+                    const formData = new FormData(form);
+
+                    // We need to fetch the form action URL
+                    const url = form.getAttribute('action');
+
+                    fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            // If product is out of stock or other validation error
+                            throw new Error('Eroare la adăugarea în coș.');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            updateCartUI(data.cart_count, data.html);
+                            openCartSidebar();
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        // Optionally show an alert or toast to user
+                    });
+                });
+            });
+
+            // AJAX Stergere din Cos (Event delegation for dynamically added items)
+            document.body.addEventListener('click', function(e) {
+                const removeBtn = e.target.closest('.remove-from-cart-btn');
+                if (removeBtn) {
+                    e.preventDefault();
+                    const productId = removeBtn.getAttribute('data-id');
+
+                    if (!productId) return;
+
+                    // Get CSRF token from page
+                    const tokenMatch = document.head.innerHTML.match(/<meta\s+name="csrf-token"\s+content="([^"]+)"/);
+                    let csrfToken = '';
+                    if (tokenMatch) {
+                        csrfToken = tokenMatch[1];
+                    } else {
+                        // fallback: try to find any input[name="_token"]
+                        const tokenInput = document.querySelector('input[name="_token"]');
+                        if (tokenInput) csrfToken = tokenInput.value;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('id', productId);
+                    formData.append('_token', csrfToken);
+
+                    fetch("{{ route('cart.remove') }}", {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            updateCartUI(data.cart_count, data.html);
+                        }
+                    })
+                    .catch(error => console.error('Error removing item:', error));
+                }
+            });
         });
     </script>
 </body>
