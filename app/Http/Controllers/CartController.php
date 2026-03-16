@@ -79,6 +79,20 @@ class CartController extends Controller
 
         session()->put('cart', $cart);
 
+        if ($request->ajax() || $request->wantsJson()) {
+            $total = 0;
+            foreach ($cart as $item) {
+                $total += $item['price'] * $item['quantity'];
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Produsul a fost adăugat în colecție.',
+                'cart_count' => count($cart),
+                'html' => view('cart._sidebar_content')->render(),
+            ]);
+        }
+
         // Verificăm dacă a apăsat pe butonul "Buy Now"
         if ($request->input('redirect_to_checkout')) {
             return redirect()->route('checkout.session');
@@ -98,6 +112,21 @@ class CartController extends Controller
             if (isset($cart[$request->id])) {
                 unset($cart[$request->id]);
                 session()->put('cart', $cart);
+            }
+
+            if ($request->ajax() || $request->wantsJson()) {
+                $cart = session()->get('cart', []);
+                $total = 0;
+                foreach ($cart as $item) {
+                    $total += $item['price'] * $item['quantity'];
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Produsul a fost eliminat din coș.',
+                    'cart_count' => count($cart),
+                    'html' => view('cart._sidebar_content')->render(),
+                ]);
             }
 
             return redirect()->back()->with('success', 'Produsul a fost eliminat din coș.');

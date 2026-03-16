@@ -83,7 +83,6 @@
                 @if(session('success'))
                     <div class="mb-6 p-4 bg-green-50/50 text-green-800 text-sm border-l border-green-500/30 font-light">
                         {{ session('success') }}
-                        <a href="{{ route('cart.index') }}" class="underline ml-2 font-medium hover:text-vintage-gold">Vezi Colecția</a>
                     </div>
                 @endif
                 @if(session('error'))
@@ -101,7 +100,7 @@
                     </a>
                 @else
                     @if($product->stock > 0)
-                        <form action="{{ route('cart.add') }}" method="POST" class="space-y-4">
+                        <form action="{{ route('cart.add') }}" method="POST" class="space-y-4 add-to-cart-ajax-form">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             <div class="flex gap-4">
