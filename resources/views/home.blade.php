@@ -2,11 +2,11 @@
 
 @section('content')
     <!-- EROU (HERO) SECTION -->
-    <section class="relative min-h-[90vh] flex flex-col justify-center overflow-hidden bg-smoked-black">
+    <section class="relative min-h-[90vh] flex flex-col justify-center overflow-hidden bg-dark-brown">
         <div class="absolute inset-0 z-0">
             <img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&q=80&w=2070"
                  class="w-full h-full object-cover opacity-40 mix-blend-luminosity scale-105 transform origin-center" alt="Artă din rășină">
-            <div class="absolute inset-0 bg-gradient-to-t from-smoked-black via-transparent to-smoked-black/60"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-dark-brown via-transparent to-dark-brown/60"></div>
         </div>
         
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-20">
@@ -21,7 +21,7 @@
                 </p>
                 <div class="flex flex-col sm:flex-row gap-6">
                     <a href="{{ route('shop.index') }}"
-                       class="group relative inline-flex items-center justify-center px-10 py-4 bg-vintage-gold text-white font-medium uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-smoked-black transition duration-500 overflow-hidden">
+                       class="group relative inline-flex items-center justify-center px-10 py-4 bg-vintage-gold text-white font-medium uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-dark-brown transition duration-500 overflow-hidden">
                         <span class="relative z-10">Explorați Galeria</span>
                     </a>
                 </div>
@@ -38,8 +38,8 @@
     <!-- COLECȚII PRINCIPALE -->
     <section class="max-w-7xl mx-auto py-32 px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-24">
-            <h2 class="font-serif text-4xl md:text-5xl text-smoked-black mb-6">Esență & Măiestrie</h2>
-            <p class="text-smoked-black/50 font-light max-w-2xl mx-auto tracking-wide text-sm md:text-base leading-relaxed">
+            <h2 class="font-serif text-4xl md:text-5xl text-dark-brown mb-6">Esență & Măiestrie</h2>
+            <p class="text-dark-brown/50 font-light max-w-2xl mx-auto tracking-wide text-sm md:text-base leading-relaxed">
                 Fiecare colecție reprezintă un studiu al materialului. Lemnul capătă noi valențe prin incluziunea rășinii epoxidice, într-o simbioză perfectă de texturi și transparențe.
             </p>
         </div>
@@ -53,7 +53,7 @@
                         <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500"></div>
                     </a>
                     <div class="flex items-center justify-between">
-                        <h3 class="font-serif text-2xl text-smoked-black">{{ $category->name }}</h3>
+                        <h3 class="font-serif text-2xl text-dark-brown">{{ $category->name }}</h3>
                         <span class="text-vintage-gold text-sm opacity-0 group-hover:opacity-100 transition duration-300 transform translate-x-4 group-hover:translate-x-0">
                             &rarr;
                         </span>
@@ -64,7 +64,7 @@
     </section>
 
     <!-- PIESE RECENTE -->
-    <section class="bg-smoked-black py-32">
+    <section class="bg-dark-brown py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
                 <div class="max-w-2xl">
