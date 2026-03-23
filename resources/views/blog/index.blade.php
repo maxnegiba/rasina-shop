@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-    <section class="relative min-h-[60vh] flex flex-col justify-center overflow-hidden bg-smoked-black">
+    <section class="relative min-h-[60vh] flex flex-col justify-center overflow-hidden bg-dark-brown">
         <div class="absolute inset-0 z-0">
             <img src="https://images.unsplash.com/photo-1455390582262-044cdead27d8?auto=format&fit=crop&q=80&w=2000"
                  class="w-full h-full object-cover opacity-30 mix-blend-luminosity scale-105 transform origin-center" alt="Jurnal de Atelier">
-            <div class="absolute inset-0 bg-gradient-to-t from-smoked-black via-transparent to-smoked-black/60"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-dark-brown via-transparent to-dark-brown/60"></div>
         </div>
         
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-20 text-center">
@@ -46,39 +46,39 @@
                                 <span class="text-vintage-gold text-[10px] uppercase tracking-[0.2em] font-medium">
                                     {{ $post->category->name ?? 'Studio Design' }}
                                 </span>
-                                <span class="w-4 h-px bg-smoked-black/20"></span>
-                                <span class="text-smoked-black/50 text-[10px] uppercase tracking-[0.1em]">
+                                <span class="w-4 h-px bg-dark-brown/20"></span>
+                                <span class="text-dark-brown/50 text-[10px] uppercase tracking-[0.1em]">
                                     {{ $post->created_at->format('d M, Y') }}
                                 </span>
                             </div>
 
-                            <h3 class="font-serif text-2xl text-smoked-black mb-4 leading-snug group-hover:text-vintage-gold transition-colors duration-300">
+                            <h3 class="font-serif text-2xl text-dark-brown mb-4 leading-snug group-hover:text-vintage-gold transition-colors duration-300">
                                 <a href="{{ route('blog.show', $post->slug) }}">
                                     {{ $post->title }}
                                 </a>
                             </h3>
 
-                            <p class="text-smoked-black/60 font-light text-sm md:text-base leading-relaxed mb-6 line-clamp-3">
+                            <p class="text-dark-brown/60 font-light text-sm md:text-base leading-relaxed mb-6 line-clamp-3">
                                 {{ $post->excerpt ?? \Illuminate\Support\Str::limit(strip_tags($post->content), 150) }}
                             </p>
 
-                            <a href="{{ route('blog.show', $post->slug) }}" class="inline-flex items-center gap-3 text-smoked-black group-hover:text-vintage-gold transition-colors duration-300">
+                            <a href="{{ route('blog.show', $post->slug) }}" class="inline-flex items-center gap-3 text-dark-brown group-hover:text-vintage-gold transition-colors duration-300">
                                 <span class="text-[10px] uppercase tracking-[0.2em] font-semibold">Citește Articolul</span>
-                                <span class="w-8 h-px bg-smoked-black group-hover:bg-vintage-gold transition-colors duration-300"></span>
+                                <span class="w-8 h-px bg-dark-brown group-hover:bg-vintage-gold transition-colors duration-300"></span>
                             </a>
                         </div>
                     </article>
                 @endforeach
             </div>
 
-            <div class="mt-24 flex justify-center border-t border-smoked-black/10 pt-12">
+            <div class="mt-24 flex justify-center border-t border-dark-brown/10 pt-12">
                 {{ $posts->links() }}
             </div>
             
         @else
-            <div class="text-center py-32 border border-dashed border-smoked-black/20 bg-smoked-black/5">
-                <h3 class="font-serif text-3xl mb-4 text-smoked-black/60 italic">Pagina este albă.</h3>
-                <p class="font-light text-smoked-black/50 mb-8 max-w-md mx-auto text-sm leading-relaxed">
+            <div class="text-center py-32 border border-dashed border-dark-brown/20 bg-dark-brown/5">
+                <h3 class="font-serif text-3xl mb-4 text-dark-brown/60 italic">Pagina este albă.</h3>
+                <p class="font-light text-dark-brown/50 mb-8 max-w-md mx-auto text-sm leading-relaxed">
                     Momentan suntem în atelier și lucrăm la noi concepte. Întoarce-te curând pentru a descoperi poveștile din spatele creațiilor noastre.
                 </p>
                 <a href="{{ route('shop.index') }}" class="inline-block border border-vintage-gold text-vintage-gold px-8 py-3 uppercase tracking-[0.2em] text-xs hover:bg-vintage-gold hover:text-white transition duration-300">

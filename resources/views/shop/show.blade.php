@@ -4,13 +4,13 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
     
     <!-- Breadcrumbs minimaliste -->
-    <nav class="mb-12 text-[10px] font-medium uppercase tracking-[0.2em] text-smoked-black/40 flex items-center gap-3">
-        <a href="{{ route('home') }}" class="hover:text-smoked-black transition-colors">Acasă</a>
+    <nav class="mb-12 text-[10px] font-medium uppercase tracking-[0.2em] text-dark-brown/40 flex items-center gap-3">
+        <a href="{{ route('home') }}" class="hover:text-dark-brown transition-colors">Acasă</a>
         <span class="w-1 h-1 rounded-full bg-black/10"></span>
-        <a href="{{ route('shop.index') }}" class="hover:text-smoked-black transition-colors">Galerie</a>
+        <a href="{{ route('shop.index') }}" class="hover:text-dark-brown transition-colors">Galerie</a>
         @if($product->category)
             <span class="w-1 h-1 rounded-full bg-black/10"></span>
-            <a href="{{ route('shop.category', $product->category->slug) }}" class="hover:text-smoked-black transition-colors">
+            <a href="{{ route('shop.category', $product->category->slug) }}" class="hover:text-dark-brown transition-colors">
                 {{ $product->category->name }}
             </a>
         @endif
@@ -38,7 +38,7 @@
                      class="w-full h-full object-cover filter contrast-[0.95] group-hover:contrast-100 transition-all duration-700">
                      
                 @if($product->is_custom)
-                    <div class="absolute top-6 left-6 bg-ivory/90 backdrop-blur-sm text-smoked-black text-[10px] px-4 py-2 uppercase tracking-[0.2em] font-medium shadow-sm">
+                    <div class="absolute top-6 left-6 bg-ivory/90 backdrop-blur-sm text-dark-brown text-[10px] px-4 py-2 uppercase tracking-[0.2em] font-medium shadow-sm">
                         Lucrare Unicat / Comandă
                     </div>
                 @endif
@@ -60,11 +60,11 @@
         <div class="w-full lg:w-2/5 py-4 lg:sticky lg:top-32">
             
             <div class="mb-8">
-                <h1 class="font-serif text-4xl lg:text-5xl text-smoked-black mb-6 leading-tight">
+                <h1 class="font-serif text-4xl lg:text-5xl text-dark-brown mb-6 leading-tight">
                     {{ $product->name }}
                 </h1>
 
-                <div class="text-xl font-sans text-smoked-black/80 tracking-[0.1em] uppercase">
+                <div class="text-xl font-sans text-dark-brown/80 tracking-[0.1em] uppercase">
                     @if($product->is_custom)
                         Preț la cerere
                     @else
@@ -75,7 +75,7 @@
 
             <div class="w-12 h-px bg-vintage-gold mb-8"></div>
 
-            <div class="prose prose-sm prose-smoked-black prose-a:text-vintage-gold font-light leading-relaxed text-smoked-black/70 mb-12">
+            <div class="prose prose-sm prose-dark-brown prose-a:text-vintage-gold font-light leading-relaxed text-dark-brown/70 mb-12">
                 {!! $product->description !!}
             </div>
 
@@ -92,10 +92,10 @@
                 @endif
 
                 @if($product->is_custom)
-                    <p class="text-xs font-light text-smoked-black/60 mb-6 leading-relaxed">
+                    <p class="text-xs font-light text-dark-brown/60 mb-6 leading-relaxed">
                         * Această piesă este o lucrare unicat de referință. Putem realiza o operă similară, adaptată dimensiunilor și preferințelor dumneavoastră cromatice.
                     </p>
-                    <a href="{{ route('contact') }}#cerere-personalizata" class="group relative flex items-center justify-center w-full bg-smoked-black text-white px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium hover:bg-vintage-gold transition-colors duration-500 overflow-hidden">
+                    <a href="{{ route('contact') }}#cerere-personalizata" class="group relative flex items-center justify-center w-full bg-dark-brown text-white px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium hover:bg-vintage-gold transition-colors duration-500 overflow-hidden">
                         <span class="relative z-10">Solicită o propunere</span>
                     </a>
                 @else
@@ -104,26 +104,26 @@
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             <div class="flex gap-4">
-                                <button type="submit" name="redirect_to_checkout" value="0" class="flex-1 bg-ivory border border-smoked-black/20 text-smoked-black px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium hover:border-vintage-gold hover:text-vintage-gold transition-colors duration-500 shadow-sm">
+                                <button type="submit" name="redirect_to_checkout" value="0" class="flex-1 bg-ivory border border-dark-brown/20 text-dark-brown px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium hover:border-vintage-gold hover:text-vintage-gold transition-colors duration-500 shadow-sm">
                                     Adaugă în Colecție
                                 </button>
-                                <button type="submit" name="redirect_to_checkout" value="1" class="flex-1 bg-vintage-gold text-white px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium hover:bg-smoked-black transition-colors duration-500 shadow-sm">
+                                <button type="submit" name="redirect_to_checkout" value="1" class="flex-1 bg-vintage-gold text-white px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium hover:bg-dark-brown transition-colors duration-500 shadow-sm">
                                     Cumpără Acum
                                 </button>
                             </div>
                         </form>
-                        <p class="text-[10px] text-center text-smoked-black/40 mt-4 tracking-[0.2em] uppercase font-medium">
+                        <p class="text-[10px] text-center text-dark-brown/40 mt-4 tracking-[0.2em] uppercase font-medium">
                             Disponibil pentru livrare
                         </p>
                     @else
-                        <button disabled class="w-full border border-smoked-black/20 text-smoked-black/30 bg-black/5 px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium cursor-not-allowed">
+                        <button disabled class="w-full border border-dark-brown/20 text-dark-brown/30 bg-black/5 px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium cursor-not-allowed">
                             Lucrare Achiziționată
                         </button>
                     @endif
                 @endif
             </div>
             
-            <div class="mt-16 space-y-5 text-[10px] font-medium tracking-[0.15em] text-smoked-black/50 uppercase border-t border-black/5 pt-8">
+            <div class="mt-16 space-y-5 text-[10px] font-medium tracking-[0.15em] text-dark-brown/50 uppercase border-t border-black/5 pt-8">
                 <div class="flex items-center gap-4">
                     <span class="w-6 h-px bg-vintage-gold"></span>
                     <span>Design și manufactură în România</span>
