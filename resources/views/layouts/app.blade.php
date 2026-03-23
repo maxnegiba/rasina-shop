@@ -13,13 +13,13 @@
             theme: {
                 extend: {
                     colors: {
-                        // Nuanțe curate, cu contrast puternic (Black & White + Accent auriu vibrant)
-                        'ivory': '#FAFAFA', // un alb mai curat, foarte modern
-                        'cream-white': '#FFFFFF',
-                        'warm-beige': '#F0EDE5',
-                        'vintage-gold': '#D4AF37', // Auriu metalic, mai contrastant
-                        'deep-oak': '#2C1D11',
-                        'smoked-black': '#0A0A0A', // Aproape complet negru
+                        // Paleta Cromatică (Ivory Vintage)
+                        'ivory': '#FFFFF0', // Fildeș
+                        'cream-white': '#FFFDD0', // Alb Crem
+                        'warm-beige': '#F5F5DC', // Bej Cald
+                        'vintage-gold': '#CFB53B', // Auriu antichizat
+                        'deep-oak': '#3B2818', // Lemn de nuc/stejar profund
+                        'smoked-black': '#1C1C1C', // Negru Cărbune
                     },
                     fontFamily: {
                         serif: ['Playfair Display', 'serif'],
@@ -37,9 +37,9 @@
             <div class="flex justify-between h-24 items-center">
                 <div class="flex-shrink-0">
                     <a href="{{ route('home') }}" class="font-serif text-lg md:text-2xl tracking-[0.2em] uppercase text-smoked-black hover:text-vintage-gold transition-colors duration-300 flex items-center gap-2 md:gap-3">
-                        <img src="/img/logo.png" alt="Ivory Vintage Logo" class="h-14 md:h-20 w-auto object-contain transition-all duration-300">
+                        <img src="/img/logo.png" alt="Ivory Vintage Logo" class="h-20 md:h-28 w-auto object-contain transition-all duration-300 absolute -top-1 md:-top-4">
                         
-                        <span>MTD</span>
+                        <span class="ml-24 md:ml-32">MTD</span>
                     </a>
                 </div>
                 <div class="hidden md:flex flex-1 justify-center">
@@ -73,7 +73,7 @@
         <div id="mobile-sidebar-content" class="fixed top-0 right-0 bottom-0 w-64 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
             <div class="flex justify-between items-center p-6 border-b border-black/5">
                 <span class="font-serif text-lg tracking-[0.1em] uppercase text-smoked-black flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-vintage-gold"></span>
+                    <img src="/img/logo.png" alt="Logo" class="h-8 w-auto object-contain mr-2">
                     Meniu
                 </span>
                 <button id="mobile-close-btn" class="text-smoked-black focus:outline-none">
