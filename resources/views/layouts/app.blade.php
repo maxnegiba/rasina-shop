@@ -32,14 +32,14 @@
 </head>
 <body class="bg-ivory text-smoked-black font-sans antialiased selection:bg-vintage-gold selection:text-white flex flex-col min-h-screen">
 
-    <!-- Navbar cu aspect modern, "plutitor" sau foarte curat -->
-    <nav class="bg-white/90 backdrop-blur-xl sticky top-0 z-50 border-b border-black/5 shadow-sm transition-all duration-300">
+    <<nav class="bg-white/90 backdrop-blur-xl sticky top-0 z-50 border-b border-black/5 shadow-sm transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-24 items-center">
                 <div class="flex-shrink-0">
-                    <a href="{{ route('home') }}" class="font-serif text-2xl tracking-[0.2em] uppercase text-smoked-black hover:text-vintage-gold transition-colors duration-300 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-vintage-gold"></span>
-                        Ivory Vintage
+                    <a href="{{ route('home') }}" class="font-serif text-lg md:text-2xl tracking-[0.2em] uppercase text-smoked-black hover:text-vintage-gold transition-colors duration-300 flex items-center gap-2 md:gap-3">
+                        <img src="/img/logo.png" alt="Ivory Vintage Logo" class="h-14 md:h-20 w-auto object-contain transition-all duration-300">
+                        
+                        <span>MTD</span>
                     </a>
                 </div>
                 <div class="hidden md:flex flex-1 justify-center">
@@ -59,7 +59,6 @@
                             {{ session('cart') ? count(session('cart')) : 0 }}
                         </span>
                     </button>
-                    <!-- Mobile menu button -->
                     <button id="mobile-menu-btn" class="md:hidden text-smoked-black focus:outline-none">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
@@ -70,7 +69,6 @@
         </div>
     </nav>
 
-    <!-- Mobile Sidebar Menu -->
     <div id="mobile-sidebar" class="fixed inset-0 z-50 bg-smoked-black/50 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
         <div id="mobile-sidebar-content" class="fixed top-0 right-0 bottom-0 w-64 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
             <div class="flex justify-between items-center p-6 border-b border-black/5">
@@ -93,17 +91,14 @@
         </div>
     </div>
 
-    <!-- Cart Sidebar -->
     <div id="cart-sidebar" class="fixed inset-0 z-[60] bg-smoked-black/50 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
         <div id="cart-sidebar-content" class="fixed top-0 right-0 bottom-0 w-full sm:w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out">
-            <!-- Conținutul va fi injectat aici (fie inițial, fie prin AJAX) -->
             <div id="cart-sidebar-inner" class="h-full">
                 @include('cart._sidebar_content')
             </div>
         </div>
     </div>
 
-    <!-- Floating Cart Icon -->
     <button id="floating-cart-btn" class="fixed bottom-6 right-6 z-40 bg-smoked-black text-white p-4 rounded-full shadow-lg hover:bg-vintage-gold hover:-translate-y-1 transition-all duration-300 focus:outline-none {{ session('cart') && count(session('cart')) > 0 ? '' : 'hidden' }}">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -158,9 +153,9 @@
         </div>
     </footer>
 
-    <!-- Mobile Sidebar Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile Sidebar
             const menuBtn = document.getElementById('mobile-menu-btn');
             const closeBtn = document.getElementById('mobile-close-btn');
             const sidebar = document.getElementById('mobile-sidebar');
@@ -168,58 +163,33 @@
             const mobileLinks = document.querySelectorAll('.mobile-link');
 
             function openSidebar() {
-                // Show the container
                 sidebar.classList.remove('hidden');
-
-                // Allow a tiny delay for display:block to apply before animating opacity/transform
                 setTimeout(() => {
                     sidebar.classList.remove('opacity-0');
                     sidebarContent.classList.remove('translate-x-full');
                 }, 10);
-
-                // Prevent background scrolling
                 document.body.style.overflow = 'hidden';
             }
 
             function closeSidebar() {
-                // Animate out
                 sidebar.classList.add('opacity-0');
                 sidebarContent.classList.add('translate-x-full');
-
-                // Hide after animation finishes
                 setTimeout(() => {
                     sidebar.classList.add('hidden');
-                }, 300); // 300ms matches the transition duration
-
-                // Restore background scrolling
+                }, 300);
                 document.body.style.overflow = '';
             }
 
             if (menuBtn && closeBtn && sidebar && sidebarContent) {
-                // Open sidebar on hamburger click
                 menuBtn.addEventListener('click', openSidebar);
-
-                // Close sidebar on close button click
                 closeBtn.addEventListener('click', closeSidebar);
-
-                // Close sidebar on clicking outside the content area (on the backdrop)
                 sidebar.addEventListener('click', function(e) {
-                    if (e.target === sidebar) {
-                        closeSidebar();
-                    }
+                    if (e.target === sidebar) closeSidebar();
                 });
-
-                // Close sidebar when a link is clicked
-                mobileLinks.forEach(link => {
-                    link.addEventListener('click', closeSidebar);
-                });
+                mobileLinks.forEach(link => link.addEventListener('click', closeSidebar));
             }
-        });
-    </script>
 
-    <!-- Cart Sidebar & AJAX Script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
+            // Cart Sidebar
             const cartSidebar = document.getElementById('cart-sidebar');
             const cartSidebarContent = document.getElementById('cart-sidebar-content');
             const cartMenuBtn = document.getElementById('cart-menu-btn');
@@ -244,25 +214,16 @@
                 document.body.style.overflow = '';
             }
 
-            // Bind click to the navbar icon and floating icon
             if (cartMenuBtn) cartMenuBtn.addEventListener('click', openCartSidebar);
             if (floatingCartBtn) floatingCartBtn.addEventListener('click', openCartSidebar);
 
-            // Bind click to the close button inside the sidebar (need event delegation because it can be replaced by AJAX)
             document.body.addEventListener('click', function(e) {
-                // Close button
                 const closeBtn = e.target.closest('#cart-sidebar-close');
-                if (closeBtn) {
-                    closeCartSidebar();
-                }
-
-                // Close on backdrop click
-                if (e.target === cartSidebar) {
+                if (closeBtn || e.target === cartSidebar) {
                     closeCartSidebar();
                 }
             });
 
-            // Update UI Counters and Visibility
             function updateCartUI(cartCount, htmlContent) {
                 const navbarBadge = document.getElementById('cart-count-badge');
                 const floatingBtn = document.getElementById('floating-cart-btn');
@@ -270,20 +231,12 @@
 
                 if (navbarBadge) {
                     navbarBadge.textContent = cartCount;
-                    if (cartCount > 0) {
-                        navbarBadge.classList.remove('hidden');
-                    } else {
-                        navbarBadge.classList.add('hidden');
-                    }
+                    cartCount > 0 ? navbarBadge.classList.remove('hidden') : navbarBadge.classList.add('hidden');
                 }
 
                 if (floatingBtn && floatingCount) {
                     floatingCount.textContent = cartCount;
-                    if (cartCount > 0) {
-                        floatingBtn.classList.remove('hidden');
-                    } else {
-                        floatingBtn.classList.add('hidden');
-                    }
+                    cartCount > 0 ? floatingBtn.classList.remove('hidden') : floatingBtn.classList.add('hidden');
                 }
 
                 if (cartSidebarInner && htmlContent) {
@@ -291,23 +244,15 @@
                 }
             }
 
-            // AJAX Adaugare in Cos (Intercept forms)
+            // AJAX Adaugare in Cos
             const addForms = document.querySelectorAll('.add-to-cart-ajax-form');
             addForms.forEach(form => {
                 form.addEventListener('submit', function(e) {
-                    // Check which button was clicked
                     const clickedButton = e.submitter;
-                    if (clickedButton && clickedButton.value === "1") {
-                        // "Cumpara Acum" was clicked, allow default submit
-                        return;
-                    }
+                    if (clickedButton && clickedButton.value === "1") return;
 
-                    // Otherwise, "Adauga in Colectie" was clicked, use AJAX
                     e.preventDefault();
-
                     const formData = new FormData(form);
-
-                    // We need to fetch the form action URL
                     const url = form.getAttribute('action');
 
                     fetch(url, {
@@ -319,10 +264,7 @@
                         }
                     })
                     .then(response => {
-                        if (!response.ok) {
-                            // If product is out of stock or other validation error
-                            throw new Error('Eroare la adăugarea în coș.');
-                        }
+                        if (!response.ok) throw new Error('Eroare la adăugarea în coș.');
                         return response.json();
                     })
                     .then(data => {
@@ -331,32 +273,20 @@
                             openCartSidebar();
                         }
                     })
-                    .catch(error => {
-                        console.error(error);
-                        // Optionally show an alert or toast to user
-                    });
+                    .catch(error => console.error(error));
                 });
             });
 
-            // AJAX Stergere din Cos (Event delegation for dynamically added items)
+            // AJAX Stergere din Cos
             document.body.addEventListener('click', function(e) {
                 const removeBtn = e.target.closest('.remove-from-cart-btn');
                 if (removeBtn) {
                     e.preventDefault();
                     const productId = removeBtn.getAttribute('data-id');
-
                     if (!productId) return;
 
-                    // Get CSRF token from page
                     const tokenMatch = document.head.innerHTML.match(/<meta\s+name="csrf-token"\s+content="([^"]+)"/);
-                    let csrfToken = '';
-                    if (tokenMatch) {
-                        csrfToken = tokenMatch[1];
-                    } else {
-                        // fallback: try to find any input[name="_token"]
-                        const tokenInput = document.querySelector('input[name="_token"]');
-                        if (tokenInput) csrfToken = tokenInput.value;
-                    }
+                    let csrfToken = tokenMatch ? tokenMatch[1] : (document.querySelector('input[name="_token"]')?.value || '');
 
                     const formData = new FormData();
                     formData.append('id', productId);
