@@ -66,7 +66,7 @@
             </div>
 
             <!-- Formular de Contact (Generic) -->
-            <div class="bg-white p-8 sm:p-10 shadow-sm border border-black/5 rounded-sm relative">
+            <div class="bg-ivory p-8 sm:p-10 shadow-sm border border-black/5 rounded-sm relative">
                 <!-- Decor -->
                 <div class="absolute top-0 right-0 w-24 h-24 bg-vintage-gold/5 rounded-bl-full -z-0"></div>
 
@@ -126,7 +126,7 @@
                     Vă rugăm să ne oferiți detalii despre viziunea dumneavoastră. Tipul de lemn, nuanța dorită pentru rășină, dimensiunile aproximative și scopul piesei.
                 </p>
 
-                <form action="{{ route('custom-request.store') }}" method="POST" class="space-y-6 text-left bg-white p-8 border border-vintage-gold/20 shadow-sm rounded-sm">
+                <form action="{{ route('custom-request.store') }}" method="POST" class="space-y-6 text-left bg-ivory p-8 border border-vintage-gold/20 shadow-sm rounded-sm">
                     @csrf
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">

@@ -38,7 +38,7 @@
                      class="w-full h-full object-cover filter contrast-[0.95] group-hover:contrast-100 transition-all duration-700">
                      
                 @if($product->is_custom)
-                    <div class="absolute top-6 left-6 bg-white/90 backdrop-blur-sm text-smoked-black text-[10px] px-4 py-2 uppercase tracking-[0.2em] font-medium shadow-sm">
+                    <div class="absolute top-6 left-6 bg-ivory/90 backdrop-blur-sm text-smoked-black text-[10px] px-4 py-2 uppercase tracking-[0.2em] font-medium shadow-sm">
                         Lucrare Unicat / Comandă
                     </div>
                 @endif
@@ -104,7 +104,7 @@
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             <div class="flex gap-4">
-                                <button type="submit" name="redirect_to_checkout" value="0" class="flex-1 bg-white border border-smoked-black/20 text-smoked-black px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium hover:border-vintage-gold hover:text-vintage-gold transition-colors duration-500 shadow-sm">
+                                <button type="submit" name="redirect_to_checkout" value="0" class="flex-1 bg-ivory border border-smoked-black/20 text-smoked-black px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium hover:border-vintage-gold hover:text-vintage-gold transition-colors duration-500 shadow-sm">
                                     Adaugă în Colecție
                                 </button>
                                 <button type="submit" name="redirect_to_checkout" value="1" class="flex-1 bg-vintage-gold text-white px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-medium hover:bg-smoked-black transition-colors duration-500 shadow-sm">

@@ -67,7 +67,7 @@
                                 <div class="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500"></div>
 
                                 @if($product->is_custom)
-                                    <div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-smoked-black text-[9px] px-3 py-1.5 uppercase tracking-[0.2em] font-medium shadow-sm">
+                                    <div class="absolute top-4 left-4 bg-ivory/90 backdrop-blur-sm text-smoked-black text-[9px] px-3 py-1.5 uppercase tracking-[0.2em] font-medium shadow-sm">
                                         Comandă
                                     </div>
                                 @endif
