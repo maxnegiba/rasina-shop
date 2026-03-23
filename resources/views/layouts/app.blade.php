@@ -32,14 +32,15 @@
 </head>
 <body class="bg-ivory text-smoked-black font-sans antialiased selection:bg-vintage-gold selection:text-white flex flex-col min-h-screen">
 
-    <nav class="bg-white/90 backdrop-blur-xl sticky top-0 z-50 border-b border-black/5 shadow-sm transition-all duration-300">
+    <nav class="bg-ivory/90 backdrop-blur-xl sticky top-0 z-50 border-b border-black/5 shadow-sm transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-24 items-center">
-                <div class="flex-shrink-0">
+            <div class="flex justify-between h-24 items-center relative">
+                <div class="flex-shrink-0 flex items-center h-full">
                     <a href="{{ route('home') }}" class="font-serif text-lg md:text-2xl tracking-[0.2em] uppercase text-smoked-black hover:text-vintage-gold transition-colors duration-300 flex items-center gap-2 md:gap-3">
-                        <img src="/img/logo.png" alt="Ivory Vintage Logo" class="h-20 md:h-28 w-auto object-contain transition-all duration-300 absolute -top-1 md:-top-4">
-                        
-                        <span class="ml-24 md:ml-32">MTD</span>
+                        <div class="relative h-24 w-24 md:w-32 flex items-center justify-center">
+                            <img src="/img/logo.png" alt="Ivory Vintage Logo" class="absolute top-1 md:top-2 h-24 md:h-32 w-auto object-contain transition-all duration-300">
+                        </div>
+                        <span>MTD</span>
                     </a>
                 </div>
                 <div class="hidden md:flex flex-1 justify-center">
@@ -70,7 +71,7 @@
     </nav>
 
     <div id="mobile-sidebar" class="fixed inset-0 z-50 bg-smoked-black/50 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
-        <div id="mobile-sidebar-content" class="fixed top-0 right-0 bottom-0 w-64 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+        <div id="mobile-sidebar-content" class="fixed top-0 right-0 bottom-0 w-64 bg-ivory shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
             <div class="flex justify-between items-center p-6 border-b border-black/5">
                 <span class="font-serif text-lg tracking-[0.1em] uppercase text-smoked-black flex items-center gap-2">
                     <img src="/img/logo.png" alt="Logo" class="h-8 w-auto object-contain mr-2">
@@ -92,7 +93,7 @@
     </div>
 
     <div id="cart-sidebar" class="fixed inset-0 z-[60] bg-smoked-black/50 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
-        <div id="cart-sidebar-content" class="fixed top-0 right-0 bottom-0 w-full sm:w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out">
+        <div id="cart-sidebar-content" class="fixed top-0 right-0 bottom-0 w-full sm:w-96 bg-ivory shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out">
             <div id="cart-sidebar-inner" class="h-full">
                 @include('cart._sidebar_content')
             </div>

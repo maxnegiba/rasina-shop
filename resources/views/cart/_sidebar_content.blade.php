@@ -1,5 +1,5 @@
 <div class="flex flex-col h-full bg-ivory">
-    <div class="flex justify-between items-center p-6 border-b border-black/5 bg-white">
+    <div class="flex justify-between items-center p-6 border-b border-black/5 bg-ivory">
         <span class="font-serif text-lg tracking-[0.1em] uppercase text-smoked-black flex items-center gap-2">
             <span class="w-1.5 h-1.5 rounded-full bg-vintage-gold"></span>
             Colecția Mea
@@ -23,7 +23,7 @@
         @if(count($cart) > 0)
             <div class="space-y-6">
                 @foreach($cart as $id => $details)
-                    <div class="flex gap-4 items-center bg-white p-3 border border-black/5 relative group">
+                    <div class="flex gap-4 items-center bg-ivory p-3 border border-black/5 relative group">
                         <div class="w-20 h-24 flex-shrink-0 bg-warm-beige/20 overflow-hidden">
                             <img src="{{ $details['image'] }}" alt="{{ $details['name'] }}" class="w-full h-full object-cover filter contrast-95">
                         </div>
@@ -57,7 +57,7 @@
     </div>
 
     <!-- Sumar Footer -->
-    <div class="p-6 border-t border-black/5 bg-white">
+    <div class="p-6 border-t border-black/5 bg-ivory">
         <div class="flex justify-between items-end mb-6">
             <span class="text-xs uppercase tracking-[0.1em] text-smoked-black font-medium">Subtotal</span>
             <span class="font-sans text-lg text-smoked-black tracking-wide font-medium" id="cart-sidebar-total">
