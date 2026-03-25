@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Ivory Vintage | Artă din Rășină Epoxidică</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
@@ -36,7 +37,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-24 items-center relative">
                 <div class="flex-shrink-0 flex items-center h-full">
-                    <a href="{{ route('home') }}" class="font-serif text-lg md:text-2xl tracking-[0.2em] uppercase text-dark-brown hover:text-vintage-gold transition-colors duration-300 flex items-center gap-2 md:gap-3">
+                    <a href="{{ route('home') ?? '/' }}" class="font-serif text-lg md:text-2xl tracking-[0.2em] uppercase text-dark-brown hover:text-vintage-gold transition-colors duration-300 flex items-center gap-2 md:gap-3">
                         <div class="relative h-24 w-24 md:w-32 flex items-center justify-center">
                             <img src="/img/logo.png" alt="Ivory Vintage Logo" class="absolute top-1 md:top-2 h-24 md:h-32 w-auto object-contain transition-all duration-300">
                         </div>
@@ -46,9 +47,9 @@
                 <div class="hidden md:flex flex-1 justify-center">
                     <div class="flex items-center space-x-12 font-medium tracking-[0.15em] uppercase text-[11px] text-dark-brown/60">
                         <a href="{{ route('shop.index') }}" class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Galerie</a>
-                        <a href="{{ route('blog.index') }}" class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Jurnal</a>
-                        <a href="{{ route('about') }}" class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Poveste</a>
-                        <a href="{{ route('contact') }}" class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Contact</a>
+                        <a href="#" class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Jurnal</a>
+                        <a href="#" class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Poveste</a>
+                        <a href="{{ route('contact') ?? '#' }}" class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Contact</a>
                     </div>
                 </div>
                 <div class="flex items-center space-x-6">
@@ -85,9 +86,9 @@
             </div>
             <div class="flex-grow py-8 px-6 overflow-y-auto flex flex-col space-y-6">
                 <a href="{{ route('shop.index') }}" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown/80 hover:text-vintage-gold transition-colors block">Galerie</a>
-                <a href="{{ route('blog.index') }}" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown/80 hover:text-vintage-gold transition-colors block">Jurnal</a>
-                <a href="{{ route('about') }}" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown/80 hover:text-vintage-gold transition-colors block">Poveste</a>
-                <a href="{{ route('contact') }}" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown/80 hover:text-vintage-gold transition-colors block">Contact</a>
+                <a href="#" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown/80 hover:text-vintage-gold transition-colors block">Jurnal</a>
+                <a href="#" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown/80 hover:text-vintage-gold transition-colors block">Poveste</a>
+                <a href="{{ route('contact') ?? '#' }}" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown/80 hover:text-vintage-gold transition-colors block">Contact</a>
             </div>
         </div>
     </div>
@@ -95,7 +96,9 @@
     <div id="cart-sidebar" class="fixed inset-0 z-[60] bg-dark-brown/50 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
         <div id="cart-sidebar-content" class="fixed top-0 right-0 bottom-0 w-full sm:w-96 bg-ivory shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out">
             <div id="cart-sidebar-inner" class="h-full">
-                @include('cart._sidebar_content')
+                @if(View::exists('cart._sidebar_content'))
+                    @include('cart._sidebar_content')
+                @endif
             </div>
         </div>
     </div>
@@ -113,42 +116,62 @@
         @yield('content')
     </main>
 
-    <footer class="bg-dark-brown text-white pt-24 pb-12 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-16 mb-16">
-                <div class="text-center md:text-left">
-                    <h2 class="font-serif text-3xl mb-6 tracking-wider text-white">Ivory Vintage</h2>
-                    <p class="font-light text-white/50 text-sm leading-relaxed max-w-sm mx-auto md:mx-0">
-                        O fuziune atemporală între esența naturală a lemnului și eleganța translucidă a rășinii. Piese de artă unicat, lucrate manual cu pasiune și măiestrie.
+    <footer class="bg-dark-brown text-white pt-20 pb-10 mt-auto border-t border-vintage-gold/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-8 mb-16">
+                
+                <div class="md:col-span-4 text-center md:text-left">
+                    <h2 class="font-serif text-3xl mb-4 tracking-wider text-white">Ivory Vintage</h2>
+                    <p class="font-light text-white/50 text-sm leading-relaxed mb-6 max-w-sm mx-auto md:mx-0">
+                        O fuziune atemporală între esența naturală a lemnului și eleganța translucidă a rășinii. Piese de artă unicat, lucrate manual cu pasiune și măiestrie în România.
                     </p>
+                    <a href="mailto:contact@mtdart.ro" class="text-vintage-gold hover:text-white transition-colors duration-300 text-sm font-medium tracking-wide">
+                        contact@mtdart.ro
+                    </a>
                 </div>
-                <div class="text-center md:text-left flex flex-col md:items-center">
-                    <div>
-                        <h3 class="font-sans text-xs uppercase tracking-[0.2em] text-vintage-gold mb-6">Explorați</h3>
-                        <ul class="space-y-4 font-light text-white/60 text-sm">
-                            <li><a href="{{ route('shop.index') }}" class="hover:text-white transition">Galerie</a></li>
-                            <li><a href="{{ route('about') }}" class="hover:text-white transition">Povestea Noastră</a></li>
-                            <li><a href="{{ route('contact') }}" class="hover:text-white transition">Comenzi Personalizate</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="text-center md:text-right">
-                    <h3 class="font-sans text-xs uppercase tracking-[0.2em] text-vintage-gold mb-6">Social</h3>
+
+                <div class="md:col-span-2 md:col-start-7 text-center md:text-left">
+                    <h3 class="font-sans text-[10px] uppercase tracking-[0.2em] text-vintage-gold mb-6 font-semibold">Explorați</h3>
                     <ul class="space-y-4 font-light text-white/60 text-sm">
-                        <li><a href="#" class="hover:text-white transition">Instagram</a></li>
-                        <li><a href="#" class="hover:text-white transition">Facebook</a></li>
-                        <li><a href="#" class="hover:text-white transition">Pinterest</a></li>
+                        <li><a href="{{ route('shop.index') }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Galerie Produse</a></li>
+                        <li><a href="#" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Povestea Noastră</a></li>
+                        <li><a href="{{ route('contact') ?? '#' }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Comenzi Personalizate</a></li>
                     </ul>
                 </div>
-            </div>
-            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] uppercase tracking-[0.2em] text-white/40">
-                <div class="mb-4 md:mb-0">
-                    &copy; {{ date('Y') }} Ivory Vintage Gallery.
+
+                <div class="md:col-span-2 text-center md:text-left">
+                    <h3 class="font-sans text-[10px] uppercase tracking-[0.2em] text-vintage-gold mb-6 font-semibold">Informații Utile</h3>
+                    <ul class="space-y-4 font-light text-white/60 text-sm">
+                        <li><a href="{{ route('legal.terms') }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Termeni și Condiții</a></li>
+                        <li><a href="{{ route('legal.privacy') }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Politica de Confidențialitate</a></li>
+                        <li><a href="{{ route('legal.returns') }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Livrare și Retur</a></li>
+                    </ul>
                 </div>
-                <div class="space-x-4">
-                    <a href="#" class="hover:text-white transition">Termeni & Condiții</a>
-                    <span>|</span>
-                    <a href="#" class="hover:text-white transition">Confidențialitate</a>
+
+                <div class="md:col-span-2 text-center md:text-left">
+                    <h3 class="font-sans text-[10px] uppercase tracking-[0.2em] text-vintage-gold mb-6 font-semibold">Social</h3>
+                    <ul class="space-y-4 font-light text-white/60 text-sm">
+                        <li><a href="#" target="_blank" class="hover:text-white transition-colors duration-300 flex items-center justify-center md:justify-start gap-2">Instagram</a></li>
+                        <li><a href="#" target="_blank" class="hover:text-white transition-colors duration-300 flex items-center justify-center md:justify-start gap-2">Facebook</a></li>
+                        <li><a href="#" target="_blank" class="hover:text-white transition-colors duration-300 flex items-center justify-center md:justify-start gap-2">Pinterest</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="text-[10px] uppercase tracking-[0.2em] text-white/40 text-center md:text-left">
+                    &copy; {{ date('Y') }} Ivory Vintage Gallery.<br class="md:hidden"> Toate drepturile rezervate.
+                </div>
+                
+                <div class="flex items-center gap-4 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                    <div class="flex items-center gap-1 text-[10px] text-white/60 uppercase tracking-[0.1em] mr-2">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        Plăți Securizate
+                    </div>
+                    <span class="text-xs font-bold text-white/80">VISA</span>
+                    <span class="text-xs font-bold text-white/80">Mastercard</span>
+                    <span class="text-xs font-bold text-white/80">Stripe</span>
                 </div>
             </div>
         </div>
@@ -164,6 +187,7 @@
             const mobileLinks = document.querySelectorAll('.mobile-link');
 
             function openSidebar() {
+                if(!sidebar) return;
                 sidebar.classList.remove('hidden');
                 setTimeout(() => {
                     sidebar.classList.remove('opacity-0');
@@ -173,6 +197,7 @@
             }
 
             function closeSidebar() {
+                if(!sidebar) return;
                 sidebar.classList.add('opacity-0');
                 sidebarContent.classList.add('translate-x-full');
                 setTimeout(() => {
@@ -198,6 +223,7 @@
             const cartSidebarInner = document.getElementById('cart-sidebar-inner');
 
             function openCartSidebar() {
+                if(!cartSidebar) return;
                 cartSidebar.classList.remove('hidden');
                 setTimeout(() => {
                     cartSidebar.classList.remove('opacity-0');
@@ -207,6 +233,7 @@
             }
 
             function closeCartSidebar() {
+                if(!cartSidebar) return;
                 cartSidebar.classList.add('opacity-0');
                 cartSidebarContent.classList.add('translate-x-full');
                 setTimeout(() => {
@@ -286,14 +313,16 @@
                     const productId = removeBtn.getAttribute('data-id');
                     if (!productId) return;
 
-                    const tokenMatch = document.head.innerHTML.match(/<meta\s+name="csrf-token"\s+content="([^"]+)"/);
-                    let csrfToken = tokenMatch ? tokenMatch[1] : (document.querySelector('input[name="_token"]')?.value || '');
+                    // Extragem meta tag-ul pt token csrf (l-am adăugat în <head>)
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
                     const formData = new FormData();
                     formData.append('id', productId);
                     formData.append('_token', csrfToken);
 
-                    fetch("{{ route('cart.remove') }}", {
+                    // Deoarece adăugăm rutele legal pe viitor, ne asigurăm că punem aici ruta corectă pentru remove (presupusă /cos/sterge)
+                    // Dacă ai definit route('cart.remove'), folosește direct stringul '/cos/sterge' sau {{ route('cart.remove') }}
+                    fetch("{{ route('cart.remove') ?? '/cos/sterge' }}", {
                         method: 'POST',
                         body: formData,
                         headers: {

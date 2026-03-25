@@ -55,3 +55,7 @@ Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
 
 // Notă: Rutele pentru Filament (Admin) sunt gestionate automat de pachet, 
 // deci nu trebuie să adăugăm nimic aici pentru panoul de control.
+// Paginile Legale
+Route::view('/termeni-si-conditii', 'legal.terms')->name('legal.terms');
+Route::view('/politica-de-confidentialitate', 'legal.privacy')->name('legal.privacy');
+Route::view('/politica-de-retur', 'legal.returns')->name('legal.returns');
