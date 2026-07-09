@@ -66,8 +66,7 @@
         </div>
 
         @if(count($cart) > 0)
-            <form action="{{ route('checkout.session') }}" method="POST">
-                @csrf
+            <form action="{{ route('checkout.index') }}" method="GET">
                 <button type="submit" class="w-full bg-dark-brown text-white px-6 py-4 uppercase tracking-[0.2em] text-[10px] font-medium hover:bg-vintage-gold transition-colors duration-500 shadow-sm flex justify-center items-center gap-2 group">
                     <span>Spre Plată</span>
                     <span class="transform group-hover:translate-x-1 transition-transform duration-300">&rarr;</span>
