@@ -6,6 +6,8 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CustomRequestController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutOptionsController;
+use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -48,10 +50,13 @@ Route::group(['prefix' => 'cos', 'as' => 'cart.'], function () {
 
 // --- Checkout & Plăți (Stripe) ---
 Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
-    Route::match(['get', 'post'], '/create-session', [CheckoutController::class, 'createSession'])->name('session');
+    Route::get('/', [CheckoutOptionsController::class, 'index'])->name('index');
+    Route::post('/process', [CheckoutOptionsController::class, 'process'])->name('process');
     Route::get('/succes', [CheckoutController::class, 'success'])->name('success');
     Route::get('/anulare', [CheckoutController::class, 'cancel'])->name('cancel');
 });
+
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])->name('stripe.webhook')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 // Notă: Rutele pentru Filament (Admin) sunt gestionate automat de pachet, 
 // deci nu trebuie să adăugăm nimic aici pentru panoul de control.

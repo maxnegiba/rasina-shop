@@ -95,7 +95,7 @@ class CartController extends Controller
 
         // Verificăm dacă a apăsat pe butonul "Buy Now"
         if ($request->input('redirect_to_checkout')) {
-            return redirect()->route('checkout.session');
+            return redirect()->route('checkout.index');
         }
 
         return redirect()->back()->with('success', 'Produsul a fost adăugat în colecție (coș).');

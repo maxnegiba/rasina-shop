@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,12 +16,14 @@ class Order extends Model
     protected $fillable = [
         'user_id', 'order_number', 'total_amount', 'payment_status', 
         'shipping_status', 'customer_details', 'stripe_transaction_id',
-        'invoice_series', 'invoice_number'
+        'invoice_series', 'invoice_number', 'shipping_method', 'shipping_cost',
+        'easybox_id', 'easybox_name', 'awb_number', 'awb_status'
     ];
 
     protected $casts = [
         'customer_details' => 'array', // Transformă automat JSON-ul din DB în array PHP
         'total_amount' => 'decimal:2',
+        'shipping_cost' => 'decimal:2',
     ];
 
     public function items(): HasMany

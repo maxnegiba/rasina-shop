@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    'sameday' => [
+        'username' => env('SAMEDAY_USERNAME'),
+        'password' => env('SAMEDAY_PASSWORD'),
+        'env' => env('SAMEDAY_ENV', 'demo'), // demo sau prod
+        'pickup_point_id' => env('SAMEDAY_PICKUP_POINT_ID'),
+    ],
+
+    'stripe' => [
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+    ],
 ];
