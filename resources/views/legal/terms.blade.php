@@ -29,7 +29,7 @@
             Toate prețurile afișate pe site sunt exprimate în RON. Ne rezervăm dreptul de a modifica prețurile fără o notificare prealabilă, însă comenzile deja plasate și confirmate vor păstra prețul de la momentul achiziției.
         </p>
         <p>
-            Plata online este procesată în siguranță prin intermediul platformei <strong>Stripe</strong>. Nu stocăm și nu avem acces la datele cardului dumneavoastră bancar. Factura fiscală va fi emisă automat și trimisă pe email (și în e-Factura/SPV) conform legislației în vigoare.
+            Plata online este procesată în siguranță prin intermediul platformei <strong>Stripe</strong>. Nu stocăm și nu avem acces la datele cardului dumneavoastră bancar. Factura proforma va fi emisă automat și trimisă pe email.
         </p>
 
         <h2 class="text-2xl mt-12 mb-4">4. Politica de Retur și Excepții (OUG 34/2014)</h2>
