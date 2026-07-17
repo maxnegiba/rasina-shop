@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Translatable\HasTranslations;
+use RalphJSmit\Laravel\SEO\Support\HasSEO;
+use RalphJSmit\Laravel\SEO\Support\SEOData;
 
 class Product extends Model
 {
-    use HasFactory, HasTranslations;
+    use HasFactory, HasTranslations, HasSEO;
 
     // Aici am adăugat 'image' la final ca să îi dăm voie să îl salveze!
     protected $fillable = [
@@ -34,5 +36,21 @@ class Product extends Model
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    public function getDynamicSEOData(): SEOData
+    {
+        $featuredImage = $this->images->where('is_featured', true)->first()
+                         ?? $this->images->first();
+
+        $imagePath = $featuredImage
+                     ? asset('storage/' . $featuredImage->image_path)
+                     : asset('/img/logo.png');
+
+        return new SEOData(
+            title: $this->name,
+            description: strip_tags($this->description),
+            image: $imagePath,
+        );
     }
 }

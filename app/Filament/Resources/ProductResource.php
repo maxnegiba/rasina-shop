@@ -14,6 +14,7 @@ use Filament\Tables\Columns\IconColumn;
 use Illuminate\Support\Str;
 use Filament\Forms\Set;
 use Illuminate\Database\Eloquent\Builder;
+use RalphJSmit\Laravel\SEO\SEO;
 
 class ProductResource extends Resource
 {
@@ -116,6 +117,12 @@ class ProductResource extends Resource
                             ->hidden(fn (Forms\Get $get): bool => $get('is_custom') === true)
                             ->required(fn (Forms\Get $get): bool => $get('is_custom') === false),
                     ]),
+
+                    Forms\Components\Section::make('SEO & Meta Data')
+                        ->schema([
+                            SEO::make(),
+                        ])
+                        ->collapsed(),
                 ])->columnSpan(['lg' => 1]),
             ])
             ->columns(3);

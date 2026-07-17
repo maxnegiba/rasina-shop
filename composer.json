@@ -13,6 +13,7 @@
         "filament/spatie-laravel-translatable-plugin": "^3.2",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "ralphjsmit/laravel-seo": "^1.8",
         "spatie/laravel-settings": "^3.9",
         "spatie/laravel-translatable": "^6.13",
         "stripe/stripe-php": "^19.4"
