@@ -50,9 +50,7 @@
                                 
                                 @php
                                     $imageUrl = null;
-                                    if (!empty($product->image)) {
-                                        $imageUrl = asset('storage/' . $product->image);
-                                    } elseif (isset($product->images) && $product->images->count() > 0) {
+                                    if (isset($product->images) && $product->images->count() > 0) {
                                         $firstImage = $product->images->where('is_featured', true)->first() ?? $product->images->first();
                                         $imageUrl = asset('storage/' . $firstImage->image_path);
                                     } else {
@@ -69,6 +67,10 @@
                                 @if($product->is_custom)
                                     <div class="absolute top-4 left-4 bg-ivory/90 backdrop-blur-sm text-dark-brown text-[9px] px-3 py-1.5 uppercase tracking-[0.2em] font-medium shadow-sm">
                                         Comandă
+                                    </div>
+                                @elseif($product->stock <= 0)
+                                    <div class="absolute top-4 left-4 bg-red-900/90 backdrop-blur-sm text-white text-[9px] px-3 py-1.5 uppercase tracking-[0.2em] font-medium shadow-sm">
+                                        Stoc Epuizat
                                     </div>
                                 @endif
                             </div>
@@ -101,5 +103,7 @@
             @endif
         </div>
     </div>
+
+    <x-flashy-custom-order />
 </div>
 @endsection
