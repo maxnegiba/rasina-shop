@@ -48,10 +48,16 @@ Route::group(['prefix' => 'cos', 'as' => 'cart.'], function () {
 
 // --- Checkout & Plăți (Stripe) ---
 Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
-    Route::match(['get', 'post'], '/create-session', [CheckoutController::class, 'createSession'])->name('session');
+    Route::match(['get', 'post'], '/', [CheckoutController::class, 'index'])->name('index');
     Route::get('/succes', [CheckoutController::class, 'success'])->name('success');
     Route::get('/anulare', [CheckoutController::class, 'cancel'])->name('cancel');
 });
+
+Route::post('/webhook/stripe', [\App\Http\Controllers\WebhookController::class, 'handleStripeWebhook'])->name('webhook.stripe');
+
+// --- Descarcare Proforma ---
+Route::get('/proforma/{order}', [\App\Http\Controllers\ProformaController::class, 'download'])->name('order.proforma.download');
+
 
 // Notă: Rutele pentru Filament (Admin) sunt gestionate automat de pachet, 
 // deci nu trebuie să adăugăm nimic aici pentru panoul de control.

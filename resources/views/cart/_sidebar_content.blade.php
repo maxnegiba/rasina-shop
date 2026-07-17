@@ -66,13 +66,10 @@
         </div>
 
         @if(count($cart) > 0)
-            <form action="{{ route('checkout.session') }}" method="POST">
-                @csrf
-                <button type="submit" class="w-full bg-dark-brown text-white px-6 py-4 uppercase tracking-[0.2em] text-[10px] font-medium hover:bg-vintage-gold transition-colors duration-500 shadow-sm flex justify-center items-center gap-2 group">
-                    <span>Spre Plată</span>
-                    <span class="transform group-hover:translate-x-1 transition-transform duration-300">&rarr;</span>
-                </button>
-            </form>
+            <a href="{{ route('checkout.index') }}" class="w-full bg-dark-brown text-white px-6 py-4 uppercase tracking-[0.2em] text-[10px] font-medium hover:bg-vintage-gold transition-colors duration-500 shadow-sm flex justify-center items-center gap-2 group">
+                <span>Spre Plată</span>
+                <span class="transform group-hover:translate-x-1 transition-transform duration-300">&rarr;</span>
+            </a>
         @else
             <button disabled class="w-full bg-black/5 text-dark-brown/30 px-6 py-4 uppercase tracking-[0.2em] text-[10px] font-medium cursor-not-allowed">
                 Spre Plată

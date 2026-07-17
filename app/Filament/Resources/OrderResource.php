@@ -86,12 +86,11 @@ class OrderResource extends Resource
                             ->native(false),
                     ]),
 
-                    Forms\Components\Section::make('Facturare Oblio')->schema([
-                        Forms\Components\TextInput::make('invoice_series')->label('Serie')->disabled(),
-                        Forms\Components\TextInput::make('invoice_number')->label('Număr')->disabled(),
-                        Forms\Components\Placeholder::make('oblio_info')
+                    Forms\Components\Section::make('Factură Proforma')->schema([
+                        Forms\Components\TextInput::make('proforma_number')->label('Număr Proforma')->disabled(),
+                        Forms\Components\Placeholder::make('proforma_info')
                             ->label('Status')
-                            ->content('Facturarea se face automat prin Oblio API la confirmarea plății.'),
+                            ->content('Factura Proforma este generată automat la crearea comenzii.'),
                     ]),
                 ])->columnSpan(['lg' => 1]),
             ])
@@ -160,12 +159,12 @@ class OrderResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('Detalii'),
-                Tables\Actions\Action::make('download_invoice')
-                    ->label('Factură')
+                Tables\Actions\Action::make('download_proforma')
+                    ->label('Descarcă Proforma')
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('gray')
-                    ->url(fn (Order $record): string => '#')
-                    ->visible(fn (Order $record): bool => $record->payment_status === 'paid'),
+                    ->url(fn (Order $record): string => route('order.proforma.download', $record))
+                    ->openUrlInNewTab(),
             ]);
     }
 

@@ -21,7 +21,6 @@ return new class extends Migration
         $table->json('customer_details'); // Nume, Adresă, Email, Telefon salvate la momentul comenzii
         $table->string('stripe_transaction_id')->nullable();
         
-        // Pregătite pentru Oblio
         $table->string('invoice_series')->nullable();
         $table->string('invoice_number')->nullable();
         

@@ -30,7 +30,7 @@
 
         <h2 class="text-2xl mt-12 mb-4">3. Scopul colectării și timpul de păstrare</h2>
         <p>
-            Colectăm aceste date exclusiv pentru: procesarea și livrarea comenzilor, emiterea facturilor fiscale (Oblio/e-Factura) și comunicarea cu dumneavoastră referitoare la statusul comenzii (sau detalii pentru piesele realizate la comandă).
+            Colectăm aceste date exclusiv pentru: procesarea și livrarea comenzilor, emiterea facturilor (Proforma) și comunicarea cu dumneavoastră referitoare la statusul comenzii (sau detalii pentru piesele realizate la comandă).
         </p>
         <p>
             Conform legislației fiscale din România, documentele financiar-contabile (facturile) care conțin datele dumneavoastră trebuie arhivate pe o perioadă de 10 ani.

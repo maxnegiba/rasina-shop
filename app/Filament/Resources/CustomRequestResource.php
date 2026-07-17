@@ -92,18 +92,15 @@ class CustomRequestResource extends Resource{
                             ->required(),
                     ]),
 
-                    Forms\Components\Section::make('Facturare Oblio')->schema([
-                        Forms\Components\TextInput::make('invoice_series')
-                            ->label('Serie Factură')
-                            ->disabled(),
-                        Forms\Components\TextInput::make('invoice_number')
-                            ->label('Număr Factură')
+                    Forms\Components\Section::make('Factură Proforma')->schema([
+                        Forms\Components\TextInput::make('proforma_number')
+                            ->label('Număr Proforma')
                             ->disabled(),
                         
                         // Un Placeholder (un mesaj vizual) care îți amintește că factura e automată
-                        Forms\Components\Placeholder::make('oblio_info')
+                        Forms\Components\Placeholder::make('proforma_info')
                             ->label('Sistem Automatizat')
-                            ->content('Factura este generată și trimisă automat prin API-ul Oblio în momentul confirmării plății.'),
+                            ->content('Factura Proforma este generată automat la crearea comenzii.'),
                     ]),
                 ])->columnSpan(['lg' => 1]),
             ])
@@ -180,14 +177,12 @@ class CustomRequestResource extends Resource{
             ->actions([
                 Tables\Actions\EditAction::make()->label('Gestionează'),
                 
-                // Buton custom pe care îl vom lega mai târziu de PDF-ul din Oblio
-                Tables\Actions\Action::make('download_invoice')
-                    ->label('Factură')
+                Tables\Actions\Action::make('download_proforma')
+                    ->label('Descarcă Proforma')
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('gray')
-                    ->url(fn (Order $record): string => '#') // Aici vom pune linkul către PDF-ul generat
-                    ->openUrlInNewTab()
-                    ->visible(fn (Order $record): bool => $record->payment_status === 'paid'), // Apare doar dacă e plătită
+                    ->url(fn (Order $record): string => route('order.proforma.download', $record))
+                    ->openUrlInNewTab(),
             ])
             ->bulkActions([
                 // Fără ștergere în masă la comenzi, pentru siguranța datelor contabile!
