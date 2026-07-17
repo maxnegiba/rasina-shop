@@ -177,6 +177,8 @@
         </div>
     </footer>
 
+    @livewire('custom-order-modal')
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Mobile Sidebar

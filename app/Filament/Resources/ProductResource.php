@@ -49,13 +49,22 @@ class ProductResource extends Resource
                             ->columnSpanFull(),
                     ])->columns(2),
 
-                    Forms\Components\Section::make('Imagini')->schema([
-                        // Aici presupunem că ai un câmp image direct pe produs 
-                        // sau folosești un tabel separat. Ca placeholder standard pentru Filament:
-                        Forms\Components\FileUpload::make('image')
-                            ->label('Imagine Principală')
-                            ->image()
-                            ->directory('products')
+                    Forms\Components\Section::make('Galerie Imagini')->schema([
+                        Forms\Components\Repeater::make('images')
+                            ->relationship()
+                            ->schema([
+                                Forms\Components\FileUpload::make('image_path')
+                                    ->label('Imagine')
+                                    ->image()
+                                    ->directory('products')
+                                    ->required(),
+                                Forms\Components\Toggle::make('is_featured')
+                                    ->label('Imagine Principală (Featured)')
+                                    ->default(false),
+                            ])
+                            ->columns(2)
+                            ->defaultItems(1)
+                            ->createItemButtonLabel('Adaugă o nouă imagine')
                             ->columnSpanFull(),
                     ]),
                 ])->columnSpan(['lg' => 2]),
@@ -102,6 +111,7 @@ class ProductResource extends Resource
                         Forms\Components\TextInput::make('stock')
                             ->label('Stoc disponibil')
                             ->numeric()
+                            ->minValue(0)
                             ->default(1)
                             ->hidden(fn (Forms\Get $get): bool => $get('is_custom') === true)
                             ->required(fn (Forms\Get $get): bool => $get('is_custom') === false),

@@ -30,6 +30,7 @@ Route::group(['prefix' => 'magazin', 'as' => 'shop.'], function () {
 // --- Cereri Personalizate (Custom Requests) ---
 // Aici trimitem datele din formularul pentru produse unicat
 Route::post('/cerere-personalizata', [CustomRequestController::class, 'store'])->name('custom-request.store');
+Route::view('/custom-orders', 'custom-orders')->name('custom-orders');
 
 // --- Jurnal de Atelier (Blog) ---
 Route::group(['prefix' => 'jurnal', 'as' => 'blog.'], function () {
