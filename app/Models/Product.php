@@ -40,8 +40,15 @@ class Product extends Model
 
     public function getDynamicSEOData(): SEOData
     {
-        $featuredImage = $this->images->where('is_featured', true)->first()
-                         ?? $this->images->first();
+        if (!$this->exists) {
+            return new SEOData(
+                title: $this->name ?? 'New Product',
+                image: asset('/img/logo.png'),
+            );
+        }
+
+        $featuredImage = $this->images?->where('is_featured', true)->first()
+                         ?? $this->images?->first();
 
         $imagePath = $featuredImage
                      ? asset('storage/' . $featuredImage->image_path)

@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Filament\Forms\Set;
 use Carbon\Carbon;
+use RalphJSmit\Filament\SEO\SEO;
 
 class PostResource extends Resource
 {
@@ -70,13 +71,19 @@ class PostResource extends Resource
                             ->helperText('Dacă lași gol, articolul va fi salvat ca ciornă. Dacă pui o dată în viitor, se va publica automat atunci.'),
                     ]),
 
-                    Forms\Components\Section::make('Optimizare SEO')->schema([
+                    Forms\Components\Section::make('SEO & Meta Data')
+                        ->schema([
+                            SEO::make(),
+                        ])
+                        ->collapsed(),
+
+                    Forms\Components\Section::make('Optimizare SEO Veche')->schema([
                         Forms\Components\Textarea::make('seo_meta_description')
                             ->label('Meta Descriere (Google)')
                             ->rows(3)
                             ->helperText('Un rezumat scurt (150-160 caractere) care va apărea în rezultatele căutărilor Google.')
                             ->maxLength(255),
-                    ]),
+                    ])->hidden(),
                 ])->columnSpan(['lg' => 1]),
             ])
             ->columns(3);
