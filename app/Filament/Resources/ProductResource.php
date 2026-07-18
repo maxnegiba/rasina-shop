@@ -14,7 +14,7 @@ use Filament\Tables\Columns\IconColumn;
 use Illuminate\Support\Str;
 use Filament\Forms\Set;
 use Illuminate\Database\Eloquent\Builder;
-use RalphJSmit\Laravel\SEO\SEO;
+use RalphJSmit\Filament\SEO\SEO;
 
 class ProductResource extends Resource
 {
