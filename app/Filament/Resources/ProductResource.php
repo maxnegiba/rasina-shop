@@ -15,9 +15,12 @@ use Illuminate\Support\Str;
 use Filament\Forms\Set;
 use Illuminate\Database\Eloquent\Builder;
 use RalphJSmit\Filament\SEO\SEO;
+use Filament\Resources\Concerns\Translatable;
 
 class ProductResource extends Resource
 {
+    use Translatable;
+
     protected static ?string $model = Product::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-paint-brush';
