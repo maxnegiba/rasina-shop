@@ -51,8 +51,8 @@
                 <div class="hidden md:flex flex-1 justify-center">
                     <div class="flex items-center space-x-12 font-medium tracking-[0.15em] uppercase text-[11px] text-dark-brown/60">
                         <a href="{{ route('shop.index') }}" class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Galerie</a>
-                        <a href="#" class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Jurnal</a>
-                        <a href="#" class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Poveste</a>
+                        <a href="{{ route('blog.index') }}" wire:navigate class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Jurnal</a>
+                        <a href="{{ route('about') }}" wire:navigate class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Poveste</a>
                         <a href="{{ route('contact') ?? '#' }}" class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Contact</a>
                     </div>
                 </div>
@@ -90,8 +90,8 @@
             </div>
             <div class="flex-grow py-8 px-6 overflow-y-auto flex flex-col space-y-6">
                 <a href="{{ route('shop.index') }}" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown/80 hover:text-vintage-gold transition-colors block">Galerie</a>
-                <a href="#" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown/80 hover:text-vintage-gold transition-colors block">Jurnal</a>
-                <a href="#" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown/80 hover:text-vintage-gold transition-colors block">Poveste</a>
+                <a href="{{ route('blog.index') }}" wire:navigate class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown/80 hover:text-vintage-gold transition-colors block">Jurnal</a>
+                <a href="{{ route('about') }}" wire:navigate class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown/80 hover:text-vintage-gold transition-colors block">Poveste</a>
                 <a href="{{ route('contact') ?? '#' }}" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown/80 hover:text-vintage-gold transition-colors block">Contact</a>
             </div>
         </div>
@@ -138,7 +138,7 @@
                     <h3 class="font-sans text-[10px] uppercase tracking-[0.2em] text-vintage-gold mb-6 font-semibold">Explorați</h3>
                     <ul class="space-y-4 font-light text-white/60 text-sm">
                         <li><a href="{{ route('shop.index') }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Galerie Produse</a></li>
-                        <li><a href="#" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Povestea Noastră</a></li>
+                        <li><a href="{{ route('about') }}" wire:navigate class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Povestea Noastră</a></li>
                         <li><a href="{{ route('contact') ?? '#' }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Comenzi Personalizate</a></li>
                     </ul>
                 </div>
