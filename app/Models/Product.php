@@ -40,11 +40,8 @@ class Product extends Model
 
     public function getDynamicSEOData(): SEOData
     {
-        if (!$this->exists) {
-            return new SEOData(
-                title: $this->name ?? 'New Product',
-                image: asset('/img/logo.png'),
-            );
+        if (! $this->exists) {
+            return new SEOData();
         }
 
         $featuredImage = $this->images?->where('is_featured', true)->first()
