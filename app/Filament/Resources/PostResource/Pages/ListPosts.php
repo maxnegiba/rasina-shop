@@ -8,6 +8,8 @@ use Filament\Resources\Pages\ListRecords;
 
 class ListPosts extends ListRecords
 {
+    use ListRecords\Concerns\Translatable;
+
     protected static string $resource = PostResource::class;
 
     protected function getHeaderActions(): array
