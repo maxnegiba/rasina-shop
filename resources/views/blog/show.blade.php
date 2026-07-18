@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('seo_meta')
+{!! seo($post) !!}
+@endsection
+
 @section('content')
 <div class="bg-ivory pt-12 pb-24">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -22,6 +22,7 @@
             <ul class="space-y-4 font-light text-xs tracking-[0.1em] uppercase">
                 <li>
                     <a href="{{ route('shop.index') }}" 
+                       wire:navigate
                        class="{{ !isset($category) ? 'text-dark-brown font-medium border-b border-dark-brown pb-1' : 'text-dark-brown/40 hover:text-vintage-gold' }} transition-colors duration-300 flex items-center">
                         Toate Piesele
                     </a>
@@ -29,6 +30,7 @@
                 @foreach($categories as $cat)
                     <li>
                         <a href="{{ route('shop.category', $cat->slug) }}" 
+                           wire:navigate
                            class="flex justify-between items-center {{ isset($category) && $category->id === $cat->id ? 'text-dark-brown font-medium border-b border-dark-brown pb-1' : 'text-dark-brown/40 hover:text-vintage-gold' }} transition-colors duration-300">
                             <span>{{ $cat->name }}</span>
                             <span class="text-[9px] text-dark-brown/30 font-sans">
