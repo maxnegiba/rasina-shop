@@ -14,7 +14,7 @@ class Post extends Model
 
     protected $fillable = [
         'slug', 'title', 'content', 'featured_image', 
-        'seo_meta_description', 'published_at'
+        'seo_meta_description', 'published_at', 'author'
     ];
 
     public $translatable = ['title', 'content', 'seo_meta_description'];
@@ -29,8 +29,8 @@ class Post extends Model
             return new SEOData();
         }
 
-        $imagePath = $this->image_path
-                     ? asset('storage/' . $this->image_path)
+        $imagePath = $this->featured_image
+                     ? asset('storage/' . $this->featured_image)
                      : asset('/img/logo.png');
 
         return new SEOData(

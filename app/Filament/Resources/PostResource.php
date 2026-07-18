@@ -40,6 +40,11 @@ class PostResource extends Resource
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
 
+                        Forms\Components\TextInput::make('author')
+                            ->label('Autor Articol')
+                            ->default('MTD ART')
+                            ->maxLength(255),
+
                         Forms\Components\TextInput::make('slug')
                             ->label('URL Prietenos (Slug)')
                             ->required()

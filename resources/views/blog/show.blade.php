@@ -40,20 +40,20 @@
                     {{ $post->published_at->translatedFormat('d F Y') }}
                 </time>
                 <span>&bull;</span>
-                <span>Atelierul Ivory Vintage</span>
+                <span>{{ $post->author ?? 'MTD ART' }}</span>
             </div>
         </header>
 
         <!-- Imagine Principală -->
-        @if($post->image_path)
+        @if($post->featured_image)
             <div class="w-full aspect-video sm:aspect-[21/9] bg-warm-beige mb-16 relative overflow-hidden rounded-sm group">
-                <img src="{{ Storage::url($post->image_path) }}" alt="{{ $post->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
+                <img src="{{ Storage::url($post->featured_image) }}" alt="{{ $post->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
                 <div class="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-sm"></div>
             </div>
         @else
             <!-- Placeholder elegant în caz că lipsește imaginea -->
             <div class="w-full aspect-video sm:aspect-[21/9] bg-warm-beige mb-16 relative overflow-hidden rounded-sm flex items-center justify-center border border-black/5">
-                <span class="font-serif italic text-dark-brown/20 text-2xl">Ivory Vintage Art</span>
+                <img src="{{ asset('/img/logo.png') }}" alt="{{ $post->title }}" class="w-1/4 h-auto object-contain opacity-50 grayscale transition-transform duration-700 ease-out">
             </div>
         @endif
 
@@ -96,10 +96,12 @@
             @foreach($recentPosts as $recentPost)
                 <a href="{{ route('blog.show', $recentPost->slug) }}" class="group block bg-ivory shadow-sm border border-black/5 hover:border-vintage-gold/30 transition-all duration-300 hover:-translate-y-1">
                     <div class="aspect-[4/3] bg-warm-beige relative overflow-hidden">
-                        @if($recentPost->image_path)
-                            <img src="{{ Storage::url($recentPost->image_path) }}" alt="{{ $recentPost->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
+                        @if($recentPost->featured_image)
+                            <img src="{{ Storage::url($recentPost->featured_image) }}" alt="{{ $recentPost->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
                         @else
-                            <div class="absolute inset-0 flex items-center justify-center text-dark-brown/20 font-serif italic">Ivory Vintage</div>
+                            <div class="absolute inset-0 flex items-center justify-center bg-warm-beige">
+                                <img src="{{ asset('/img/logo.png') }}" alt="{{ $recentPost->title }}" class="w-1/2 h-auto object-contain opacity-50 grayscale">
+                            </div>
                         @endif
                         <div class="absolute top-4 right-4 bg-ivory/90 backdrop-blur-sm px-3 py-1 text-[10px] font-sans tracking-widest text-vintage-gold uppercase">
                             {{ $recentPost->published_at->translatedFormat('d M') }}

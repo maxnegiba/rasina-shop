@@ -27,24 +27,23 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20">
                 @foreach($posts as $post)
                     <article class="group block">
-                        <a href="{{ route('blog.show', $post->slug) }}" class="block relative overflow-hidden aspect-[4/5] mb-8 bg-warm-beige/30">
-                            @php
-                                // Logica antiglonț pentru imagini
-                                $imageUrl = $post->image 
-                                    ? asset('storage/' . $post->image) 
-                                    : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iODAwIiBmaWxsPSIjRkRGQkY3Ij48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjgwMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiNDNUE4ODAiPkl2b3J5IFZpbnRhZ2U8L3RleHQ+PC9zdmc+';
-                            @endphp
-                            
-                            <img src="{{ $imageUrl }}" 
-                                 class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out" 
-                                 alt="{{ $post->title }}">
+                        <a href="{{ route('blog.show', $post->slug) }}" class="block relative overflow-hidden aspect-[4/5] mb-8 bg-warm-beige/30 flex items-center justify-center">
+                            @if($post->featured_image)
+                                <img src="{{ asset('storage/' . $post->featured_image) }}"
+                                     class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
+                                     alt="{{ $post->title }}">
+                            @else
+                                <img src="{{ asset('/img/logo.png') }}"
+                                     class="w-1/2 h-auto object-contain opacity-50 filter grayscale group-hover:scale-105 transition-all duration-700 ease-out"
+                                     alt="{{ $post->title }}">
+                            @endif
                             <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500"></div>
                         </a>
 
                         <div>
                             <div class="flex items-center gap-4 mb-4">
                                 <span class="text-vintage-gold text-[10px] uppercase tracking-[0.2em] font-medium">
-                                    {{ $post->category->name ?? 'Studio Design' }}
+                                    {{ $post->author ?? 'MTD ART' }}
                                 </span>
                                 <span class="w-4 h-px bg-dark-brown/20"></span>
                                 <span class="text-dark-brown/50 text-[10px] uppercase tracking-[0.1em]">
