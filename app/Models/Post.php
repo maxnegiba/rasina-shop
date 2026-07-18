@@ -25,6 +25,10 @@ class Post extends Model
 
     public function getDynamicSEOData(): SEOData
     {
+        if (! $this->exists) {
+            return new SEOData();
+        }
+
         $imagePath = $this->image_path
                      ? asset('storage/' . $this->image_path)
                      : asset('/img/logo.png');
