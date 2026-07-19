@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <section class="relative min-h-[60vh] flex flex-col justify-center overflow-hidden bg-dark-brown">
+    <section class="relative min-h-[60vh] flex flex-col justify-center overflow-hidden bg-dark-brown border-b border-vintage-gold/30">
         <div class="absolute inset-0 z-0">
             <img src="https://images.unsplash.com/photo-1455390582262-044cdead27d8?auto=format&fit=crop&q=80&w=2000"
                  class="w-full h-full object-cover opacity-30 mix-blend-luminosity scale-105 transform origin-center" alt="Jurnal de Atelier">
@@ -15,26 +15,27 @@
                     Povești din<br>
                     <span class="italic text-white/90">Atelier</span>
                 </h1>
-                <p class="text-white/70 text-lg font-light tracking-wide mb-0 max-w-xl mx-auto leading-relaxed">
+                <p class="text-white/80 text-lg font-light tracking-wide mb-0 max-w-xl mx-auto leading-relaxed">
                     Descoperă procesul creativ, tehnicile de prelucrare a lemnului cu rășină și sursele noastre de inspirație pentru fiecare colecție.
                 </p>
             </div>
         </div>
     </section>
 
-    <section class="max-w-7xl mx-auto py-24 md:py-32 px-4 sm:px-6 lg:px-8">
-        @if($posts->count() > 0)
+    <section class="max-w-7xl mx-auto py-24 md:py-32 px-4 sm:px-6 lg:px-8 bg-ivory">
+        @if(isset($posts) && $posts->count() > 0)
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20">
                 @foreach($posts as $post)
-                    <article class="group block">
-                        <a href="{{ route('blog.show', $post->slug) }}" class="block relative overflow-hidden aspect-[4/5] mb-8 bg-warm-beige/30 flex items-center justify-center">
+                    <article class="group block bg-ivory">
+                        <!-- Schimbat bg-warm-beige si object-contain pentru a incadra perfect arta -->
+                        <a href="{{ route('blog.show', $post->slug) }}" class="block relative overflow-hidden aspect-[4/5] mb-8 bg-warm-beige/30 ring-1 ring-inset ring-black/5 flex items-center justify-center p-4">
                             @if($post->featured_image)
                                 <img src="{{ asset('storage/' . $post->featured_image) }}"
-                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                     class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 ease-out"
                                      alt="{{ $post->title }}">
                             @else
                                 <img src="{{ asset('/img/logo.png') }}"
-                                     class="w-1/2 h-auto object-contain group-hover:scale-105 transition-transform duration-700 ease-out"
+                                     class="w-1/2 h-auto object-contain group-hover:scale-105 transition-transform duration-700 ease-out opacity-50"
                                      alt="{{ $post->title }}">
                             @endif
                         </a>
@@ -56,7 +57,8 @@
                                 </a>
                             </h3>
 
-                            <p class="text-dark-brown/60 font-light text-sm md:text-base leading-relaxed mb-6 line-clamp-3">
+                            <!-- Typography imbunatatita la excerpt -->
+                            <p class="text-dark-brown/70 font-light text-sm md:text-base leading-loose mb-6 line-clamp-3">
                                 {{ $post->excerpt ?? \Illuminate\Support\Str::limit(strip_tags($post->content), 150) }}
                             </p>
 
@@ -74,12 +76,12 @@
             </div>
             
         @else
-            <div class="text-center py-32 border border-dashed border-dark-brown/20 bg-dark-brown/5">
+            <div class="text-center py-32 border border-dashed border-dark-brown/20 bg-warm-beige/10">
                 <h3 class="font-serif text-3xl mb-4 text-dark-brown/60 italic">Pagina este albă.</h3>
                 <p class="font-light text-dark-brown/50 mb-8 max-w-md mx-auto text-sm leading-relaxed">
                     Momentan suntem în atelier și lucrăm la noi concepte. Întoarce-te curând pentru a descoperi poveștile din spatele creațiilor noastre.
                 </p>
-                <a href="{{ route('shop.index') }}" class="inline-block border border-vintage-gold text-vintage-gold px-8 py-3 uppercase tracking-[0.2em] text-xs hover:bg-vintage-gold hover:text-white transition duration-300">
+                <a href="{{ route('shop.index') }}" class="inline-block border border-vintage-gold text-vintage-gold px-8 py-3 uppercase tracking-[0.2em] text-xs font-medium hover:bg-vintage-gold hover:text-white transition duration-300">
                     Vizitează Galeria
                 </a>
             </div>
