@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@php $settings = app(\App\Settings\GeneralSettings::class); @endphp
 <div class="bg-ivory min-h-screen py-16 sm:py-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
@@ -26,9 +27,8 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-10">
                     <div class="space-y-4">
                         <h3 class="text-[10px] font-sans tracking-[0.2em] font-semibold text-vintage-gold uppercase">Adresă Atelier</h3>
-                        <p class="font-serif text-dark-brown text-xl leading-relaxed">
-                            Strada Pasiunii, Nr. 10<br>
-                            București, România
+                        <p class="font-serif text-dark-brown text-xl leading-relaxed whitespace-pre-line">
+                            {{ $settings->company_address ?: "Strada Pasiunii, Nr. 10\nBucurești, România" }}
                         </p>
                         <p class="text-xs text-dark-brown/50 italic font-light tracking-wide">(Vizite doar cu programare prealabilă)</p>
                     </div>
@@ -36,8 +36,10 @@
                     <div class="space-y-4">
                         <h3 class="text-[10px] font-sans tracking-[0.2em] font-semibold text-vintage-gold uppercase">Comunicare</h3>
                         <div class="font-serif text-dark-brown text-xl leading-relaxed flex flex-col gap-2">
-                            <a href="mailto:contact@mtdart.ro" class="hover:text-vintage-gold transition-colors duration-300">contact@mtdart.ro</a>
-                            <a href="tel:+40700000000" class="hover:text-vintage-gold transition-colors duration-300">+40 700 000 000</a>
+                            <a href="mailto:{{ $settings->contact_email ?: 'contact@mtdart.ro' }}" class="hover:text-vintage-gold transition-colors duration-300">{{ $settings->contact_email ?: 'contact@mtdart.ro' }}</a>
+                            @if($settings->contact_phone)
+                            <a href="tel:{{ str_replace(' ', '', $settings->contact_phone) }}" class="hover:text-vintage-gold transition-colors duration-300">{{ $settings->contact_phone }}</a>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -45,18 +47,24 @@
                 <div class="space-y-6 pt-6">
                     <h3 class="text-[10px] font-sans tracking-[0.2em] font-semibold text-vintage-gold uppercase">Program Atelier</h3>
                     <ul class="font-light text-dark-brown/70 space-y-4 text-sm">
-                        <li class="flex justify-between items-center border-b border-black/5 pb-3">
-                            <span class="tracking-wide">Luni - Vineri</span>
-                            <span class="font-medium">10:00 - 18:00</span>
-                        </li>
-                        <li class="flex justify-between items-center border-b border-black/5 pb-3">
-                            <span class="tracking-wide">Sâmbătă</span>
-                            <span class="font-medium">10:00 - 14:00 <span class="text-xs text-dark-brown/50 italic font-light ml-1">(Doar programări)</span></span>
-                        </li>
-                        <li class="flex justify-between items-center pb-2">
-                            <span class="tracking-wide">Duminică</span>
-                            <span class="font-medium text-vintage-gold">Închis</span>
-                        </li>
+                        @if(empty($settings->working_hours))
+                            <li class="flex justify-between items-center border-b border-black/5 pb-3">
+                                <span class="tracking-wide">Luni - Vineri</span>
+                                <span class="font-medium">10:00 - 18:00</span>
+                            </li>
+                        @else
+                            @foreach($settings->working_hours as $index => $hours)
+                                <li class="flex justify-between items-center {{ !$loop->last ? 'border-b border-black/5 pb-3' : 'pb-2' }}">
+                                    <span class="tracking-wide">{{ $hours['day'] ?? '' }}</span>
+                                    <span class="font-medium {{ ($hours['hours'] ?? '') == 'Închis' ? 'text-vintage-gold' : '' }}">
+                                        {{ $hours['hours'] ?? '' }}
+                                        @if(!empty($hours['note']))
+                                        <span class="text-xs text-dark-brown/50 italic font-light ml-1">({{ $hours['note'] }})</span>
+                                        @endif
+                                    </span>
+                                </li>
+                            @endforeach
+                        @endif
                     </ul>
                 </div>
 

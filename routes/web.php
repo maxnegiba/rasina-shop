@@ -63,6 +63,4 @@ Route::get('/proforma/{order}', [\App\Http\Controllers\ProformaController::class
 // Notă: Rutele pentru Filament (Admin) sunt gestionate automat de pachet, 
 // deci nu trebuie să adăugăm nimic aici pentru panoul de control.
 // Paginile Legale
-Route::view('/termeni-si-conditii', 'legal.terms')->name('legal.terms');
-Route::view('/politica-de-confidentialitate', 'legal.privacy')->name('legal.privacy');
-Route::view('/politica-de-retur', 'legal.returns')->name('legal.returns');
+Route::get('/info/{slug}', [PageController::class, 'show'])->name('page.show');

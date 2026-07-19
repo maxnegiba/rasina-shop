@@ -46,6 +46,20 @@ class ManageGeneralSettings extends SettingsPage
                             ->schema([
                                 Forms\Components\Textarea::make('company_address')
                                     ->label('Company Address'),
+                                Forms\Components\Repeater::make('working_hours')
+                                    ->label('Working Hours')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('day')
+                                            ->label('Zi (ex: Luni - Vineri)')
+                                            ->required(),
+                                        Forms\Components\TextInput::make('hours')
+                                            ->label('Ore (ex: 10:00 - 18:00)')
+                                            ->required(),
+                                        Forms\Components\TextInput::make('note')
+                                            ->label('Notă (ex: Doar programări)'),
+                                    ])
+                                    ->columns(3)
+                                    ->defaultItems(0),
                             ]),
                     ])->columnSpanFull()
             ]);
