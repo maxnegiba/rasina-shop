@@ -23,43 +23,81 @@
     <div class="flex flex-col lg:flex-row gap-16 lg:gap-24 items-start">
         
         <!-- Zona de Imagine -->
-        <div class="w-full lg:w-3/5">
-            <div class="aspect-[4/5] overflow-hidden bg-warm-beige/20 relative group">
-                @php
-                    $imageUrl = null;
-                    $featuredImage = null;
-                    if (isset($product->images) && $product->images->count() > 0) {
-                        $featuredImage = $product->images->where('is_featured', true)->first() ?? $product->images->first();
-                        $imageUrl = asset('storage/' . $featuredImage->image_path);
-                    } else {
-                        $imageUrl = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iODAwIiBmaWxsPSIjRkRGQkY3Ij48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjgwMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiNDNUE4ODAiPkl2b3J5IFZpbnRhZ2U8L3RleHQ+PC9zdmc+';
+        <div class="w-full lg:w-3/5" x-data="{ activeSlide: 0 }">
+            @php
+                $images = [];
+                if (isset($product->images) && $product->images->count() > 0) {
+                    $featuredImage = $product->images->where('is_featured', true)->first();
+                    if ($featuredImage) {
+                        $images[] = asset('storage/' . $featuredImage->image_path);
                     }
-                @endphp
+                    foreach ($product->images as $image) {
+                        if (!$featuredImage || $image->id !== $featuredImage->id) {
+                            $images[] = asset('storage/' . $image->image_path);
+                        }
+                    }
+                }
                 
-                <img src="{{ $imageUrl }}" 
-                     alt="{{ $product->name }}" 
-                     class="w-full h-full object-cover filter contrast-[0.95] group-hover:contrast-100 transition-all duration-700">
+                if (empty($images)) {
+                    $images[] = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iODAwIiBmaWxsPSIjRkRGQkY3Ij48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjgwMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiNDNUE4ODAiPkl2b3J5IFZpbnRhZ2U8L3RleHQ+PC9zdmc+';
+                }
+            @endphp
+
+            <div class="aspect-[4/5] overflow-hidden bg-warm-beige/20 relative group">
+                <!-- Main Slider Container -->
+                <div class="relative w-full h-full">
+                    @foreach($images as $index => $imageUrl)
+                        <div x-show="activeSlide === {{ $index }}"
+                             x-transition:enter="transition ease-out duration-500"
+                             x-transition:enter-start="opacity-0 transform scale-95"
+                             x-transition:enter-end="opacity-100 transform scale-100"
+                             x-transition:leave="transition ease-in duration-300 absolute inset-0"
+                             x-transition:leave-start="opacity-100 transform scale-100"
+                             x-transition:leave-end="opacity-0 transform scale-105"
+                             class="w-full h-full flex items-center justify-center {{ $index === 0 ? '' : 'hidden' }}"
+                             style="{{ $index === 0 ? '' : 'display: none;' }}">
+                            <img src="{{ $imageUrl }}"
+                                 alt="{{ $product->name }}"
+                                 class="w-full h-full object-contain filter contrast-[0.95] group-hover:contrast-100 transition-all duration-700">
+                        </div>
+                    @endforeach
+                </div>
                      
                 @if($product->is_custom)
-                    <div class="absolute top-6 left-6 bg-ivory/90 backdrop-blur-sm text-dark-brown text-[10px] px-4 py-2 uppercase tracking-[0.2em] font-medium shadow-sm">
+                    <div class="absolute top-6 left-6 z-10 bg-ivory/90 backdrop-blur-sm text-dark-brown text-[10px] px-4 py-2 uppercase tracking-[0.2em] font-medium shadow-sm pointer-events-none">
                         Lucrare Unicat / Comandă
                     </div>
                 @elseif($product->stock <= 0)
-                    <div class="absolute top-6 left-6 bg-red-900/90 backdrop-blur-sm text-white text-[10px] px-4 py-2 uppercase tracking-[0.2em] font-medium shadow-sm">
+                    <div class="absolute top-6 left-6 z-10 bg-red-900/90 backdrop-blur-sm text-white text-[10px] px-4 py-2 uppercase tracking-[0.2em] font-medium shadow-sm pointer-events-none">
                         Stoc Epuizat
                     </div>
                 @endif
+
+                @if(count($images) > 1)
+                    <!-- Navigation Arrows -->
+                    <button @click="activeSlide = activeSlide === 0 ? {{ count($images) - 1 }} : activeSlide - 1"
+                            class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/50 hover:bg-white backdrop-blur-sm border border-black/10 rounded-full flex items-center justify-center text-dark-brown opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 focus:outline-none">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <button @click="activeSlide = activeSlide === {{ count($images) - 1 }} ? 0 : activeSlide + 1"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/50 hover:bg-white backdrop-blur-sm border border-black/10 rounded-full flex items-center justify-center text-dark-brown opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 focus:outline-none">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                @endif
             </div>
 
-            <!-- Galerie secundară (dacă există alte imagini) -->
-            @if(isset($product->images) && $product->images->count() > 1)
-                <div class="grid grid-cols-3 gap-4 mt-4">
-                    @foreach($product->images as $image)
-                        @if(!$featuredImage || $image->id !== $featuredImage->id)
-                            <div class="aspect-square bg-warm-beige/20 overflow-hidden cursor-pointer">
-                                <img src="{{ asset('storage/' . $image->image_path) }}" class="w-full h-full object-cover filter grayscale hover:grayscale-0 transition duration-500">
-                            </div>
-                        @endif
+            <!-- Galerie secundară (Thumbnails) -->
+            @if(count($images) > 1)
+                <div class="grid grid-cols-4 gap-4 mt-4">
+                    @foreach($images as $index => $imageUrl)
+                        <div @click="activeSlide = {{ $index }}"
+                             class="aspect-square bg-warm-beige/20 overflow-hidden cursor-pointer relative"
+                             :class="{ 'ring-2 ring-vintage-gold': activeSlide === {{ $index }} }">
+                            <img src="{{ $imageUrl }}"
+                                 class="w-full h-full object-contain filter transition duration-500"
+                                 :class="activeSlide === {{ $index }} ? 'grayscale-0' : 'grayscale hover:grayscale-0'">
+                             <div x-show="activeSlide !== {{ $index }}" class="absolute inset-0 bg-white/20 hover:bg-transparent transition-colors duration-300"></div>
+                        </div>
                     @endforeach
                 </div>
             @endif
