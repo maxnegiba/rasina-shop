@@ -46,13 +46,13 @@
 
         <!-- Imagine Principală -->
         @if($post->featured_image)
-            <div class="w-full aspect-video sm:aspect-[21/9] bg-warm-beige mb-16 relative overflow-hidden rounded-sm group">
-                <img src="{{ Storage::url($post->featured_image) }}" alt="{{ $post->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
-                <div class="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-sm"></div>
+            <div class="w-full h-auto max-h-[70vh] mx-auto flex items-center justify-center bg-warm-beige mb-16 relative overflow-hidden rounded-sm group">
+                <img src="{{ Storage::url($post->featured_image) }}" alt="{{ $post->title }}" class="w-full max-h-[70vh] object-contain group-hover:scale-105 transition-transform duration-700 ease-out">
+                <div class="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-sm pointer-events-none"></div>
             </div>
         @else
             <!-- Placeholder elegant în caz că lipsește imaginea -->
-            <div class="w-full aspect-video sm:aspect-[21/9] bg-warm-beige mb-16 relative overflow-hidden rounded-sm flex items-center justify-center border border-black/5">
+            <div class="w-full h-auto max-h-[70vh] aspect-video bg-warm-beige mb-16 relative overflow-hidden rounded-sm flex items-center justify-center border border-black/5">
                 <img src="{{ asset('/img/logo.png') }}" alt="{{ $post->title }}" class="w-1/4 h-auto object-contain opacity-50 grayscale transition-transform duration-700 ease-out">
             </div>
         @endif
