@@ -132,8 +132,9 @@
                     <p class="font-light text-white/60 text-sm leading-relaxed mb-6 max-w-sm mx-auto md:mx-0">
                         O fuziune atemporală între esența naturală a lemnului și eleganța translucidă a rășinii. Piese de artă unicat, lucrate manual cu pasiune și măiestrie în România.
                     </p>
-                    <a href="mailto:contact@mtdart.ro" class="text-vintage-gold hover:text-white transition-colors duration-300 text-sm font-medium tracking-wide">
-                        contact@mtdart.ro
+                    @php $settings = app(\App\Settings\GeneralSettings::class); @endphp
+                    <a href="mailto:{{ $settings->contact_email ?? 'contact@mtdart.ro' }}" class="text-vintage-gold hover:text-white transition-colors duration-300 text-sm font-medium tracking-wide">
+                        {{ $settings->contact_email ?? 'contact@mtdart.ro' }}
                     </a>
                 </div>
 
@@ -149,18 +150,21 @@
                 <div class="md:col-span-2 text-center md:text-left">
                     <h3 class="font-sans text-[10px] uppercase tracking-[0.2em] text-vintage-gold mb-6 font-semibold">Informații Utile</h3>
                     <ul class="space-y-4 font-light text-white/70 text-sm">
-                        <li><a href="{{ route('legal.terms') ?? '#' }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Termeni și Condiții</a></li>
-                        <li><a href="{{ route('legal.privacy') ?? '#' }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Politica de Confidențialitate</a></li>
-                        <li><a href="{{ route('legal.returns') ?? '#' }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Livrare și Retur</a></li>
+                        <li><a href="{{ route('page.show', 'termeni-si-conditii') }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Termeni și Condiții</a></li>
+                        <li><a href="{{ route('page.show', 'politica-de-confidentialitate') }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Politica de Confidențialitate</a></li>
+                        <li><a href="{{ route('page.show', 'politica-de-retur') }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Livrare și Retur</a></li>
                     </ul>
                 </div>
 
                 <div class="md:col-span-2 text-center md:text-left">
                     <h3 class="font-sans text-[10px] uppercase tracking-[0.2em] text-vintage-gold mb-6 font-semibold">Social</h3>
                     <ul class="space-y-4 font-light text-white/70 text-sm">
-                        <li><a href="#" target="_blank" class="hover:text-white transition-colors duration-300 flex items-center justify-center md:justify-start gap-2">Instagram</a></li>
-                        <li><a href="#" target="_blank" class="hover:text-white transition-colors duration-300 flex items-center justify-center md:justify-start gap-2">Facebook</a></li>
-                        <li><a href="#" target="_blank" class="hover:text-white transition-colors duration-300 flex items-center justify-center md:justify-start gap-2">Pinterest</a></li>
+                        @if(!empty($settings->instagram_url))
+                        <li><a href="{{ $settings->instagram_url }}" target="_blank" class="hover:text-white transition-colors duration-300 flex items-center justify-center md:justify-start gap-2">Instagram</a></li>
+                        @endif
+                        @if(!empty($settings->facebook_url))
+                        <li><a href="{{ $settings->facebook_url }}" target="_blank" class="hover:text-white transition-colors duration-300 flex items-center justify-center md:justify-start gap-2">Facebook</a></li>
+                        @endif
                     </ul>
                 </div>
 

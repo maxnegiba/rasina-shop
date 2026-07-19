@@ -13,6 +13,7 @@ class GeneralSettings extends Settings
     public string $facebook_url;
     public string $instagram_url;
     public string $default_whatsapp_greeting_text;
+    public array $working_hours;
 
     public static function group(): string
     {

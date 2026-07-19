@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Post;
 use App\Models\Category;
+use App\Models\Page;
 use Illuminate\Http\Request;
 
 class PageController extends Controller
@@ -69,5 +70,15 @@ class PageController extends Controller
         // Mail::to('contact@ivoryvintage.ro')->send(new ContactFormMail($validated));
 
         return redirect()->back()->with('success', 'Vă mulțumim pentru mesaj! Vă vom contacta în curând.');
+    }
+
+    /**
+     * Pagina dinamica legala/informationala
+     */
+    public function show($slug)
+    {
+        $page = Page::where('slug', $slug)->firstOrFail();
+
+        return view('pages.show', compact('page'));
     }
 }
