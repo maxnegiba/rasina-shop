@@ -30,14 +30,13 @@
                         <a href="{{ route('blog.show', $post->slug) }}" class="block relative overflow-hidden aspect-[4/5] mb-8 bg-warm-beige/30 flex items-center justify-center">
                             @if($post->featured_image)
                                 <img src="{{ asset('storage/' . $post->featured_image) }}"
-                                     class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                                      alt="{{ $post->title }}">
                             @else
                                 <img src="{{ asset('/img/logo.png') }}"
-                                     class="w-1/2 h-auto object-contain opacity-50 filter grayscale group-hover:scale-105 transition-all duration-700 ease-out"
+                                     class="w-1/2 h-auto object-contain group-hover:scale-105 transition-transform duration-700 ease-out"
                                      alt="{{ $post->title }}">
                             @endif
-                            <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500"></div>
                         </a>
 
                         <div>

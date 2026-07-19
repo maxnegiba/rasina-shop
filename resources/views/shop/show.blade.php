@@ -58,7 +58,7 @@
                              style="{{ $index === 0 ? '' : 'display: none;' }}">
                             <img src="{{ $imageUrl }}"
                                  alt="{{ $product->name }}"
-                                 class="w-full h-full object-contain filter contrast-[0.95] group-hover:contrast-100 transition-all duration-700">
+                                 class="w-full h-full object-contain transition-all duration-700">
                         </div>
                     @endforeach
                 </div>
@@ -94,9 +94,7 @@
                              class="aspect-square bg-warm-beige/20 overflow-hidden cursor-pointer relative"
                              :class="{ 'ring-2 ring-vintage-gold': activeSlide === {{ $index }} }">
                             <img src="{{ $imageUrl }}"
-                                 class="w-full h-full object-contain filter transition duration-500"
-                                 :class="activeSlide === {{ $index }} ? 'grayscale-0' : 'grayscale hover:grayscale-0'">
-                             <div x-show="activeSlide !== {{ $index }}" class="absolute inset-0 bg-white/20 hover:bg-transparent transition-colors duration-300"></div>
+                                 class="w-full h-full object-contain transition duration-500">
                         </div>
                     @endforeach
                 </div>

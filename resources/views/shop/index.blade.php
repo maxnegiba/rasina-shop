@@ -23,7 +23,7 @@
                 <li>
                     <a href="{{ route('shop.index') }}" 
                        wire:navigate
-                       class="{{ !isset($category) ? 'text-dark-brown font-medium border-b border-dark-brown pb-1' : 'text-dark-brown/40 hover:text-vintage-gold' }} transition-colors duration-300 flex items-center">
+                       class="{{ !isset($category) ? 'text-dark-brown font-medium border-b border-dark-brown pb-1' : 'text-dark-brown/70 hover:text-vintage-gold' }} transition-colors duration-300 flex items-center">
                         Toate Piesele
                     </a>
                 </li>
@@ -31,9 +31,9 @@
                     <li>
                         <a href="{{ route('shop.category', $cat->slug) }}" 
                            wire:navigate
-                           class="flex justify-between items-center {{ isset($category) && $category->id === $cat->id ? 'text-dark-brown font-medium border-b border-dark-brown pb-1' : 'text-dark-brown/40 hover:text-vintage-gold' }} transition-colors duration-300">
+                           class="flex justify-between items-center {{ isset($category) && $category->id === $cat->id ? 'text-dark-brown font-medium border-b border-dark-brown pb-1' : 'text-dark-brown/70 hover:text-vintage-gold' }} transition-colors duration-300">
                             <span>{{ $cat->name }}</span>
-                            <span class="text-[9px] text-dark-brown/30 font-sans">
+                            <span class="text-[9px] text-dark-brown/60 font-sans">
                                 {{ str_pad($cat->products_count, 2, '0', STR_PAD_LEFT) }}
                             </span>
                         </a>
@@ -62,9 +62,7 @@
                                 
                                 <img src="{{ $imageUrl }}" 
                                      alt="{{ $product->name }}" 
-                                     class="w-full h-full object-cover filter contrast-[0.95] group-hover:contrast-100 group-hover:scale-105 transition duration-700 ease-out">
-                                
-                                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500"></div>
+                                     class="w-full h-full object-cover group-hover:scale-105 transition duration-700 ease-out">
 
                                 @if($product->is_custom)
                                     <div class="absolute top-4 left-4 bg-ivory/90 backdrop-blur-sm text-dark-brown text-[9px] px-3 py-1.5 uppercase tracking-[0.2em] font-medium shadow-sm">
