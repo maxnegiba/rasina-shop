@@ -53,7 +53,7 @@
         @else
             <!-- Placeholder elegant în caz că lipsește imaginea -->
             <div class="w-full h-auto max-h-[70vh] aspect-video bg-warm-beige mb-16 relative overflow-hidden rounded-sm flex items-center justify-center border border-black/5">
-                <img src="{{ asset('/img/logo.png') }}" alt="{{ $post->title }}" class="w-1/4 h-auto object-contain opacity-50 grayscale transition-transform duration-700 ease-out">
+                <img src="{{ asset('/img/logo.png') }}" alt="{{ $post->title }}" class="w-1/4 h-auto object-contain transition-transform duration-700 ease-out">
             </div>
         @endif
 
@@ -100,7 +100,7 @@
                             <img src="{{ Storage::url($recentPost->featured_image) }}" alt="{{ $recentPost->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
                         @else
                             <div class="absolute inset-0 flex items-center justify-center bg-warm-beige">
-                                <img src="{{ asset('/img/logo.png') }}" alt="{{ $recentPost->title }}" class="w-1/2 h-auto object-contain opacity-50 grayscale">
+                                <img src="{{ asset('/img/logo.png') }}" alt="{{ $recentPost->title }}" class="w-1/2 h-auto object-contain">
                             </div>
                         @endif
                         <div class="absolute top-4 right-4 bg-ivory/90 backdrop-blur-sm px-3 py-1 text-[10px] font-sans tracking-widest text-vintage-gold uppercase">

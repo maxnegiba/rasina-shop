@@ -49,8 +49,7 @@
                 <div class="group block {{ $index === 1 ? 'md:mt-16' : '' }}">
                     <a href="{{ route('shop.category', $category->slug ?? '#') }}" class="block relative overflow-hidden aspect-[4/5] mb-8 bg-warm-beige/30">
                         <img src="https://via.placeholder.com/600x800" 
-                             class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out" alt="{{ $category->name }}">
-                        <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500"></div>
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" alt="{{ $category->name }}">
                     </a>
                     <div class="flex items-center justify-between">
                         <h3 class="font-serif text-2xl text-dark-brown">{{ $category->name }}</h3>
@@ -82,7 +81,7 @@
                     <div class="group">
                         <a href="{{ route('shop.show', $product->slug) }}" class="block">
                             <div class="aspect-[3/4] overflow-hidden bg-ivory mb-6 relative">
-                                <img src="{{ $product->image ? asset('storage/' . $product->image) : 'https://via.placeholder.com/500' }}" class="w-full h-full object-cover filter brightness-90 group-hover:brightness-110 group-hover:scale-105 transition duration-700">
+                                <img src="{{ $product->image ? asset('storage/' . $product->image) : 'https://via.placeholder.com/500' }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
                                 
                                 @if($product->is_custom)
                                     <span class="absolute top-4 left-4 bg-vintage-gold text-white text-[9px] px-3 py-1.5 uppercase tracking-[0.2em] font-medium shadow-sm">
