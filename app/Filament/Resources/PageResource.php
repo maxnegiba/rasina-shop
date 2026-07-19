@@ -32,22 +32,22 @@ class PageResource extends Resource
     {
         return $form
             ->schema([
-                Filament\Forms\Components\Group::make()->schema([
-                    Filament\Forms\Components\Section::make('Conținut Pagină')->schema([
-                        Filament\Forms\Components\TextInput::make('title')
+                Forms\Components\Group::make()->schema([
+                    Forms\Components\Section::make('Conținut Pagină')->schema([
+                        Forms\Components\TextInput::make('title')
                             ->label('Titlu Pagină (RO/EN)')
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
 
-                        Filament\Forms\Components\TextInput::make('slug')
+                        Forms\Components\TextInput::make('slug')
                             ->label('URL Prietenos (Slug)')
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
 
-                        Filament\Forms\Components\RichEditor::make('content')
+                        Forms\Components\RichEditor::make('content')
                             ->label('Conținut (RO/EN)')
                             ->required()
                             ->toolbarButtons([
@@ -59,8 +59,8 @@ class PageResource extends Resource
                     ])->columns(2),
                 ])->columnSpan(['lg' => 2]),
 
-                Filament\Forms\Components\Group::make()->schema([
-                    Filament\Forms\Components\Section::make('SEO & Meta Data')
+                Forms\Components\Group::make()->schema([
+                    Forms\Components\Section::make('SEO & Meta Data')
                         ->schema([
                             SEO::make(),
                         ])
