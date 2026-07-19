@@ -126,7 +126,8 @@ class PostResource extends Resource
                     ->date('d M Y')
                     ->sortable(),
             ])
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('sort_order', 'asc')
+            ->reorderable('sort_order')
             ->filters([
                 //
             ])

@@ -14,7 +14,7 @@ class Post extends Model
 
     protected $fillable = [
         'slug', 'title', 'content', 'featured_image', 
-        'seo_meta_description', 'published_at', 'author'
+        'seo_meta_description', 'published_at', 'author', 'sort_order'
     ];
 
     public $translatable = ['title', 'content', 'seo_meta_description'];

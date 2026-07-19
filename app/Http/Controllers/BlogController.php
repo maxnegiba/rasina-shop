@@ -14,7 +14,8 @@ class BlogController extends Controller
     {
         $posts = Post::whereNotNull('published_at')
             ->where('published_at', '<=', now())
-            ->latest('published_at')
+            ->orderBy('sort_order', 'asc')
+            ->orderBy('published_at', 'desc')
             ->paginate(9);
 
         return view('blog.index', compact('posts'));
