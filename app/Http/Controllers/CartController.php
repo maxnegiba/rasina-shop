@@ -35,14 +35,14 @@ class CartController extends Controller
 
         $product = Product::findOrFail($request->product_id);
 
-        // Dacă este un produs la comandă, redirecționăm către contact
-        if ($product->is_custom) {
-            return redirect()->route('contact')->with('success', 'Aceasta este o piesă unicat. Vă rugăm să ne lăsați un mesaj pentru o comandă.');
-        }
+        // Piesele unicat urmează același flux de cumpărare ca toate celelalte produse.
+        // Prețul și stocul sunt singurele condiții comerciale pentru adăugarea în coș.
+        if (! $product->isPurchasable()) {
+            $message = $product->price === null || (float) $product->price <= 0
+                ? 'Produsul nu poate fi cumpărat până când nu are un preț valid.'
+                : 'Produsul nu mai este în stoc.';
 
-        // Verificăm stocul
-        if ($product->stock < 1) {
-            return redirect()->back()->with('error', 'Produsul nu mai este în stoc.');
+            return redirect()->back()->with('error', $message);
         }
 
         $cart = session()->get('cart', []);
@@ -95,7 +95,7 @@ class CartController extends Controller
 
         // Verificăm dacă a apăsat pe butonul "Buy Now"
         if ($request->input('redirect_to_checkout')) {
-            return redirect()->route('checkout.session');
+            return redirect()->route('checkout.index');
         }
 
         return redirect()->back()->with('success', 'Produsul a fost adăugat în colecție (coș).');
