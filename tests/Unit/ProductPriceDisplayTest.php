@@ -26,6 +26,7 @@ class ProductPriceDisplayTest extends TestCase
 
         $this->assertSame('Preț la cerere', $product->displayPrice());
     }
+
     public function test_a_unique_product_uses_the_normal_purchase_flow_when_priced_and_in_stock(): void
     {
         $product = new Product([
@@ -58,5 +59,4 @@ class ProductPriceDisplayTest extends TestCase
 
         $this->assertFalse($product->isPurchasable());
     }
-
 }
