@@ -65,7 +65,11 @@
                         @endforeach
                     </div>
                          
-                    @if($product->is_custom)
+                    @if($product->isSold())
+                        <div class="absolute top-6 left-6 z-10 bg-dark-brown/90 backdrop-blur-sm text-white border border-black/10 text-[10px] px-4 py-2 uppercase tracking-[0.2em] font-semibold shadow-sm pointer-events-none">
+                            Vândut
+                        </div>
+                    @elseif($product->is_custom)
                         <div class="absolute top-6 left-6 z-10 bg-ivory/90 backdrop-blur-sm text-vintage-gold border border-vintage-gold/20 text-[10px] px-4 py-2 uppercase tracking-[0.2em] font-semibold shadow-sm pointer-events-none">
                             Piesă Unicat
                         </div>
@@ -139,7 +143,11 @@
                         </div>
                     @endif
 
-                    @if($product->is_custom)
+                    @if($product->isSold())
+                        <p class="text-xs font-light text-dark-brown/60 mb-8 leading-relaxed italic">
+                            * Această piesă a fost vândută. Putem crea o lucrare asemănătoare, adaptată preferințelor dumneavoastră.
+                        </p>
+                    @elseif($product->is_custom)
                         <p class="text-xs font-light text-dark-brown/60 mb-8 leading-relaxed italic">
                             * Aceasta este o piesă unicat. Exemplarul disponibil poate fi cumpărat direct prin fluxul normal al magazinului.
                         </p>
@@ -164,17 +172,17 @@
                         </p>
                     @else
                         <button disabled class="w-full border border-black/5 text-dark-brown/40 bg-black/5 px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold cursor-not-allowed mb-6 shadow-inner">
-                            {{ $product->stock <= 0 ? 'Stoc Epuizat' : 'Indisponibil momentan' }}
+                            {{ $product->isSold() ? 'Vândut' : 'Indisponibil momentan' }}
                         </button>
                     @endif
                     
                     <div class="w-full flex items-center justify-center mt-6">
                         <span class="w-full h-px bg-black/5"></span>
-                        <span class="px-4 text-[10px] uppercase tracking-[0.2em] text-dark-brown/40 font-semibold">SAU</span>
+                        <span class="px-4 text-[10px] uppercase tracking-[0.2em] text-dark-brown/40 font-semibold">{{ $product->isSold() ? 'DORIȚI UNA ASEMĂNĂTOARE?' : 'SAU' }}</span>
                         <span class="w-full h-px bg-black/5"></span>
                     </div>
                     <button x-data @click="$dispatch('open-custom-modal', { productId: {{ $product->id }} })" class="w-full mt-6 bg-transparent border border-dark-brown text-dark-brown px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold hover:bg-dark-brown hover:text-white transition-colors duration-500 shadow-sm">
-                        Comandă Variantă Personalizată
+                        {{ $product->isSold() ? 'Comandă o piesă asemănătoare' : 'Comandă Variantă Personalizată' }}
                     </button>
                 </div>
                 
