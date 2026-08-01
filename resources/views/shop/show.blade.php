@@ -114,11 +114,7 @@
                     </h1>
 
                     <div class="text-xl font-sans text-vintage-gold font-medium tracking-[0.1em] uppercase">
-                        @if($product->is_custom)
-                            Preț la cerere
-                        @else
-                            {{ number_format($product->price, 0, ',', '.') }} <span class="text-sm font-light">RON</span>
-                        @endif
+                        {{ $product->displayPrice() }}
                     </div>
                 </div>
 

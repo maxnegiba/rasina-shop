@@ -98,7 +98,7 @@
                                 <div class="p-4 border-t border-black/5">
                                     <h4 class="font-serif text-lg text-dark-brown mb-2 truncate">{{ $product->name }}</h4>
                                     <p class="text-vintage-gold font-sans text-xs tracking-[0.15em] uppercase font-medium">
-                                        {{ $product->is_custom ? 'Preț la cerere' : $product->price . ' RON' }}
+                                        {{ $product->displayPrice() }}
                                     </p>
                                 </div>
                             </a>

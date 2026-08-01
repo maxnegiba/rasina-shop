@@ -84,7 +84,7 @@
                                         {{ $product->name }}
                                     </h2>
                                     <p class="text-dark-brown/60 font-sans text-xs tracking-[0.15em] uppercase font-medium">
-                                        {{ $product->is_custom ? 'Preț la cerere' : $product->price . ' RON' }}
+                                        {{ $product->displayPrice() }}
                                     </p>
                                 </div>
                             </a>

@@ -38,6 +38,18 @@ class Product extends Model
         return $this->hasMany(ProductImage::class);
     }
 
+    /**
+     * Price shown in the storefront, independent of the ordering flow.
+     */
+    public function displayPrice(): string
+    {
+        if ($this->price === null) {
+            return 'Preț la cerere';
+        }
+
+        return number_format((float) $this->price, 0, ',', '.') . ' RON';
+    }
+
     public function getDynamicSEOData(): SEOData
     {
         if (! $this->exists) {

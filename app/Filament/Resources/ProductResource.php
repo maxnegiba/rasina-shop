@@ -101,15 +101,18 @@ class ProductResource extends Resource
                     Forms\Components\Section::make('Comercial')->schema([
                         Forms\Components\Toggle::make('is_custom')
                             ->label('Piesă Unicat (La Comandă)')
-                            ->helperText('Dacă este activat, prețul va fi înlocuit cu "Preț la cerere", iar clientul va completa un formular în loc să cumpere direct.')
+                            ->helperText('Dacă este activat, clientul va trimite o cerere în loc să cumpere direct. Prețul introdus mai jos va fi afișat pe site.')
                             ->default(false)
                             ->live(),
 
                         Forms\Components\TextInput::make('price')
                             ->label('Preț (RON)')
                             ->numeric()
+                            ->minValue(0)
                             ->prefix('RON')
-                            ->hidden(fn (Forms\Get $get): bool => $get('is_custom') === true)
+                            ->helperText(fn (Forms\Get $get): string => $get('is_custom')
+                                ? 'Opțional pentru piesele unicat. Dacă rămâne gol, pe site va apărea „Preț la cerere”.'
+                                : 'Obligatoriu pentru produsele care pot fi cumpărate direct.')
                             ->required(fn (Forms\Get $get): bool => $get('is_custom') === false),
 
                         Forms\Components\TextInput::make('stock')
