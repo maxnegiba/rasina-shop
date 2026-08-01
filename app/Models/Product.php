@@ -50,6 +50,16 @@ class Product extends Model
         return number_format((float) $this->price, 0, ',', '.') . ' RON';
     }
 
+    /**
+     * A product can use the normal shop flow regardless of whether it is unique.
+     */
+    public function isPurchasable(): bool
+    {
+        return $this->price !== null
+            && (float) $this->price > 0
+            && (int) $this->stock > 0;
+    }
+
     public function getDynamicSEOData(): SEOData
     {
         if (! $this->exists) {
