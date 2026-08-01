@@ -59,4 +59,24 @@ class ProductPriceDisplayTest extends TestCase
 
         $this->assertFalse($product->isPurchasable());
     }
+
+    public function test_a_product_with_zero_stock_is_sold(): void
+    {
+        $product = new Product([
+            'price' => 1250,
+            'stock' => 0,
+        ]);
+
+        $this->assertTrue($product->isSold());
+    }
+
+    public function test_an_in_stock_product_is_not_sold(): void
+    {
+        $product = new Product([
+            'price' => 1250,
+            'stock' => 1,
+        ]);
+
+        $this->assertFalse($product->isSold());
+    }
 }
