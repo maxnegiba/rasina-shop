@@ -100,28 +100,25 @@ class ProductResource extends Resource
 
                     Forms\Components\Section::make('Comercial')->schema([
                         Forms\Components\Toggle::make('is_custom')
-                            ->label('Piesă Unicat (La Comandă)')
-                            ->helperText('Dacă este activat, clientul va trimite o cerere în loc să cumpere direct. Prețul introdus mai jos va fi afișat pe site.')
-                            ->default(false)
-                            ->live(),
+                            ->label('Piesă Unicat')
+                            ->helperText('Marchează piesa ca fiind unicat. Produsul păstrează prețul, stocul și fluxul normal de cumpărare.')
+                            ->default(false),
 
                         Forms\Components\TextInput::make('price')
                             ->label('Preț (RON)')
                             ->numeric()
-                            ->minValue(0)
+                            ->minValue(0.01)
                             ->prefix('RON')
-                            ->helperText(fn (Forms\Get $get): string => $get('is_custom')
-                                ? 'Opțional pentru piesele unicat. Dacă rămâne gol, pe site va apărea „Preț la cerere”.'
-                                : 'Obligatoriu pentru produsele care pot fi cumpărate direct.')
-                            ->required(fn (Forms\Get $get): bool => $get('is_custom') === false),
+                            ->helperText('Obligatoriu pentru toate produsele, inclusiv pentru piesele unicat.')
+                            ->required(),
 
                         Forms\Components\TextInput::make('stock')
                             ->label('Stoc disponibil')
                             ->numeric()
                             ->minValue(0)
                             ->default(1)
-                            ->hidden(fn (Forms\Get $get): bool => $get('is_custom') === true)
-                            ->required(fn (Forms\Get $get): bool => $get('is_custom') === false),
+                            ->helperText('Pentru o piesă unicat, stocul este în mod normal 1.')
+                            ->required(),
                     ]),
 
                     Forms\Components\Section::make('SEO & Meta Data')
@@ -187,8 +184,8 @@ class ProductResource extends Resource
                     ]),
                 Tables\Filters\TernaryFilter::make('is_custom')
                     ->label('Tip Produs')
-                    ->trueLabel('Doar Unicat / La Comandă')
-                    ->falseLabel('Doar Standard (În Stoc)'),
+                    ->trueLabel('Doar Piese Unicat')
+                    ->falseLabel('Doar Produse Standard'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
