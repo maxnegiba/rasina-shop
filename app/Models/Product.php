@@ -60,6 +60,14 @@ class Product extends Model
             && (int) $this->stock > 0;
     }
 
+    /**
+     * A sold product remains visible as a reference for similar custom orders.
+     */
+    public function isSold(): bool
+    {
+        return (int) $this->stock <= 0;
+    }
+
     public function getDynamicSEOData(): SEOData
     {
         if (! $this->exists) {
