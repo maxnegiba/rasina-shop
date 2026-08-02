@@ -9,9 +9,11 @@
     @else
         {!! seo() !!}
     @endif
-    
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
-    
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -26,13 +28,43 @@
                         'dark-brown': '#2C1E16',
                     },
                     fontFamily: {
-                        serif: ['Playfair Display', 'serif'],
-                        sans: ['Montserrat', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'Georgia', 'serif'],
+                        editorial: ['Libre Baskerville', 'Georgia', 'serif'],
+                        sans: ['Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
+
+    <style>
+        h1, h2, .font-serif {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+        }
+
+        .prose,
+        .font-editorial,
+        .product-description,
+        .article-content {
+            font-family: 'Libre Baskerville', Georgia, serif;
+        }
+
+        .prose h1,
+        .prose h2,
+        .prose h3,
+        .prose h4,
+        .prose h5,
+        .prose h6 {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+        }
+    </style>
 </head>
 <body class="bg-ivory text-dark-brown font-sans antialiased selection:bg-vintage-gold selection:text-white flex flex-col min-h-screen">
 
@@ -126,7 +158,6 @@
     <footer class="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-dark-brown via-dark-brown to-[#1a120d] text-white pt-20 pb-10 mt-auto border-t border-vintage-gold/20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-8 mb-16">
-                
                 <div class="md:col-span-4 text-center md:text-left">
                     <h2 class="font-serif text-3xl mb-4 tracking-widest text-white uppercase text-xl">MTD Art</h2>
                     <p class="font-light text-white/60 text-sm leading-relaxed mb-6 max-w-sm mx-auto md:mx-0">
@@ -167,14 +198,12 @@
                         @endif
                     </ul>
                 </div>
-
             </div>
 
             <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="text-[10px] uppercase tracking-[0.2em] text-white/50 text-center md:text-left">
                     &copy; {{ date('Y') }} MTD Art Gallery.<br class="md:hidden"> Toate drepturile rezervate.
                 </div>
-                
                 <div class="flex items-center gap-4 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
                     <div class="flex items-center gap-1 text-[10px] text-white/70 uppercase tracking-[0.1em] mr-2">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
@@ -192,7 +221,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // JS pt Sidebar-uri ramane neschimbat
             const menuBtn = document.getElementById('mobile-menu-btn');
             const closeBtn = document.getElementById('mobile-close-btn');
             const sidebar = document.getElementById('mobile-sidebar');
