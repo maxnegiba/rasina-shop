@@ -24,10 +24,15 @@ class CustomOrderModal extends Component
         $this->isOpen = true;
         $this->successMessage = '';
         $this->product_id = $productId;
+        $this->message = '';
 
         if ($productId) {
             $product = Product::find($productId);
             $this->product_name = $product ? $product->name : null;
+
+            if ($product?->isSold()) {
+                $this->message = 'Doresc să comand o piesă asemănătoare cu „' . $product->name . '”.';
+            }
         } else {
             $this->product_name = null;
         }

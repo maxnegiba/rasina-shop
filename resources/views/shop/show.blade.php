@@ -65,9 +65,13 @@
                         @endforeach
                     </div>
                          
-                    @if($product->is_custom)
+                    @if($product->isSold())
+                        <div class="absolute top-6 left-6 z-10 bg-dark-brown/90 backdrop-blur-sm text-white border border-black/10 text-[10px] px-4 py-2 uppercase tracking-[0.2em] font-semibold shadow-sm pointer-events-none">
+                            Vândut
+                        </div>
+                    @elseif($product->is_custom)
                         <div class="absolute top-6 left-6 z-10 bg-ivory/90 backdrop-blur-sm text-vintage-gold border border-vintage-gold/20 text-[10px] px-4 py-2 uppercase tracking-[0.2em] font-semibold shadow-sm pointer-events-none">
-                            Lucrare Unicat / Comandă
+                            Piesă Unicat
                         </div>
                     @elseif($product->stock <= 0)
                         <div class="absolute top-6 left-6 z-10 bg-dark-brown/90 backdrop-blur-sm text-white border border-black/10 text-[10px] px-4 py-2 uppercase tracking-[0.2em] font-semibold shadow-sm pointer-events-none">
@@ -114,11 +118,7 @@
                     </h1>
 
                     <div class="text-xl font-sans text-vintage-gold font-medium tracking-[0.1em] uppercase">
-                        @if($product->is_custom)
-                            Preț la cerere
-                        @else
-                            {{ number_format($product->price, 0, ',', '.') }} <span class="text-sm font-light">RON</span>
-                        @endif
+                        {{ $product->displayPrice() }}
                     </div>
                 </div>
 
@@ -143,46 +143,47 @@
                         </div>
                     @endif
 
-                    @if($product->is_custom)
+                    @if($product->isSold())
                         <p class="text-xs font-light text-dark-brown/60 mb-8 leading-relaxed italic">
-                            * Această piesă este o lucrare unicat de referință. Putem realiza o operă similară, adaptată dimensiunilor și preferințelor dumneavoastră cromatice.
+                            * Această piesă a fost vândută. Putem crea o lucrare asemănătoare, adaptată preferințelor dumneavoastră.
                         </p>
-                        <button x-data @click="$dispatch('open-custom-modal', { productId: {{ $product->id }} })" class="group relative flex items-center justify-center w-full bg-dark-brown text-white px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold hover:bg-vintage-gold transition-colors duration-500 overflow-hidden shadow-sm">
-                            <span class="relative z-10">Solicită o propunere</span>
-                        </button>
+                    @elseif($product->is_custom)
+                        <p class="text-xs font-light text-dark-brown/60 mb-8 leading-relaxed italic">
+                            * Aceasta este o piesă unicat. Exemplarul disponibil poate fi cumpărat direct prin fluxul normal al magazinului.
+                        </p>
+                    @endif
+
+                    @if($product->isPurchasable())
+                        <form action="{{ route('cart.add') }}" method="POST" class="space-y-4 add-to-cart-ajax-form mb-6">
+                            @csrf
+                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+                            <div class="flex gap-4">
+                                <button type="submit" name="redirect_to_checkout" value="0" class="flex-1 bg-white border border-black/10 text-dark-brown px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold hover:border-vintage-gold hover:text-vintage-gold transition-colors duration-300 shadow-sm">
+                                    Adaugă în Colecție
+                                </button>
+                                <button type="submit" name="redirect_to_checkout" value="1" class="flex-1 bg-vintage-gold border border-vintage-gold text-white px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold hover:bg-dark-brown hover:border-dark-brown transition-colors duration-300 shadow-sm">
+                                    Cumpără Acum
+                                </button>
+                            </div>
+                        </form>
+                        <p class="text-[9px] text-center text-dark-brown/50 mb-6 tracking-[0.2em] uppercase font-semibold flex items-center justify-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-600/80"></span>
+                            Disponibil pentru livrare
+                        </p>
                     @else
-                        @if($product->stock > 0)
-                            <form action="{{ route('cart.add') }}" method="POST" class="space-y-4 add-to-cart-ajax-form mb-6">
-                                @csrf
-                                <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                <div class="flex gap-4">
-                                    <button type="submit" name="redirect_to_checkout" value="0" class="flex-1 bg-white border border-black/10 text-dark-brown px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold hover:border-vintage-gold hover:text-vintage-gold transition-colors duration-300 shadow-sm">
-                                        Adaugă în Colecție
-                                    </button>
-                                    <button type="submit" name="redirect_to_checkout" value="1" class="flex-1 bg-vintage-gold border border-vintage-gold text-white px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold hover:bg-dark-brown hover:border-dark-brown transition-colors duration-300 shadow-sm">
-                                        Cumpără Acum
-                                    </button>
-                                </div>
-                            </form>
-                            <p class="text-[9px] text-center text-dark-brown/50 mb-6 tracking-[0.2em] uppercase font-semibold flex items-center justify-center gap-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-green-600/80"></span>
-                                Disponibil pentru livrare
-                            </p>
-                        @else
-                            <button disabled class="w-full border border-black/5 text-dark-brown/40 bg-black/5 px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold cursor-not-allowed mb-6 shadow-inner">
-                                Stoc Epuizat
-                            </button>
-                        @endif
-                        
-                        <div class="w-full flex items-center justify-center mt-6">
-                            <span class="w-full h-px bg-black/5"></span>
-                            <span class="px-4 text-[10px] uppercase tracking-[0.2em] text-dark-brown/40 font-semibold">SAU</span>
-                            <span class="w-full h-px bg-black/5"></span>
-                        </div>
-                        <button x-data @click="$dispatch('open-custom-modal', { productId: {{ $product->id }} })" class="w-full mt-6 bg-transparent border border-dark-brown text-dark-brown px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold hover:bg-dark-brown hover:text-white transition-colors duration-500 shadow-sm">
-                            Comandă Variantă Personalizată
+                        <button disabled class="w-full border border-black/5 text-dark-brown/40 bg-black/5 px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold cursor-not-allowed mb-6 shadow-inner">
+                            {{ $product->isSold() ? 'Vândut' : 'Indisponibil momentan' }}
                         </button>
                     @endif
+                    
+                    <div class="w-full flex items-center justify-center mt-6">
+                        <span class="w-full h-px bg-black/5"></span>
+                        <span class="px-4 text-[10px] uppercase tracking-[0.2em] text-dark-brown/40 font-semibold">{{ $product->isSold() ? 'DORIȚI UNA ASEMĂNĂTOARE?' : 'SAU' }}</span>
+                        <span class="w-full h-px bg-black/5"></span>
+                    </div>
+                    <button x-data @click="$dispatch('open-custom-modal', { productId: {{ $product->id }} })" class="w-full mt-6 bg-transparent border border-dark-brown text-dark-brown px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold hover:bg-dark-brown hover:text-white transition-colors duration-500 shadow-sm">
+                        {{ $product->isSold() ? 'Comandă o piesă asemănătoare' : 'Comandă Variantă Personalizată' }}
+                    </button>
                 </div>
                 
                 <div class="mt-16 space-y-5 text-[10px] font-semibold tracking-[0.15em] text-dark-brown/60 uppercase border-t border-black/5 pt-10">

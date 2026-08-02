@@ -23,6 +23,7 @@ class PageController extends Controller
 
         // 2. Luăm ultimele 6 produse publicate pentru secțiunea "Noutăți în Galerie"
         $latestProducts = Product::where('status', 'published')
+            ->where('stock', '>', 0)
             ->with('images')
             ->latest()
             ->take(6)

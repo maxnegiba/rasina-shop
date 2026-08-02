@@ -38,6 +38,36 @@ class Product extends Model
         return $this->hasMany(ProductImage::class);
     }
 
+    /**
+     * Price shown in the storefront, independent of the ordering flow.
+     */
+    public function displayPrice(): string
+    {
+        if ($this->price === null) {
+            return 'Preț la cerere';
+        }
+
+        return number_format((float) $this->price, 0, ',', '.') . ' RON';
+    }
+
+    /**
+     * A product can use the normal shop flow regardless of whether it is unique.
+     */
+    public function isPurchasable(): bool
+    {
+        return $this->price !== null
+            && (float) $this->price > 0
+            && (int) $this->stock > 0;
+    }
+
+    /**
+     * A sold product remains visible as a reference for similar custom orders.
+     */
+    public function isSold(): bool
+    {
+        return (int) $this->stock <= 0;
+    }
+
     public function getDynamicSEOData(): SEOData
     {
         if (! $this->exists) {
