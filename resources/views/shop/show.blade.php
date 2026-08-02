@@ -7,7 +7,7 @@
 @section('content')
 <div class="bg-ivory min-h-screen pt-12 pb-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         <!-- Breadcrumbs minimaliste premium -->
         <nav class="mb-12 text-[10px] font-sans font-medium uppercase tracking-[0.2em] text-dark-brown/50 flex items-center gap-3">
             <a href="{{ route('home') }}" class="hover:text-vintage-gold transition-colors">Acasă</a>
@@ -22,9 +22,15 @@
         </nav>
 
         <div class="flex flex-col lg:flex-row gap-16 lg:gap-24 items-start">
-            
+
             <!-- Zona de Imagine (Slider pe fundal curat) -->
-            <div class="w-full lg:w-3/5" x-data="{ activeSlide: 0 }">
+            <div class="w-full lg:w-3/5"
+                 data-product-gallery
+                 data-active-index="0"
+                 tabindex="0"
+                 role="region"
+                 aria-roledescription="carusel"
+                 aria-label="Galeria produsului {{ $product->name }}">
                 @php
                     $images = [];
                     $imageAlts = []; // MTD_ART_FINAL_ALT_TEXT
@@ -41,7 +47,7 @@
                             }
                         }
                     }
-                    
+
                     if (empty($images)) {
                         $images[] = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iODAwIiBmaWxsPSIjRkRGQkY3Ij48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjgwMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiNDNUE4ODAiPkl2b3J5IFZpbnRhZ2U8L3RleHQ+PC9zdmc+';
                         $imageAlts[] = $product->name;
@@ -49,26 +55,22 @@
                 @endphp
 
                 <!-- Container Principal Slider: Fundal alb, spatios, object-contain -->
-                <div class="aspect-[4/5] overflow-hidden bg-white relative group ring-1 ring-inset ring-black/5 shadow-sm p-8 flex items-center justify-center">
+                <div class="aspect-[4/5] overflow-hidden bg-white relative group ring-1 ring-inset ring-black/5 shadow-sm p-8 flex items-center justify-center touch-pan-y">
                     <div class="relative w-full h-full">
                         @foreach($images as $index => $imageUrl)
-                            <div x-show="activeSlide === {{ $index }}"
-                                 x-transition:enter="transition ease-out duration-500"
-                                 x-transition:enter-start="opacity-0 transform scale-95"
-                                 x-transition:enter-end="opacity-100 transform scale-100"
-                                 x-transition:leave="transition ease-in duration-300 absolute inset-0"
-                                 x-transition:leave-start="opacity-100 transform scale-100"
-                                 x-transition:leave-end="opacity-0 transform scale-105"
-                                 class="w-full h-full flex items-center justify-center {{ $index === 0 ? '' : 'hidden' }}"
-                                 style="{{ $index === 0 ? '' : 'display: none;' }}">
-                                <!-- Imaginea incape perfect fara a fi taiata -->
+                            <div data-gallery-slide
+                                 data-gallery-index="{{ $index }}"
+                                 aria-hidden="{{ $index === 0 ? 'false' : 'true' }}"
+                                 class="absolute inset-0 w-full h-full flex items-center justify-center transition-opacity duration-300 {{ $index === 0 ? 'opacity-100' : 'hidden opacity-0' }}">
                                 <img src="{{ $imageUrl }}"
                                      alt="{{ $imageAlts[$index] ?? $product->name }}"
-                                     class="w-full h-full object-contain drop-shadow-sm transition-all duration-700">
+                                     loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+                                     fetchpriority="{{ $index === 0 ? 'high' : 'auto' }}"
+                                     class="w-full h-full object-contain drop-shadow-sm transition-transform duration-700">
                             </div>
                         @endforeach
                     </div>
-                         
+
                     @if($product->isSold())
                         <div class="absolute top-6 left-6 z-10 bg-dark-brown/90 backdrop-blur-sm text-white border border-black/10 text-[10px] px-4 py-2 uppercase tracking-[0.2em] font-semibold shadow-sm pointer-events-none">
                             Vândut
@@ -84,31 +86,44 @@
                     @endif
 
                     @if(count($images) > 1)
-                        <!-- Navigation Arrows Premium -->
-                        <button @click="activeSlide = activeSlide === 0 ? {{ count($images) - 1 }} : activeSlide - 1"
-                                class="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 hover:bg-white backdrop-blur-md border border-black/5 rounded-full flex items-center justify-center text-dark-brown shadow-sm opacity-0 group-hover:opacity-100 hover:text-vintage-gold transition-all duration-300 z-10 focus:outline-none">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"></path></svg>
+                        <button type="button"
+                                data-gallery-prev
+                                aria-label="Imaginea precedentă"
+                                class="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 bg-white/85 hover:bg-white backdrop-blur-md border border-black/5 rounded-full flex items-center justify-center text-dark-brown shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:text-vintage-gold transition-all duration-300 z-20 focus:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"></path></svg>
                         </button>
-                        <button @click="activeSlide = activeSlide === {{ count($images) - 1 }} ? 0 : activeSlide + 1"
-                                class="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 hover:bg-white backdrop-blur-md border border-black/5 rounded-full flex items-center justify-center text-dark-brown shadow-sm opacity-0 group-hover:opacity-100 hover:text-vintage-gold transition-all duration-300 z-10 focus:outline-none">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"></path></svg>
+                        <button type="button"
+                                data-gallery-next
+                                aria-label="Imaginea următoare"
+                                class="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 bg-white/85 hover:bg-white backdrop-blur-md border border-black/5 rounded-full flex items-center justify-center text-dark-brown shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:text-vintage-gold transition-all duration-300 z-20 focus:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"></path></svg>
                         </button>
+
+                        <div class="absolute bottom-4 right-4 z-20 bg-dark-brown/75 text-white px-3 py-1.5 text-[9px] font-sans tracking-[0.15em] rounded-full backdrop-blur-sm"
+                             data-gallery-position
+                             aria-live="polite">
+                            1 / {{ count($images) }}
+                        </div>
                     @endif
                 </div>
 
                 <!-- Galerie secundară (Thumbnails) -->
                 @if(count($images) > 1)
-                    <div class="grid grid-cols-4 gap-4 mt-4">
+                    <div class="grid grid-cols-4 gap-4 mt-4" role="tablist" aria-label="Selectați imaginea produsului">
                         @foreach($images as $index => $imageUrl)
-                            <!-- Thumbnails integrate pe fundal alb, object-contain -->
-                            <div @click="activeSlide = {{ $index }}"
-                                 class="aspect-square bg-white p-2 overflow-hidden cursor-pointer relative flex items-center justify-center transition-all duration-300"
-                                 :class="{ 'ring-1 ring-inset ring-vintage-gold shadow-sm': activeSlide === {{ $index }}, 'ring-1 ring-inset ring-black/5 hover:border-black/10': activeSlide !== {{ $index }} }">
+                            <button type="button"
+                                    data-gallery-thumb
+                                    data-gallery-index="{{ $index }}"
+                                    role="tab"
+                                    aria-selected="{{ $index === 0 ? 'true' : 'false' }}"
+                                    aria-label="Afișează imaginea {{ $index + 1 }} din {{ count($images) }}"
+                                    tabindex="{{ $index === 0 ? '0' : '-1' }}"
+                                    class="aspect-square bg-white p-2 overflow-hidden cursor-pointer relative flex items-center justify-center transition-all duration-300 ring-1 ring-inset {{ $index === 0 ? 'ring-vintage-gold shadow-sm' : 'ring-black/5 hover:ring-vintage-gold/50' }} focus:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold">
                                 <img src="{{ $imageUrl }}"
-                                     alt="{{ $imageAlts[$index] ?? $product->name }}"
-                                     class="w-full h-full object-contain transition duration-500"
-                                     :class="{ 'opacity-100': activeSlide === {{ $index }}, 'opacity-70 hover:opacity-100': activeSlide !== {{ $index }} }">
-                            </div>
+                                     alt=""
+                                     loading="lazy"
+                                     class="w-full h-full object-contain transition duration-500 {{ $index === 0 ? 'opacity-100' : 'opacity-70 hover:opacity-100' }}">
+                            </button>
                         @endforeach
                     </div>
                 @endif
@@ -116,7 +131,7 @@
 
             <!-- Zona de Detalii / Editorial -->
             <div class="w-full lg:w-2/5 py-4 lg:sticky lg:top-32">
-                
+
                 <div class="mb-10">
                     <h1 class="font-serif text-4xl lg:text-5xl text-dark-brown mb-6 leading-tight">
                         {{ $product->name }}
@@ -189,7 +204,7 @@
                             {{ $product->isSold() ? 'Vândut' : 'Indisponibil momentan' }}
                         </button>
                     @endif
-                    
+
                     <div class="w-full flex items-center justify-center mt-6">
                         <span class="w-full h-px bg-black/5"></span>
                         <span class="px-4 text-[10px] uppercase tracking-[0.2em] text-dark-brown/40 font-semibold">{{ $product->isSold() ? 'DORIȚI UNA ASEMĂNĂTOARE?' : 'SAU' }}</span>
@@ -199,7 +214,7 @@
                         {{ $product->isSold() ? 'Comandă o piesă asemănătoare' : 'Comandă Variantă Personalizată' }}
                     </button>
                 </div>
-                
+
                 <div class="mt-16 space-y-5 text-[10px] font-semibold tracking-[0.15em] text-dark-brown/60 uppercase border-t border-black/5 pt-10">
                     <div class="flex items-center gap-5">
                         <span class="w-8 h-px bg-vintage-gold/50"></span>
