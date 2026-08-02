@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -13,11 +15,7 @@ class CartController extends Controller
     public function index()
     {
         $cart = session()->get('cart', []);
-        $total = 0;
-
-        foreach ($cart as $item) {
-            $total += $item['price'] * $item['quantity'];
-        }
+        $total = collect($cart)->sum(fn (array $item) => $item['price'] * $item['quantity']);
 
         return view('cart.index', compact('cart', 'total'));
     }
@@ -25,76 +23,74 @@ class CartController extends Controller
     /**
      * Adaugă un produs în coșul de cumpărături.
      */
-    public function add(Request $request)
+    public function add(Request $request): JsonResponse|RedirectResponse
     {
-        $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'nullable|integer|min:1',
-            'redirect_to_checkout' => 'nullable|boolean'
+        $validated = $request->validate([
+            'product_id' => ['required', 'integer', 'exists:products,id'],
+            'quantity' => ['nullable', 'integer', 'min:1'],
+            'redirect_to_checkout' => ['nullable', 'boolean'],
         ]);
 
-        $product = Product::findOrFail($request->product_id);
+        $product = Product::with('images')->findOrFail($validated['product_id']);
 
-        // Piesele unicat urmează același flux de cumpărare ca toate celelalte produse.
-        // Prețul și stocul sunt singurele condiții comerciale pentru adăugarea în coș.
         if (! $product->isPurchasable()) {
             $message = $product->price === null || (float) $product->price <= 0
                 ? 'Produsul nu poate fi cumpărat până când nu are un preț valid.'
                 : 'Produsul nu mai este în stoc.';
 
-            return redirect()->back()->with('error', $message);
+            return $this->errorResponse($request, $message);
         }
 
         $cart = session()->get('cart', []);
-        $quantity = $request->input('quantity', 1);
+        $quantity = (int) ($validated['quantity'] ?? 1);
 
-        // Imaginea pentru coș
-        $imageUrl = null;
-        if (!empty($product->image)) {
-            $imageUrl = asset('storage/' . $product->image);
-        } elseif (isset($product->images) && $product->images->count() > 0) {
-            $firstImage = $product->images->where('is_featured', true)->first() ?? $product->images->first();
-            $imageUrl = asset('storage/' . $firstImage->image_path);
-        } else {
-            $imageUrl = 'https://via.placeholder.com/150'; // Fallback
-        }
-
-        // Dacă produsul este deja în coș, creștem cantitatea, verificând stocul maxim
         if (isset($cart[$product->id])) {
-            $newQuantity = $cart[$product->id]['quantity'] + $quantity;
+            $newQuantity = (int) $cart[$product->id]['quantity'] + $quantity;
+
             if ($newQuantity > $product->stock) {
-                 return redirect()->back()->with('error', 'Nu poți adăuga mai multe bucăți decât stocul disponibil.');
+                return $this->errorResponse(
+                    $request,
+                    'Nu poți adăuga mai multe bucăți decât stocul disponibil.'
+                );
             }
+
             $cart[$product->id]['quantity'] = $newQuantity;
         } else {
-            // Adăugăm produs nou în coș
+            if ($quantity > $product->stock) {
+                return $this->errorResponse(
+                    $request,
+                    'Cantitatea solicitată depășește stocul disponibil.'
+                );
+            }
+
+            $featuredImage = $product->images->firstWhere('is_featured', true)
+                ?? $product->images->first();
+
+            $imageUrl = ! empty($product->image)
+                ? asset('storage/' . $product->image)
+                : ($featuredImage
+                    ? asset('storage/' . $featuredImage->image_path)
+                    : asset('img/logo.png'));
+
             $cart[$product->id] = [
-                "id" => $product->id,
-                "name" => $product->name,
-                "quantity" => $quantity,
-                "price" => $product->price,
-                "image" => $imageUrl
+                'id' => $product->id,
+                'name' => $product->name,
+                'quantity' => $quantity,
+                'price' => (float) $product->price,
+                'image' => $imageUrl,
             ];
         }
 
         session()->put('cart', $cart);
 
-        if ($request->ajax() || $request->wantsJson()) {
-            $total = 0;
-            foreach ($cart as $item) {
-                $total += $item['price'] * $item['quantity'];
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Produsul a fost adăugat în colecție.',
-                'cart_count' => count($cart),
-                'html' => view('cart._sidebar_content')->render(),
-            ]);
+        if ($this->expectsJson($request)) {
+            return response()->json($this->cartPayload(
+                $cart,
+                'Produsul a fost adăugat în colecție.'
+            ));
         }
 
-        // Verificăm dacă a apăsat pe butonul "Buy Now"
-        if ($request->input('redirect_to_checkout')) {
+        if ($request->boolean('redirect_to_checkout')) {
             return redirect()->route('checkout.index');
         }
 
@@ -104,34 +100,50 @@ class CartController extends Controller
     /**
      * Elimină un produs din coșul de cumpărături.
      */
-    public function remove(Request $request)
+    public function remove(Request $request): JsonResponse|RedirectResponse
     {
-        if ($request->id) {
-            $cart = session()->get('cart');
+        $validated = $request->validate([
+            'id' => ['required', 'integer'],
+        ]);
 
-            if (isset($cart[$request->id])) {
-                unset($cart[$request->id]);
-                session()->put('cart', $cart);
-            }
+        $cart = session()->get('cart', []);
+        unset($cart[$validated['id']]);
+        session()->put('cart', $cart);
 
-            if ($request->ajax() || $request->wantsJson()) {
-                $cart = session()->get('cart', []);
-                $total = 0;
-                foreach ($cart as $item) {
-                    $total += $item['price'] * $item['quantity'];
-                }
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Produsul a fost eliminat din coș.',
-                    'cart_count' => count($cart),
-                    'html' => view('cart._sidebar_content')->render(),
-                ]);
-            }
-
-            return redirect()->back()->with('success', 'Produsul a fost eliminat din coș.');
+        if ($this->expectsJson($request)) {
+            return response()->json($this->cartPayload(
+                $cart,
+                'Produsul a fost eliminat din coș.'
+            ));
         }
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Produsul a fost eliminat din coș.');
+    }
+
+    private function expectsJson(Request $request): bool
+    {
+        return $request->ajax() || $request->expectsJson() || $request->wantsJson();
+    }
+
+    private function cartPayload(array $cart, string $message): array
+    {
+        return [
+            'success' => true,
+            'message' => $message,
+            'cart_count' => count($cart),
+            'html' => view('cart._sidebar_content')->render(),
+        ];
+    }
+
+    private function errorResponse(Request $request, string $message): JsonResponse|RedirectResponse
+    {
+        if ($this->expectsJson($request)) {
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+            ], 422);
+        }
+
+        return redirect()->back()->with('error', $message);
     }
 }
