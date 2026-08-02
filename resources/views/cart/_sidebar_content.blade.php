@@ -81,3 +81,4 @@
 </div>
 
 <script src="{{ asset('js/storefront-ui.js') }}" data-navigate-once defer></script>
+<script src="{{ asset('js/product-gallery.js') }}" data-navigate-once defer></script>
