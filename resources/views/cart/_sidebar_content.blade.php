@@ -1,10 +1,10 @@
-<div class="flex flex-col h-full bg-ivory">
+<div class="flex flex-col h-full bg-ivory" data-cart-remove-url="{{ route('cart.remove') }}">
     <div class="flex justify-between items-center p-6 border-b border-black/5 bg-ivory">
         <span class="font-serif text-lg tracking-[0.1em] uppercase text-dark-brown flex items-center gap-2">
             <span class="w-1.5 h-1.5 rounded-full bg-vintage-gold"></span>
             Colecția Mea
         </span>
-        <button id="cart-sidebar-close" class="text-dark-brown focus:outline-none hover:text-vintage-gold transition-colors">
+        <button type="button" id="cart-sidebar-close" aria-label="Închide colecția" class="text-dark-brown focus:outline-none hover:text-vintage-gold transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -38,8 +38,11 @@
                             </p>
                         </div>
 
-                        <!-- Buton eliminare -->
-                        <button type="button" class="remove-from-cart-btn absolute top-3 right-3 text-dark-brown/30 hover:text-red-500 transition-colors" data-id="{{ $id }}" title="Elimină">
+                        <button type="button"
+                                class="remove-from-cart-btn absolute top-3 right-3 text-dark-brown/30 hover:text-red-500 transition-colors"
+                                data-id="{{ $id }}"
+                                aria-label="Elimină {{ $details['name'] }} din colecție"
+                                title="Elimină">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
@@ -56,7 +59,6 @@
         @endif
     </div>
 
-    <!-- Sumar Footer -->
     <div class="p-6 border-t border-black/5 bg-ivory">
         <div class="flex justify-between items-end mb-6">
             <span class="text-xs uppercase tracking-[0.1em] text-dark-brown font-medium">Subtotal</span>
@@ -71,9 +73,11 @@
                 <span class="transform group-hover:translate-x-1 transition-transform duration-300">&rarr;</span>
             </a>
         @else
-            <button disabled class="w-full bg-black/5 text-dark-brown/30 px-6 py-4 uppercase tracking-[0.2em] text-[10px] font-medium cursor-not-allowed">
+            <button type="button" disabled class="w-full bg-black/5 text-dark-brown/30 px-6 py-4 uppercase tracking-[0.2em] text-[10px] font-medium cursor-not-allowed">
                 Spre Plată
             </button>
         @endif
     </div>
 </div>
+
+<script src="{{ asset('js/storefront-ui.js') }}" data-navigate-once defer></script>
