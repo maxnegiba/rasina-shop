@@ -6,18 +6,28 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Spatie\Translatable\HasTranslations;
 use RalphJSmit\Laravel\SEO\Support\HasSEO;
 use RalphJSmit\Laravel\SEO\Support\SEOData;
+use Spatie\Translatable\HasTranslations;
 
 class Product extends Model
 {
     use HasFactory, HasTranslations, HasSEO;
 
-    // Aici am adăugat 'image' la final ca să îi dăm voie să îl salveze!
     protected $fillable = [
-        'category_id', 'name', 'slug', 'description', 
-        'price', 'stock', 'is_custom', 'status', 'image' 
+        'product_code',
+        'product_type',
+        'category_id',
+        'related_post_id',
+        'name',
+        'slug',
+        'description',
+        'seo_translations',
+        'price',
+        'stock',
+        'is_custom',
+        'status',
+        'image',
     ];
 
     public $translatable = ['name', 'description'];
@@ -25,6 +35,7 @@ class Product extends Model
     protected $casts = [
         'is_custom' => 'boolean',
         'price' => 'decimal:2',
+        'seo_translations' => 'array',
     ];
 
     public function category(): BelongsTo
@@ -32,15 +43,18 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    // Această relație o vom folosi mai târziu dacă vrei să faci o galerie completă cu unghiuri diferite
-    public function images(): HasMany
+    public function relatedPost(): BelongsTo
     {
-        return $this->hasMany(ProductImage::class);
+        return $this->belongsTo(Post::class, 'related_post_id');
     }
 
-    /**
-     * Price shown in the storefront, independent of the ordering flow.
-     */
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class)
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
     public function displayPrice(): string
     {
         if ($this->price === null) {
@@ -50,9 +64,6 @@ class Product extends Model
         return number_format((float) $this->price, 0, ',', '.') . ' RON';
     }
 
-    /**
-     * A product can use the normal shop flow regardless of whether it is unique.
-     */
     public function isPurchasable(): bool
     {
         return $this->price !== null
@@ -60,9 +71,6 @@ class Product extends Model
             && (int) $this->stock > 0;
     }
 
-    /**
-     * A sold product remains visible as a reference for similar custom orders.
-     */
     public function isSold(): bool
     {
         return (int) $this->stock <= 0;
@@ -74,17 +82,23 @@ class Product extends Model
             return new SEOData();
         }
 
-        $featuredImage = $this->images?->where('is_featured', true)->first()
-                         ?? $this->images?->first();
+        $locale = app()->getLocale();
+        $translations = is_array($this->seo_translations) ? $this->seo_translations : [];
+        $localizedSeo = $translations[$locale] ?? $translations['ro'] ?? [];
+
+        $featuredImage = $this->images->firstWhere('is_featured', true)
+            ?? $this->images->first();
 
         $imagePath = $featuredImage
-                     ? asset('storage/' . $featuredImage->image_path)
-                     : asset('/img/logo.png');
+            ? asset('storage/' . $featuredImage->image_path)
+            : asset('/img/logo.png');
 
         return new SEOData(
-            title: $this->name,
-            description: strip_tags($this->description),
+            title: $localizedSeo['title'] ?? $this->name,
+            description: $localizedSeo['description'] ?? strip_tags((string) $this->description),
+            author: $translations['author'] ?? 'MTD ART',
             image: $imagePath,
+            robots: $translations['robots'] ?? 'index, follow',
         );
     }
 }

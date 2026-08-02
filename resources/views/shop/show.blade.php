@@ -27,20 +27,24 @@
             <div class="w-full lg:w-3/5" x-data="{ activeSlide: 0 }">
                 @php
                     $images = [];
+                    $imageAlts = []; // MTD_ART_FINAL_ALT_TEXT
                     if (isset($product->images) && $product->images->count() > 0) {
                         $featuredImage = $product->images->where('is_featured', true)->first();
                         if ($featuredImage) {
                             $images[] = asset('storage/' . $featuredImage->image_path);
+                            $imageAlts[] = $featuredImage->translatedAltText() ?: $product->name;
                         }
                         foreach ($product->images as $image) {
                             if (!$featuredImage || $image->id !== $featuredImage->id) {
                                 $images[] = asset('storage/' . $image->image_path);
+                                $imageAlts[] = $image->translatedAltText() ?: $product->name;
                             }
                         }
                     }
                     
                     if (empty($images)) {
                         $images[] = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iODAwIiBmaWxsPSIjRkRGQkY3Ij48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjgwMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiNDNUE4ODAiPkl2b3J5IFZpbnRhZ2U8L3RleHQ+PC9zdmc+';
+                        $imageAlts[] = $product->name;
                     }
                 @endphp
 
@@ -59,7 +63,7 @@
                                  style="{{ $index === 0 ? '' : 'display: none;' }}">
                                 <!-- Imaginea incape perfect fara a fi taiata -->
                                 <img src="{{ $imageUrl }}"
-                                     alt="{{ $product->name }}"
+                                     alt="{{ $imageAlts[$index] ?? $product->name }}"
                                      class="w-full h-full object-contain drop-shadow-sm transition-all duration-700">
                             </div>
                         @endforeach
@@ -101,6 +105,7 @@
                                  class="aspect-square bg-white p-2 overflow-hidden cursor-pointer relative flex items-center justify-center transition-all duration-300"
                                  :class="{ 'ring-1 ring-inset ring-vintage-gold shadow-sm': activeSlide === {{ $index }}, 'ring-1 ring-inset ring-black/5 hover:border-black/10': activeSlide !== {{ $index }} }">
                                 <img src="{{ $imageUrl }}"
+                                     alt="{{ $imageAlts[$index] ?? $product->name }}"
                                      class="w-full h-full object-contain transition duration-500"
                                      :class="{ 'opacity-100': activeSlide === {{ $index }}, 'opacity-70 hover:opacity-100': activeSlide !== {{ $index }} }">
                             </div>
@@ -124,6 +129,15 @@
 
                 <div class="w-12 h-px bg-vintage-gold/50 mb-10"></div>
 
+                @if($product->relatedPost)
+                    <a href="{{ route('blog.show', $product->relatedPost->slug) }}"
+                       class="mb-8 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] font-semibold text-vintage-gold hover:text-dark-brown transition-colors">
+                        Citește povestea acestei piese
+                        <span aria-hidden="true">→</span>
+                    </a>
+                @endif
+
+                <!-- MTD_ART_FINAL_RELATED_ARTICLE -->
                 <!-- Tipografie aliniata cu editorialul jurnalului -->
                 <div class="prose prose-stone max-w-none font-light leading-loose text-dark-brown/80 mb-12 prose-a:text-vintage-gold hover:prose-a:text-dark-brown prose-a:transition-colors">
                     {!! $product->description !!}

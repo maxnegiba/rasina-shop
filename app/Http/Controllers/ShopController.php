@@ -56,7 +56,7 @@ class ShopController extends Controller
     {
         $product = Product::where('slug', $slug)
             ->where('status', 'published')
-            ->with('images')
+            ->with(['images', 'relatedPost']) // MTD_ART_FINAL_RELATED_EAGER_LOAD
             ->firstOrFail();
 
         $featuredImage = $product->images->where('is_featured', true)->first()
