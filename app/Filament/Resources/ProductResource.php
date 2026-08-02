@@ -2,20 +2,21 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\ProductResource\Actions\ProductBulkActions;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Set;
+use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
-use Illuminate\Support\Str;
-use Filament\Forms\Set;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use RalphJSmit\Filament\SEO\SEO;
-use Filament\Resources\Concerns\Translatable;
 
 class ProductResource extends Resource
 {
@@ -87,9 +88,8 @@ class ProductResource extends Resource
 
                         Forms\Components\Select::make('category_id')
                             ->label('Categorie')
-                            // FIX-UL MAGIC PENTRU POSTGRESQL & JSON
                             ->relationship(
-                                name: 'category', 
+                                name: 'category',
                                 titleAttribute: 'name',
                                 modifyQueryUsing: fn (Builder $query) => $query->orderBy('name->ro', 'asc')
                             )
@@ -140,7 +140,6 @@ class ProductResource extends Resource
                     ->searchable()
                     ->weight('bold'),
 
-                // Dezactivăm sortarea pe categorie ca să evităm eroarea Postgres în tabel
                 TextColumn::make('category.name')
                     ->label('Categorie')
                     ->sortable(false),
@@ -150,6 +149,12 @@ class ProductResource extends Resource
                     ->money('RON')
                     ->sortable()
                     ->placeholder('La cerere'),
+
+                TextColumn::make('stock')
+                    ->label('Stoc')
+                    ->badge()
+                    ->sortable()
+                    ->color(fn (int $state): string => $state > 0 ? 'success' : 'danger'),
 
                 IconColumn::make('is_custom')
                     ->label('Unicat')
@@ -182,26 +187,37 @@ class ProductResource extends Resource
                         'draft' => 'Ciorne',
                         'published' => 'Publicate',
                     ]),
+                Tables\Filters\SelectFilter::make('category_id')
+                    ->label('Categorie')
+                    ->relationship('category', 'name')
+                    ->searchable()
+                    ->preload(),
                 Tables\Filters\TernaryFilter::make('is_custom')
                     ->label('Tip Produs')
                     ->trueLabel('Doar Piese Unicat')
                     ->falseLabel('Doar Produse Standard'),
+                Tables\Filters\TernaryFilter::make('availability')
+                    ->label('Disponibilitate')
+                    ->trueLabel('În stoc')
+                    ->falseLabel('Vândute / epuizate')
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->where('stock', '>', 0),
+                        false: fn (Builder $query): Builder => $query->where('stock', '<=', 0),
+                    ),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\BulkActionGroup::make(ProductBulkActions::make())
+                    ->label('Acțiuni pentru selecție')
+                    ->icon('heroicon-o-adjustments-horizontal'),
             ]);
     }
 
     public static function getRelations(): array
     {
-        return [
-            // Aici vei putea adăuga RelationManager-ul pentru Galeria de Imagini (product_images)
-        ];
+        return [];
     }
 
     public static function getPages(): array
