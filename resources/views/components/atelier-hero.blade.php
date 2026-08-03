@@ -12,6 +12,8 @@
         'f' => 'M8 4H32C36 4 38 6 38 10C38 17 43 22 50 22C57 22 62 17 62 10C62 6 64 4 68 4H92C96 4 98 6 98 10V32C98 36 96 38 92 38C85 38 80 43 80 50C80 57 85 62 92 62C96 62 98 64 98 68V90C98 94 96 96 92 96H8C4 96 2 94 2 90V68C2 64 4 62 8 62C15 62 20 57 20 50C20 43 15 38 8 38C4 38 2 36 2 32V10C2 6 4 4 8 4Z',
     ];
 
+    $componentId = 'atelier-puzzle-' . uniqid();
+
     $pieces = [
         [
             'key' => 'pigments',
@@ -114,13 +116,29 @@
                 radial-gradient(circle at 17% 14%, rgba(255, 250, 242, .78), transparent 26%),
                 radial-gradient(circle at 82% 19%, rgba(183, 139, 69, .14), transparent 23%),
                 linear-gradient(145deg, #e4d9cc 0%, #d8cbbd 53%, #d1c1b2 100%);
+            position: relative;
             isolation: isolate;
+            overflow: hidden;
+        }
+
+        .atelier-puzzle-stage::before {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            content: '';
+            background:
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, .38) 0 1px, transparent 2px),
+                radial-gradient(circle at 74% 62%, rgba(255, 255, 255, .22) 0 1px, transparent 2px),
+                linear-gradient(120deg, rgba(255, 255, 255, .24), transparent 38%, rgba(173, 118, 75, .12) 72%, transparent);
+            background-size: 34px 34px, 46px 46px, 100% 100%;
+            opacity: .72;
         }
 
         .atelier-puzzle-stage::after {
             position: absolute;
             inset: 0;
-            z-index: 30;
+            z-index: 35;
             pointer-events: none;
             content: '';
             background: linear-gradient(90deg, rgba(68, 48, 34, .08), transparent 12%, transparent 88%, rgba(68, 48, 34, .06));
@@ -132,6 +150,7 @@
             left: var(--x);
             top: var(--y);
             z-index: 10;
+            overflow: visible;
             width: var(--w);
             height: var(--h);
             margin: 0;
@@ -175,6 +194,7 @@
         @media (max-width: 1023px) {
             .atelier-puzzle-stage {
                 position: relative !important;
+                inset: auto !important;
                 display: grid;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
                 grid-auto-flow: dense;
@@ -182,6 +202,7 @@
                 gap: 7px;
                 min-height: 0;
                 padding: 16px;
+                overflow: visible;
             }
 
             .atelier-puzzle-piece {
@@ -190,6 +211,8 @@
                 top: auto;
                 width: auto;
                 height: auto;
+                min-height: 150px;
+                aspect-ratio: 1 / 1;
                 grid-column: span var(--mc);
                 grid-row: span var(--mr);
             }
@@ -204,6 +227,7 @@
             }
 
             .atelier-puzzle-piece {
+                min-height: 180px;
                 grid-column: span var(--mc);
             }
         }
@@ -297,10 +321,10 @@
                 </div>
             </div>
 
-            <div id="atelier" class="relative min-h-[1100px] overflow-hidden bg-[#ddd1c3] sm:min-h-[850px] lg:min-h-0">
-                <div class="atelier-puzzle-stage absolute inset-0">
+            <div id="atelier" class="relative bg-[#ddd1c3] lg:min-h-0 lg:overflow-hidden">
+                <div class="atelier-puzzle-stage relative lg:absolute lg:inset-0">
                     @foreach ($pieces as $piece)
-                        @php($clipId = 'atelier-puzzle-' . $piece['key'])
+                        @php($clipId = $componentId . '-' . $piece['key'])
 
                         <figure
                             class="atelier-puzzle-piece"
@@ -322,6 +346,7 @@
                                     width="100"
                                     height="100"
                                     preserveAspectRatio="xMidYMid slice"
+                                    loading="lazy"
                                     clip-path="url(#{{ $clipId }})"
                                 />
 
