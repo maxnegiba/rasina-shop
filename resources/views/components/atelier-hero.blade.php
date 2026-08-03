@@ -42,7 +42,9 @@
                     <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center xl:mt-6">
                         <a href="{{ route('shop.index') }}"
                            class="inline-flex min-h-11 items-center justify-center gap-3 rounded-md bg-[#344f3f] px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-[#2b4335] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#344f3f]/30 focus:ring-offset-2">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 21a9 9 0 100-18 9 9 0 000 18zm0 0c0-5 2-8 6-10m-6 10c0-5-2-8-6-10" /></svg>
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 21a9 9 0 100-18 9 9 0 000 18zm0 0c0-5 2-8 6-10m-6 10c0-5-2-8-6-10" />
+                            </svg>
                             Descoperă colecțiile
                         </a>
                         <a href="{{ route('about') }}"
@@ -54,138 +56,182 @@
                     <div class="mt-6 grid gap-4 border-t border-dark-brown/10 pt-4 sm:grid-cols-3 xl:mt-7">
                         <div class="flex gap-2.5">
                             <span class="text-lg leading-none text-[#bf8179]" aria-hidden="true">♡</span>
-                            <div><p class="text-[9px] font-bold uppercase tracking-[0.12em]">Unicat</p><p class="mt-1 text-[10px] leading-4 text-dark-brown/60">Fiecare piesă este diferită</p></div>
+                            <div>
+                                <p class="text-[9px] font-bold uppercase tracking-[0.12em]">Unicat</p>
+                                <p class="mt-1 text-[10px] leading-4 text-dark-brown/60">Fiecare piesă este diferită</p>
+                            </div>
                         </div>
                         <div class="flex gap-2.5">
                             <span class="text-lg leading-none text-[#57735f]" aria-hidden="true">⌁</span>
-                            <div><p class="text-[9px] font-bold uppercase tracking-[0.12em]">Lucrat manual</p><p class="mt-1 text-[10px] leading-4 text-dark-brown/60">Cu grijă și pasiune</p></div>
+                            <div>
+                                <p class="text-[9px] font-bold uppercase tracking-[0.12em]">Lucrat manual</p>
+                                <p class="mt-1 text-[10px] leading-4 text-dark-brown/60">Cu grijă și pasiune</p>
+                            </div>
                         </div>
                         <div class="flex gap-2.5">
                             <span class="text-lg leading-none text-[#b68b45]" aria-hidden="true">✧</span>
-                            <div><p class="text-[9px] font-bold uppercase tracking-[0.12em]">Materiale premium</p><p class="mt-1 text-[10px] leading-4 text-dark-brown/60">Rășină și pigmenți aleși</p></div>
+                            <div>
+                                <p class="text-[9px] font-bold uppercase tracking-[0.12em]">Materiale premium</p>
+                                <p class="mt-1 text-[10px] leading-4 text-dark-brown/60">Rășină și pigmenți aleși</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="relative min-h-[720px] overflow-hidden bg-[#ddd1c3] lg:min-h-0">
-                @php
-                    $heroPuzzlePieces = [
-                        [
-                            'key' => 'shelf',
-                            'class' => 'hero-puzzle-piece--shelf',
-                            'src' => asset('img/hero/atelier-shelf.webp'),
-                            'alt' => 'Raftul atelierului MTD Art cu pigmenți și materiale pentru rășină',
-                            'position' => '50% 50%',
-                            'loading' => 'eager',
-                            'priority' => 'high',
-                            'path' => 'M8 7 H36 C36 2 41 1 47 1 C53 1 58 3 58 7 H91 Q97 7 97 13 V36 C89 36 85 41 85 48 C85 55 89 60 97 60 V89 Q97 96 90 96 H61 C61 88 56 84 49 84 C42 84 37 88 37 96 H10 Q3 96 3 89 V63 C11 63 16 58 16 51 C16 44 11 39 3 39 V14 Q3 7 8 7 Z',
-                        ],
-                        [
-                            'key' => 'tools',
-                            'class' => 'hero-puzzle-piece--tools',
-                            'src' => asset('img/hero/atelier-tools.webp'),
-                            'alt' => 'Unelte, recipiente și accesorii folosite la turnarea rășinii',
-                            'position' => '50% 50%',
-                            'loading' => 'eager',
-                            'priority' => 'auto',
-                            'path' => 'M10 5 H39 C39 13 44 17 51 17 C58 17 63 13 63 5 H90 Q96 5 96 12 V38 C89 38 85 43 85 50 C85 57 89 62 96 62 V89 Q96 96 89 96 H64 C64 89 59 85 52 85 C45 85 40 89 40 96 H11 Q4 96 4 89 V65 C12 65 17 60 17 53 C17 46 12 41 4 41 V12 Q4 5 10 5 Z',
-                        ],
-                        [
-                            'key' => 'prayer',
-                            'class' => 'hero-puzzle-piece--prayer',
-                            'src' => asset('img/hero/atelier-prayer-mold.webp'),
-                            'alt' => 'Matriță albastră cu motivul mâinilor împreunate',
-                            'position' => '50% 48%',
-                            'loading' => 'eager',
-                            'priority' => 'auto',
-                            'path' => 'M9 4 H37 C37 12 42 16 49 16 C56 16 61 12 61 4 H90 Q96 4 96 11 V39 C88 39 84 44 84 51 C84 58 88 63 96 63 V90 Q96 96 89 96 H61 C61 88 56 84 49 84 C42 84 37 88 37 96 H10 Q4 96 4 89 V61 C12 61 16 56 16 49 C16 42 12 37 4 37 V11 Q4 4 9 4 Z',
-                        ],
-                        [
-                            'key' => 'red-cross',
-                            'class' => 'hero-puzzle-piece--red-cross',
-                            'src' => asset('img/hero/atelier-red-cross.webp'),
-                            'alt' => 'Cruce roșie din rășină aflată în procesul de turnare',
-                            'position' => '50% 54%',
-                            'loading' => 'lazy',
-                            'priority' => 'auto',
-                            'path' => 'M10 6 H38 C38 14 43 18 50 18 C57 18 62 14 62 6 H89 Q96 6 96 13 V37 C88 37 83 42 83 49 C83 56 88 61 96 61 V89 Q96 96 89 96 H64 C64 88 59 83 52 83 C45 83 40 88 40 96 H11 Q4 96 4 89 V65 C12 65 17 60 17 53 C17 46 12 41 4 41 V13 Q4 6 10 6 Z',
-                        ],
-                        [
-                            'key' => 'cured',
-                            'class' => 'hero-puzzle-piece--cured',
-                            'src' => asset('img/hero/atelier-cured-crosses.webp'),
-                            'alt' => 'Piese în formă de cruce scoase din matrițe și pregătite pentru finisare',
-                            'position' => '50% 50%',
-                            'loading' => 'lazy',
-                            'priority' => 'auto',
-                            'path' => 'M10 4 H40 C40 12 45 16 52 16 C59 16 64 12 64 4 H90 Q96 4 96 11 V40 C88 40 84 45 84 52 C84 59 88 64 96 64 V90 Q96 96 89 96 H62 C62 88 57 84 50 84 C43 84 38 88 38 96 H10 Q4 96 4 89 V62 C12 62 16 57 16 50 C16 43 12 38 4 38 V11 Q4 4 10 4 Z',
-                        ],
-                        [
-                            'key' => 'white-cross',
-                            'class' => 'hero-puzzle-piece--white-cross',
-                            'src' => asset('img/hero/atelier-white-cross-mold.webp'),
-                            'alt' => 'Matriță albă în formă de cruce și instrumente de atelier',
-                            'position' => '52% 82%',
-                            'loading' => 'lazy',
-                            'priority' => 'auto',
-                            'path' => 'M9 5 H36 C36 13 41 17 48 17 C55 17 60 13 60 5 H89 Q96 5 96 12 V39 C88 39 84 44 84 51 C84 58 88 63 96 63 V89 Q96 96 89 96 H65 C65 88 60 84 53 84 C46 84 41 88 41 96 H10 Q4 96 4 89 V64 C12 64 17 59 17 52 C17 45 12 40 4 40 V12 Q4 5 9 5 Z',
-                        ],
-                    ];
-                @endphp
-
-                <div class="hero-puzzle-stage absolute inset-0" aria-label="Colaj din atelierul MTD Art">
-                    <svg class="absolute h-0 w-0" width="0" height="0" aria-hidden="true" focusable="false">
-                        <defs>
-                            @foreach($heroPuzzlePieces as $piece)
-                                <clipPath
-                                    id="hero-puzzle-clip-{{ $piece['key'] }}"
-                                    clipPathUnits="objectBoundingBox"
-                                >
-                                    <path d="{{ $piece['path'] }}" transform="scale(0.01)" />
+                <div class="hero-puzzle-stage absolute inset-0">
+                    {{-- LEFT LARGE / SHELF --}}
+                    <figure class="hero-puzzle-piece hero-puzzle-piece--shelf">
+                        <svg class="hero-puzzle-piece__svg" viewBox="0 0 110 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <defs>
+                                <clipPath id="clip-shelf-piece">
+                                    <path d="M14 8H74C79 8 82 12 82 17V31C82 35 85 37 89 37C96 37 101 42 101 49C101 56 96 61 89 61C85 61 82 63 82 67V101C82 105 85 107 89 107C96 107 101 112 101 119C101 126 96 131 89 131C85 131 82 133 82 137V139C82 144 78 148 73 148H14C9 148 5 144 5 139V17C5 12 9 8 14 8Z"/>
                                 </clipPath>
-                            @endforeach
-                        </defs>
-                    </svg>
+                            </defs>
 
-                    @foreach($heroPuzzlePieces as $piece)
-                        <figure class="hero-puzzle-piece {{ $piece['class'] }}">
-                            <img
-                                src="{{ $piece['src'] }}"
-                                alt="{{ $piece['alt'] }}"
-                                loading="{{ $piece['loading'] }}"
-                                fetchpriority="{{ $piece['priority'] }}"
-                                decoding="async"
-                                class="hero-puzzle-piece__image"
-                                style="object-position: {{ $piece['position'] }}; clip-path: url(#hero-puzzle-clip-{{ $piece['key'] }}); -webkit-clip-path: url(#hero-puzzle-clip-{{ $piece['key'] }});"
-                            >
+                            <image
+                                href="{{ asset('img/hero/atelier-shelf.webp') }}"
+                                width="110"
+                                height="150"
+                                preserveAspectRatio="xMidYMid slice"
+                                clip-path="url(#clip-shelf-piece)" />
 
-                            <div
-                                class="hero-puzzle-piece__shine"
-                                style="clip-path: url(#hero-puzzle-clip-{{ $piece['key'] }}); -webkit-clip-path: url(#hero-puzzle-clip-{{ $piece['key'] }});"
-                                aria-hidden="true"
-                            ></div>
+                            <path
+                                d="M14 8H74C79 8 82 12 82 17V31C82 35 85 37 89 37C96 37 101 42 101 49C101 56 96 61 89 61C85 61 82 63 82 67V101C82 105 85 107 89 107C96 107 101 112 101 119C101 126 96 131 89 131C85 131 82 133 82 137V139C82 144 78 148 73 148H14C9 148 5 144 5 139V17C5 12 9 8 14 8Z"
+                                fill="none"
+                                stroke="rgba(255,248,240,.96)"
+                                stroke-width="4"
+                                stroke-linejoin="round"/>
+                        </svg>
+                    </figure>
 
-                            <svg
-                                class="hero-puzzle-piece__outline-svg"
-                                viewBox="0 0 100 100"
-                                preserveAspectRatio="none"
-                                aria-hidden="true"
-                                focusable="false"
-                            >
-                                <path
-                                    d="{{ $piece['path'] }}"
-                                    class="hero-puzzle-piece__outline hero-puzzle-piece__outline--outer"
-                                />
-                                <path
-                                    d="{{ $piece['path'] }}"
-                                    class="hero-puzzle-piece__outline hero-puzzle-piece__outline--inner"
-                                />
-                            </svg>
-                        </figure>
-                    @endforeach
+                    {{-- TOP CENTER / TOOLS --}}
+                    <figure class="hero-puzzle-piece hero-puzzle-piece--tools">
+                        <svg class="hero-puzzle-piece__svg" viewBox="0 0 160 102" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <defs>
+                                <clipPath id="clip-tools-piece">
+                                    <path d="M18 8H131C136 8 140 12 140 17V34C140 38 143 40 147 40C154 40 159 45 159 51C159 58 154 63 147 63C143 63 140 65 140 69V76C140 81 136 85 131 85H93C89 85 87 87 87 91C87 98 82 103 76 103C69 103 64 98 64 91C64 87 62 85 58 85H18C13 85 9 81 9 76V58C9 54 11 52 15 52C22 52 27 48 27 42C27 35 22 31 15 31C11 31 9 29 9 25V17C9 12 13 8 18 8Z"/>
+                                </clipPath>
+                            </defs>
 
-                    <div class="hero-puzzle-seal absolute left-[46%] top-[45%] z-40 hidden h-24 w-24 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[#b68b45]/55 bg-[#f7f0e5]/95 text-center shadow-xl backdrop-blur xl:flex">
+                            <image
+                                href="{{ asset('img/hero/atelier-tools.webp') }}"
+                                width="160"
+                                height="102"
+                                preserveAspectRatio="xMidYMid slice"
+                                clip-path="url(#clip-tools-piece)" />
+
+                            <path
+                                d="M18 8H131C136 8 140 12 140 17V34C140 38 143 40 147 40C154 40 159 45 159 51C159 58 154 63 147 63C143 63 140 65 140 69V76C140 81 136 85 131 85H93C89 85 87 87 87 91C87 98 82 103 76 103C69 103 64 98 64 91C64 87 62 85 58 85H18C13 85 9 81 9 76V58C9 54 11 52 15 52C22 52 27 48 27 42C27 35 22 31 15 31C11 31 9 29 9 25V17C9 12 13 8 18 8Z"
+                                fill="none"
+                                stroke="rgba(255,248,240,.96)"
+                                stroke-width="4"
+                                stroke-linejoin="round"/>
+                        </svg>
+                    </figure>
+
+                    {{-- TOP RIGHT / PRAYER --}}
+                    <figure class="hero-puzzle-piece hero-puzzle-piece--prayer">
+                        <svg class="hero-puzzle-piece__svg" viewBox="0 0 92 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <defs>
+                                <clipPath id="clip-prayer-piece">
+                                    <path d="M15 8H77C82 8 86 12 86 17V106C86 111 82 115 77 115H58C54 115 52 117 52 121C52 127 47 132 41 132C35 132 30 127 30 121C30 117 28 115 24 115H15C10 115 6 111 6 106V67C6 63 8 61 12 61C19 61 24 56 24 50C24 43 19 38 12 38C8 38 6 36 6 32V17C6 12 10 8 15 8Z"/>
+                                </clipPath>
+                            </defs>
+
+                            <image
+                                href="{{ asset('img/hero/atelier-prayer-mold.webp') }}"
+                                width="92"
+                                height="130"
+                                preserveAspectRatio="xMidYMid slice"
+                                clip-path="url(#clip-prayer-piece)" />
+
+                            <path
+                                d="M15 8H77C82 8 86 12 86 17V106C86 111 82 115 77 115H58C54 115 52 117 52 121C52 127 47 132 41 132C35 132 30 127 30 121C30 117 28 115 24 115H15C10 115 6 111 6 106V67C6 63 8 61 12 61C19 61 24 56 24 50C24 43 19 38 12 38C8 38 6 36 6 32V17C6 12 10 8 15 8Z"
+                                fill="none"
+                                stroke="rgba(255,248,240,.96)"
+                                stroke-width="4"
+                                stroke-linejoin="round"/>
+                        </svg>
+                    </figure>
+
+                    {{-- BOTTOM LEFT / RED CROSS --}}
+                    <figure class="hero-puzzle-piece hero-puzzle-piece--red-cross">
+                        <svg class="hero-puzzle-piece__svg" viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <defs>
+                                <clipPath id="clip-red-cross-piece">
+                                    <path d="M15 18H40C44 18 46 20 46 24C46 30 51 35 58 35C64 35 69 30 69 24C69 20 71 18 75 18H96C101 18 105 22 105 27V63C105 67 108 69 112 69C118 69 123 74 123 80C123 86 118 91 112 91C108 91 105 93 105 97V114C105 119 101 123 96 123H15C10 123 6 119 6 114V27C6 22 10 18 15 18Z"/>
+                                </clipPath>
+                            </defs>
+
+                            <image
+                                href="{{ asset('img/hero/atelier-red-cross.webp') }}"
+                                width="120"
+                                height="130"
+                                preserveAspectRatio="xMidYMid slice"
+                                clip-path="url(#clip-red-cross-piece)" />
+
+                            <path
+                                d="M15 18H40C44 18 46 20 46 24C46 30 51 35 58 35C64 35 69 30 69 24C69 20 71 18 75 18H96C101 18 105 22 105 27V63C105 67 108 69 112 69C118 69 123 74 123 80C123 86 118 91 112 91C108 91 105 93 105 97V114C105 119 101 123 96 123H15C10 123 6 119 6 114V27C6 22 10 18 15 18Z"
+                                fill="none"
+                                stroke="rgba(255,248,240,.96)"
+                                stroke-width="4"
+                                stroke-linejoin="round"/>
+                        </svg>
+                    </figure>
+
+                    {{-- BOTTOM CENTER / CURED --}}
+                    <figure class="hero-puzzle-piece hero-puzzle-piece--cured">
+                        <svg class="hero-puzzle-piece__svg" viewBox="0 0 96 122" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <defs>
+                                <clipPath id="clip-cured-piece">
+                                    <path d="M18 8H78C83 8 87 12 87 17V41C87 45 89 47 93 47C99 47 104 52 104 58C104 64 99 69 93 69C89 69 87 71 87 75V104C87 109 83 113 78 113H18C13 113 9 109 9 104V74C9 70 11 68 15 68C21 68 26 63 26 57C26 51 21 46 15 46C11 46 9 44 9 40V17C9 12 13 8 18 8Z"/>
+                                </clipPath>
+                            </defs>
+
+                            <image
+                                href="{{ asset('img/hero/atelier-cured-crosses.webp') }}"
+                                width="96"
+                                height="122"
+                                preserveAspectRatio="xMidYMid slice"
+                                clip-path="url(#clip-cured-piece)" />
+
+                            <path
+                                d="M18 8H78C83 8 87 12 87 17V41C87 45 89 47 93 47C99 47 104 52 104 58C104 64 99 69 93 69C89 69 87 71 87 75V104C87 109 83 113 78 113H18C13 113 9 109 9 104V74C9 70 11 68 15 68C21 68 26 63 26 57C26 51 21 46 15 46C11 46 9 44 9 40V17C9 12 13 8 18 8Z"
+                                fill="none"
+                                stroke="rgba(255,248,240,.96)"
+                                stroke-width="4"
+                                stroke-linejoin="round"/>
+                        </svg>
+                    </figure>
+
+                    {{-- BOTTOM RIGHT / WHITE CROSS --}}
+                    <figure class="hero-puzzle-piece hero-puzzle-piece--white-cross">
+                        <svg class="hero-puzzle-piece__svg" viewBox="0 0 90 118" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <defs>
+                                <clipPath id="clip-white-cross-piece">
+                                    <path d="M16 18H36C40 18 42 20 42 24C42 30 47 35 53 35C60 35 65 30 65 24C65 20 67 18 71 18H74C79 18 83 22 83 27V103C83 108 79 112 74 112H16C11 112 7 108 7 103V73C7 69 9 67 13 67C19 67 24 62 24 56C24 50 19 45 13 45C9 45 7 43 7 39V27C7 22 11 18 16 18Z"/>
+                                </clipPath>
+                            </defs>
+
+                            <image
+                                href="{{ asset('img/hero/atelier-white-cross-mold.webp') }}"
+                                width="90"
+                                height="118"
+                                preserveAspectRatio="xMidYMid slice"
+                                clip-path="url(#clip-white-cross-piece)" />
+
+                            <path
+                                d="M16 18H36C40 18 42 20 42 24C42 30 47 35 53 35C60 35 65 30 65 24C65 20 67 18 71 18H74C79 18 83 22 83 27V103C83 108 79 112 74 112H16C11 112 7 108 7 103V73C7 69 9 67 13 67C19 67 24 62 24 56C24 50 19 45 13 45C9 45 7 43 7 39V27C7 22 11 18 16 18Z"
+                                fill="none"
+                                stroke="rgba(255,248,240,.96)"
+                                stroke-width="4"
+                                stroke-linejoin="round"/>
+                        </svg>
+                    </figure>
+
+                    <div class="hero-puzzle-badge absolute z-40 hidden h-24 w-24 items-center justify-center rounded-full border border-[#b68b45]/55 bg-[#f7f0e5]/95 text-center shadow-xl backdrop-blur xl:flex">
                         <div>
                             <p class="text-[8px] font-semibold uppercase tracking-[0.16em] text-[#a37639]">Din atelierul</p>
                             <p class="mt-1 font-serif text-base tracking-[0.1em] text-dark-brown">MTD ART</p>
@@ -216,301 +262,243 @@
 
 <style>
     .hero-puzzle-stage {
-        isolation: isolate;
+        --gap: 14px;
         background:
-            radial-gradient(circle at 14% 12%, rgba(248, 242, 232, 0.82), transparent 24%),
-            radial-gradient(circle at 84% 18%, rgba(215, 179, 111, 0.22), transparent 20%),
-            radial-gradient(circle at 56% 84%, rgba(191, 129, 121, 0.12), transparent 22%),
-            linear-gradient(145deg, #e5dbcf 0%, #d9cdbf 54%, #d2c3b4 100%);
-    }
-
-    .hero-puzzle-stage::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        z-index: -1;
-        opacity: 0.28;
-        background-image:
-            linear-gradient(rgba(77, 53, 37, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(77, 53, 37, 0.05) 1px, transparent 1px);
-        background-size: 52px 52px;
-        mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent 88%);
+            radial-gradient(circle at 16% 14%, rgba(244, 238, 228, 0.62), transparent 23%),
+            radial-gradient(circle at 82% 22%, rgba(215, 179, 111, 0.18), transparent 20%),
+            linear-gradient(180deg, #ddd1c3 0%, #d7cbbe 100%);
     }
 
     .hero-puzzle-piece {
-        --piece-transform: rotate(0deg);
         position: absolute;
-        z-index: 10;
         margin: 0;
-        filter:
-            drop-shadow(0 24px 24px rgba(69, 45, 29, 0.14))
-            drop-shadow(0 7px 8px rgba(69, 45, 29, 0.10));
-        transform: var(--piece-transform);
+        filter: drop-shadow(0 22px 28px rgba(76, 49, 28, 0.16));
+        transition: transform 320ms ease, filter 320ms ease;
         transform-origin: center;
-        transition:
-            transform 550ms cubic-bezier(0.22, 1, 0.36, 1),
-            filter 550ms ease;
-        will-change: transform;
     }
 
     .hero-puzzle-piece:hover {
-        z-index: 35;
-        filter:
-            drop-shadow(0 34px 32px rgba(69, 45, 29, 0.20))
-            drop-shadow(0 10px 12px rgba(69, 45, 29, 0.12));
-        transform: var(--piece-transform) translateY(-8px) scale(1.025);
+        transform: translateY(-5px) rotate(0deg) !important;
+        filter: drop-shadow(0 28px 36px rgba(76, 49, 28, 0.22));
     }
 
-    .hero-puzzle-piece__image,
-    .hero-puzzle-piece__shine,
-    .hero-puzzle-piece__outline-svg {
-        position: absolute;
-        inset: 0;
+    .hero-puzzle-piece__svg {
         display: block;
-        height: 100%;
         width: 100%;
-    }
-
-    .hero-puzzle-piece__image {
-        object-fit: cover;
-        background: #f8f2e8;
-    }
-
-    .hero-puzzle-piece__shine {
-        pointer-events: none;
-        background:
-            linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 42%),
-            linear-gradient(315deg, rgba(74, 48, 31, 0.09), transparent 36%);
-    }
-
-    .hero-puzzle-piece__outline-svg {
+        height: 100%;
         overflow: visible;
-        pointer-events: none;
     }
 
-    .hero-puzzle-piece__outline {
-        fill: none;
-        pointer-events: none;
-        vector-effect: non-scaling-stroke;
+    .hero-puzzle-piece image {
+        transform-origin: center;
     }
 
-    .hero-puzzle-piece__outline--outer {
-        stroke: rgba(255, 255, 255, 0.96);
-        stroke-width: 7px;
-        stroke-linejoin: round;
-    }
-
-    .hero-puzzle-piece__outline--inner {
-        stroke: rgba(89, 60, 40, 0.18);
-        stroke-width: 1px;
-        stroke-linejoin: round;
-    }
-
-    /* Dimensiuni intenționat diferite și mici spații între piese.
-       Formele nu sunt aliniate pentru a se îmbina perfect. */
+    /* DESKTOP POSITIONS */
     .hero-puzzle-piece--shelf {
-        --piece-transform: rotate(-2.1deg);
-        left: 1.8%;
-        top: 4.5%;
-        height: 91%;
+        left: 2%;
+        top: 3%;
         width: 34%;
-        z-index: 8;
+        height: 90%;
+        transform: rotate(-1.8deg);
     }
 
     .hero-puzzle-piece--tools {
-        --piece-transform: rotate(1.4deg);
-        left: 37.5%;
+        left: 36.6%;
         top: 4%;
-        height: 39%;
-        width: 37%;
-        z-index: 12;
+        width: 41.5%;
+        height: auto;
+        aspect-ratio: 160 / 102;
+        transform: rotate(1.3deg);
     }
 
     .hero-puzzle-piece--prayer {
-        --piece-transform: rotate(3.2deg);
-        right: 2.8%;
-        top: 7.5%;
-        height: 34%;
-        width: 22%;
-        z-index: 16;
+        left: 79.8%;
+        top: 5.2%;
+        width: 16.5%;
+        height: auto;
+        aspect-ratio: 92 / 130;
+        transform: rotate(-1.1deg);
     }
 
     .hero-puzzle-piece--red-cross {
-        --piece-transform: rotate(-1.6deg);
-        bottom: 4.5%;
-        left: 38.5%;
-        height: 48%;
-        width: 30.5%;
-        z-index: 14;
+        left: 38.1%;
+        top: 52.2%;
+        width: 23%;
+        height: auto;
+        aspect-ratio: 120 / 130;
+        transform: rotate(-2deg);
     }
 
     .hero-puzzle-piece--cured {
-        --piece-transform: rotate(2.5deg);
-        right: 3.8%;
-        top: 43%;
-        height: 30%;
-        width: 24%;
-        z-index: 22;
+        left: 62.8%;
+        top: 49.8%;
+        width: 18.4%;
+        height: auto;
+        aspect-ratio: 96 / 122;
+        transform: rotate(1.6deg);
     }
 
     .hero-puzzle-piece--white-cross {
-        --piece-transform: rotate(-3deg);
-        bottom: 2.5%;
-        right: 10.5%;
-        height: 26%;
-        width: 19.5%;
-        z-index: 18;
+        left: 82.2%;
+        top: 54.1%;
+        width: 14.3%;
+        height: auto;
+        aspect-ratio: 90 / 118;
+        transform: rotate(-1.4deg);
     }
 
-    .hero-puzzle-seal {
-        transition: transform 400ms ease, box-shadow 400ms ease;
+    .hero-puzzle-badge {
+        left: 27.2%;
+        bottom: 11.2%;
     }
 
-    .hero-puzzle-seal:hover {
-        transform: translate(-50%, -50%) rotate(-3deg) scale(1.04);
-        box-shadow: 0 22px 42px rgba(76, 49, 28, 0.18);
-    }
-
+    /* TABLET */
     @media (max-width: 1279px) {
-        .hero-puzzle-piece__outline--outer {
-            stroke-width: 5px;
-        }
-
         .hero-puzzle-piece--shelf {
-            left: 1%;
+            left: 2.5%;
+            top: 4%;
             width: 35%;
+            height: 87%;
         }
 
         .hero-puzzle-piece--tools {
-            left: 37%;
-            width: 38%;
+            left: 38%;
+            width: 40%;
         }
 
         .hero-puzzle-piece--prayer {
-            right: 1.5%;
-            width: 23%;
+            left: 79.5%;
+            width: 16%;
+        }
+
+        .hero-puzzle-piece--red-cross {
+            left: 38.5%;
+            top: 53%;
+            width: 22.5%;
+        }
+
+        .hero-puzzle-piece--cured {
+            left: 62.8%;
+            top: 51.2%;
+            width: 18%;
+        }
+
+        .hero-puzzle-piece--white-cross {
+            left: 81.8%;
+            top: 55.4%;
+            width: 14.8%;
         }
     }
 
+    /* MOBILE / STACKED COLLAGE */
     @media (max-width: 1023px) {
         .hero-puzzle-stage {
             min-height: 720px;
         }
 
-        .hero-puzzle-piece:hover {
-            transform: var(--piece-transform);
+        .hero-puzzle-piece {
+            filter: drop-shadow(0 16px 20px rgba(76, 49, 28, 0.16));
         }
 
         .hero-puzzle-piece--shelf {
-            --piece-transform: rotate(-2deg);
-            left: 1.5%;
-            top: 3%;
-            height: 43%;
-            width: 45%;
+            left: 4%;
+            top: 3.5%;
+            width: 42%;
+            height: 46%;
+            transform: rotate(-1.4deg);
         }
 
         .hero-puzzle-piece--tools {
-            --piece-transform: rotate(1.8deg);
-            left: auto;
-            right: 1.5%;
-            top: 2.5%;
-            height: 31%;
-            width: 48%;
+            left: 48%;
+            top: 4%;
+            width: 46%;
+            aspect-ratio: 160 / 102;
+            transform: rotate(1deg);
         }
 
         .hero-puzzle-piece--prayer {
-            --piece-transform: rotate(3deg);
-            right: 8%;
-            top: 31%;
-            height: 27%;
-            width: 27%;
+            left: 57%;
+            top: 29%;
+            width: 23%;
+            aspect-ratio: 92 / 130;
+            transform: rotate(-1deg);
         }
 
         .hero-puzzle-piece--red-cross {
-            --piece-transform: rotate(-1.5deg);
-            bottom: auto;
-            left: 2.5%;
-            top: 46%;
-            height: 43%;
-            width: 42%;
+            left: 6%;
+            top: 51%;
+            width: 33%;
+            aspect-ratio: 120 / 130;
+            transform: rotate(-1.8deg);
         }
 
         .hero-puzzle-piece--cured {
-            --piece-transform: rotate(2.4deg);
-            right: 1.5%;
-            top: 58%;
-            height: 29%;
-            width: 31%;
+            left: 42%;
+            top: 49%;
+            width: 26%;
+            aspect-ratio: 96 / 122;
+            transform: rotate(1.2deg);
         }
 
         .hero-puzzle-piece--white-cross {
-            --piece-transform: rotate(-2.8deg);
-            bottom: 1%;
-            right: 30%;
-            height: 25%;
-            width: 25%;
+            left: 70%;
+            top: 52%;
+            width: 22%;
+            aspect-ratio: 90 / 118;
+            transform: rotate(-1.2deg);
         }
     }
 
-    @media (max-width: 639px) {
+    @media (max-width: 640px) {
         .hero-puzzle-stage {
-            min-height: 640px;
-        }
-
-        .hero-puzzle-piece {
-            filter:
-                drop-shadow(0 18px 18px rgba(69, 45, 29, 0.13))
-                drop-shadow(0 5px 6px rgba(69, 45, 29, 0.09));
-        }
-
-        .hero-puzzle-piece__outline--outer {
-            stroke-width: 3px;
+            min-height: 650px;
         }
 
         .hero-puzzle-piece--shelf {
-            height: 41%;
-            width: 46%;
+            left: 4%;
+            top: 4%;
+            width: 44%;
+            height: 43%;
         }
 
         .hero-puzzle-piece--tools {
-            height: 30%;
-            width: 49%;
+            left: 47%;
+            top: 5%;
+            width: 47%;
         }
 
         .hero-puzzle-piece--prayer {
-            right: 6%;
-            top: 30%;
-            height: 26%;
-            width: 29%;
+            left: 58%;
+            top: 28.5%;
+            width: 24%;
         }
 
         .hero-puzzle-piece--red-cross {
-            top: 44%;
-            height: 44%;
-            width: 44%;
+            left: 5%;
+            top: 49%;
+            width: 35%;
         }
 
         .hero-puzzle-piece--cured {
-            top: 57%;
-            height: 29%;
-            width: 33%;
+            left: 42%;
+            top: 48%;
+            width: 27%;
         }
 
         .hero-puzzle-piece--white-cross {
-            right: 28%;
-            height: 24%;
-            width: 27%;
+            left: 70%;
+            top: 50.5%;
+            width: 23%;
         }
     }
 
     @media (prefers-reduced-motion: reduce) {
-        .hero-puzzle-piece,
-        .hero-puzzle-seal {
+        .hero-puzzle-piece {
             transition: none;
         }
 
         .hero-puzzle-piece:hover {
-            transform: var(--piece-transform);
+            transform: none !important;
         }
     }
 </style>
