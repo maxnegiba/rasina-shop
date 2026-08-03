@@ -1,7 +1,10 @@
 @php
     /*
      * Each image uses an individual size and position.
-     * The puzzle pieces are intentionally close together, but do not interlock perfectly.
+     * The puzzle pieces remain close together without interlocking perfectly.
+     *
+     * The visible spaces between pieces are filled visually by the
+     * translucent epoxy-resin layer underneath the collage.
      *
      * Expected image location:
      * public/img/hero/
@@ -137,55 +140,309 @@
             position: absolute;
             inset: 0;
             isolation: isolate;
+            overflow: hidden;
             background:
                 radial-gradient(
                     circle at 17% 14%,
-                    rgba(255, 250, 242, 0.78),
+                    rgba(255, 250, 242, 0.74),
                     transparent 26%
                 ),
                 radial-gradient(
                     circle at 82% 19%,
-                    rgba(183, 139, 69, 0.14),
+                    rgba(183, 139, 69, 0.18),
                     transparent 23%
                 ),
                 linear-gradient(
                     145deg,
-                    #e4d9cc 0%,
-                    #d8cbbd 53%,
-                    #d1c1b2 100%
+                    #e3d5c7 0%,
+                    #d6c5b7 52%,
+                    #ccb8a8 100%
                 );
         }
 
-        .atelier-puzzle-stage::before {
+        /*
+         * Main epoxy-resin layer.
+         * It stays underneath all puzzle images and remains visible in the gaps.
+         */
+        .atelier-resin-layer {
+            position: absolute;
+            inset: -8%;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0.98;
+            transform: translateZ(0);
+            background:
+                radial-gradient(
+                    ellipse at 7% 12%,
+                    rgba(255, 255, 255, 0.92) 0%,
+                    rgba(255, 246, 229, 0.52) 10%,
+                    transparent 26%
+                ),
+                radial-gradient(
+                    ellipse at 34% 8%,
+                    rgba(246, 190, 175, 0.48) 0%,
+                    rgba(224, 146, 133, 0.22) 17%,
+                    transparent 35%
+                ),
+                radial-gradient(
+                    ellipse at 63% 16%,
+                    rgba(255, 234, 187, 0.64) 0%,
+                    rgba(197, 142, 73, 0.25) 20%,
+                    transparent 40%
+                ),
+                radial-gradient(
+                    ellipse at 89% 35%,
+                    rgba(249, 205, 194, 0.56) 0%,
+                    rgba(212, 143, 132, 0.23) 19%,
+                    transparent 41%
+                ),
+                radial-gradient(
+                    ellipse at 22% 55%,
+                    rgba(255, 236, 204, 0.7) 0%,
+                    rgba(188, 134, 67, 0.24) 17%,
+                    transparent 39%
+                ),
+                radial-gradient(
+                    ellipse at 55% 52%,
+                    rgba(255, 255, 255, 0.82) 0%,
+                    rgba(242, 211, 179, 0.38) 12%,
+                    transparent 31%
+                ),
+                radial-gradient(
+                    ellipse at 83% 75%,
+                    rgba(213, 154, 142, 0.45) 0%,
+                    rgba(180, 118, 109, 0.18) 18%,
+                    transparent 39%
+                ),
+                radial-gradient(
+                    ellipse at 35% 91%,
+                    rgba(254, 225, 173, 0.58) 0%,
+                    rgba(190, 135, 63, 0.22) 20%,
+                    transparent 44%
+                ),
+                linear-gradient(
+                    128deg,
+                    rgba(255, 248, 235, 0.88) 0%,
+                    rgba(222, 187, 149, 0.74) 24%,
+                    rgba(239, 193, 181, 0.75) 48%,
+                    rgba(201, 154, 103, 0.72) 72%,
+                    rgba(250, 231, 205, 0.86) 100%
+                );
+            background-size:
+                42% 42%,
+                46% 40%,
+                52% 42%,
+                48% 45%,
+                50% 46%,
+                46% 42%,
+                48% 46%,
+                54% 45%,
+                100% 100%;
+            background-repeat: no-repeat;
+            filter: saturate(1.08) contrast(1.02);
+        }
+
+        /*
+         * Fluid pearlescent streaks inside the resin.
+         */
+        .atelier-resin-layer::before {
+            position: absolute;
+            inset: -20%;
+            content: "";
+            opacity: 0.76;
+            background:
+                repeating-radial-gradient(
+                    ellipse at 35% 45%,
+                    rgba(255, 255, 255, 0.46) 0,
+                    rgba(255, 255, 255, 0.18) 1.5%,
+                    transparent 3.5%,
+                    transparent 8%
+                ),
+                repeating-linear-gradient(
+                    118deg,
+                    transparent 0,
+                    transparent 8%,
+                    rgba(255, 255, 255, 0.22) 9%,
+                    rgba(255, 255, 255, 0.04) 11%,
+                    transparent 15%,
+                    transparent 26%
+                );
+            background-size:
+                130% 120%,
+                180% 180%;
+            filter: blur(9px);
+            transform: rotate(-8deg) scale(1.1);
+            mix-blend-mode: screen;
+            animation: atelier-resin-flow 18s ease-in-out infinite alternate;
+        }
+
+        /*
+         * Gold particles and small air bubbles.
+         */
+        .atelier-resin-layer::after {
             position: absolute;
             inset: 0;
-            z-index: 0;
-            pointer-events: none;
             content: "";
-            opacity: 0.22;
+            opacity: 0.72;
+            background-image:
+                radial-gradient(
+                    circle at 4% 18%,
+                    rgba(255, 255, 255, 0.85) 0 1px,
+                    transparent 2px
+                ),
+                radial-gradient(
+                    circle at 14% 47%,
+                    rgba(255, 236, 190, 0.9) 0 1.2px,
+                    transparent 2.4px
+                ),
+                radial-gradient(
+                    circle at 25% 72%,
+                    rgba(177, 121, 49, 0.74) 0 1px,
+                    transparent 2.3px
+                ),
+                radial-gradient(
+                    circle at 37% 22%,
+                    rgba(255, 255, 255, 0.82) 0 1.3px,
+                    transparent 2.6px
+                ),
+                radial-gradient(
+                    circle at 48% 61%,
+                    rgba(193, 139, 72, 0.85) 0 1.1px,
+                    transparent 2.2px
+                ),
+                radial-gradient(
+                    circle at 58% 35%,
+                    rgba(255, 240, 206, 0.92) 0 1px,
+                    transparent 2.2px
+                ),
+                radial-gradient(
+                    circle at 69% 83%,
+                    rgba(255, 255, 255, 0.82) 0 1.2px,
+                    transparent 2.5px
+                ),
+                radial-gradient(
+                    circle at 78% 13%,
+                    rgba(183, 127, 60, 0.8) 0 1px,
+                    transparent 2.3px
+                ),
+                radial-gradient(
+                    circle at 89% 54%,
+                    rgba(255, 233, 183, 0.92) 0 1.2px,
+                    transparent 2.5px
+                ),
+                radial-gradient(
+                    circle at 96% 89%,
+                    rgba(255, 255, 255, 0.84) 0 1px,
+                    transparent 2.3px
+                );
+            background-size:
+                73px 79px,
+                101px 107px,
+                89px 97px,
+                127px 121px,
+                83px 91px,
+                109px 103px,
+                97px 113px,
+                131px 127px,
+                79px 89px,
+                119px 109px;
+            mix-blend-mode: screen;
+        }
+
+        /*
+         * Glass-like highlight over the resin surface.
+         */
+        .atelier-resin-gloss {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            pointer-events: none;
+            opacity: 0.82;
+            background:
+                linear-gradient(
+                    112deg,
+                    transparent 0%,
+                    rgba(255, 255, 255, 0.04) 19%,
+                    rgba(255, 255, 255, 0.5) 22%,
+                    rgba(255, 255, 255, 0.09) 26%,
+                    transparent 34%
+                ),
+                linear-gradient(
+                    155deg,
+                    transparent 0%,
+                    transparent 52%,
+                    rgba(255, 250, 239, 0.28) 56%,
+                    transparent 62%
+                ),
+                radial-gradient(
+                    ellipse at 48% -8%,
+                    rgba(255, 255, 255, 0.62),
+                    transparent 45%
+                );
+            mix-blend-mode: screen;
+        }
+
+        /*
+         * Subtle shadow channels that give the impression
+         * that puzzle pieces are embedded in wet resin.
+         */
+        .atelier-resin-depth {
+            position: absolute;
+            inset: 0;
+            z-index: 4;
+            pointer-events: none;
+            background:
+                radial-gradient(
+                    ellipse at center,
+                    transparent 40%,
+                    rgba(77, 48, 31, 0.1) 100%
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(66, 42, 27, 0.08),
+                    transparent 9%,
+                    transparent 91%,
+                    rgba(66, 42, 27, 0.08)
+                );
+            mix-blend-mode: multiply;
+        }
+
+        .atelier-puzzle-stage > .atelier-stage-texture {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            pointer-events: none;
+            opacity: 0.18;
             background-image:
                 repeating-linear-gradient(
                     25deg,
-                    rgba(255, 255, 255, 0.1) 0,
-                    rgba(255, 255, 255, 0.1) 1px,
+                    rgba(255, 255, 255, 0.12) 0,
+                    rgba(255, 255, 255, 0.12) 1px,
                     transparent 1px,
-                    transparent 8px
+                    transparent 9px
                 );
         }
 
-        .atelier-puzzle-stage::after {
+        .atelier-puzzle-stage > .atelier-stage-vignette {
             position: absolute;
             inset: 0;
             z-index: 30;
             pointer-events: none;
-            content: "";
             background:
                 linear-gradient(
                     90deg,
-                    rgba(68, 48, 34, 0.08),
+                    rgba(68, 48, 34, 0.09),
                     transparent 12%,
                     transparent 88%,
-                    rgba(68, 48, 34, 0.06)
+                    rgba(68, 48, 34, 0.07)
+                ),
+                linear-gradient(
+                    180deg,
+                    rgba(255, 255, 255, 0.12),
+                    transparent 15%,
+                    transparent 86%,
+                    rgba(72, 47, 31, 0.08)
                 );
             mix-blend-mode: multiply;
         }
@@ -202,8 +459,9 @@
             transform: rotate(var(--r));
             transform-origin: center;
             filter:
-                drop-shadow(0 4px 2px rgba(255, 255, 255, 0.42))
-                drop-shadow(0 12px 14px rgba(69, 45, 27, 0.17));
+                drop-shadow(0 1px 1px rgba(255, 255, 255, 0.82))
+                drop-shadow(0 5px 4px rgba(76, 49, 30, 0.28))
+                drop-shadow(0 14px 17px rgba(69, 45, 27, 0.2));
             transition:
                 transform 350ms cubic-bezier(0.2, 0.7, 0.2, 1),
                 filter 350ms ease;
@@ -214,8 +472,9 @@
             z-index: 25;
             transform: translateY(-5px) rotate(0deg) scale(1.018);
             filter:
-                drop-shadow(0 4px 2px rgba(255, 255, 255, 0.52))
-                drop-shadow(0 20px 22px rgba(69, 45, 27, 0.25));
+                drop-shadow(0 2px 1px rgba(255, 255, 255, 0.9))
+                drop-shadow(0 7px 6px rgba(76, 49, 30, 0.3))
+                drop-shadow(0 22px 25px rgba(69, 45, 27, 0.3));
         }
 
         .atelier-puzzle-piece:focus-visible {
@@ -232,25 +491,63 @@
             overflow: visible;
         }
 
+        /*
+         * Bright outer line simulates the resin gathering
+         * around the border of every embedded puzzle piece.
+         */
+        .atelier-puzzle-piece__resin-rim {
+            fill: none;
+            stroke: rgba(255, 238, 211, 0.85);
+            stroke-width: 5.2;
+            stroke-linejoin: round;
+            opacity: 0.5;
+            filter: blur(1.4px);
+            vector-effect: non-scaling-stroke;
+        }
+
         .atelier-puzzle-piece__edge {
             fill: none;
             stroke: rgba(255, 250, 243, 0.96);
-            stroke-width: 2.4;
+            stroke-width: 2.35;
             stroke-linejoin: round;
             vector-effect: non-scaling-stroke;
         }
 
         .atelier-puzzle-piece__inner-edge {
             fill: none;
-            stroke: rgba(112, 76, 47, 0.22);
-            stroke-width: 0.75;
+            stroke: rgba(91, 57, 35, 0.28);
+            stroke-width: 0.8;
             stroke-linejoin: round;
             vector-effect: non-scaling-stroke;
         }
 
+        .atelier-puzzle-piece__shine {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.45);
+            stroke-width: 1.1;
+            stroke-dasharray: 18 82;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            vector-effect: non-scaling-stroke;
+        }
+
+        @keyframes atelier-resin-flow {
+            0% {
+                transform: translate3d(-2%, -1%, 0) rotate(-8deg) scale(1.1);
+            }
+
+            50% {
+                transform: translate3d(2%, 1%, 0) rotate(-5deg) scale(1.14);
+            }
+
+            100% {
+                transform: translate3d(-1%, 2%, 0) rotate(-10deg) scale(1.12);
+            }
+        }
+
         /*
-         * Mobile/tablet layout:
-         * Absolute coordinates are replaced with a masonry-like grid.
+         * Mobile and tablet:
+         * coordinates are replaced with a masonry-like grid.
          */
         @media (max-width: 1023px) {
             .atelier-puzzle-stage {
@@ -260,10 +557,18 @@
                 grid-template-columns: repeat(2, minmax(0, 1fr));
                 grid-auto-flow: dense;
                 grid-auto-rows: 18px;
-                gap: 8px;
+                gap: 9px;
                 width: 100%;
                 min-height: 0;
                 padding: 14px;
+            }
+
+            .atelier-resin-layer,
+            .atelier-resin-gloss,
+            .atelier-resin-depth,
+            .atelier-stage-texture,
+            .atelier-stage-vignette {
+                position: absolute;
             }
 
             .atelier-puzzle-piece {
@@ -288,7 +593,7 @@
             .atelier-puzzle-stage {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
                 grid-auto-rows: 21px;
-                gap: 10px;
+                gap: 11px;
                 padding: 20px;
             }
 
@@ -302,12 +607,17 @@
                 z-index: 10;
                 transform: rotate(var(--r));
                 filter:
-                    drop-shadow(0 4px 2px rgba(255, 255, 255, 0.42))
-                    drop-shadow(0 12px 14px rgba(69, 45, 27, 0.17));
+                    drop-shadow(0 1px 1px rgba(255, 255, 255, 0.82))
+                    drop-shadow(0 5px 4px rgba(76, 49, 30, 0.28))
+                    drop-shadow(0 14px 17px rgba(69, 45, 27, 0.2));
             }
         }
 
         @media (prefers-reduced-motion: reduce) {
+            .atelier-resin-layer::before {
+                animation: none;
+            }
+
             .atelier-puzzle-piece {
                 transition: none;
             }
@@ -491,9 +801,30 @@
             {{-- Puzzle collage --}}
             <div
                 id="atelier"
-                class="relative overflow-hidden bg-[#ddd1c3] scroll-mt-24 lg:min-h-0"
+                class="relative overflow-hidden bg-[#d7c7b8] scroll-mt-24 lg:min-h-0"
             >
                 <div class="atelier-puzzle-stage">
+                    {{-- Resin visible between the puzzle pieces --}}
+                    <div
+                        class="atelier-resin-layer"
+                        aria-hidden="true"
+                    ></div>
+
+                    <div
+                        class="atelier-resin-gloss"
+                        aria-hidden="true"
+                    ></div>
+
+                    <div
+                        class="atelier-resin-depth"
+                        aria-hidden="true"
+                    ></div>
+
+                    <div
+                        class="atelier-stage-texture"
+                        aria-hidden="true"
+                    ></div>
+
                     @foreach ($pieces as $piece)
                         @php
                             $clipId = $componentId . '-' . $piece['key'];
@@ -520,7 +851,38 @@
                                     >
                                         <path d="{{ $puzzlePaths[$piece['shape']] }}"></path>
                                     </clipPath>
+
+                                    <linearGradient
+                                        id="{{ $clipId }}-shine"
+                                        x1="0"
+                                        y1="0"
+                                        x2="1"
+                                        y2="1"
+                                    >
+                                        <stop
+                                            offset="0%"
+                                            stop-color="#ffffff"
+                                            stop-opacity="0.42"
+                                        />
+
+                                        <stop
+                                            offset="38%"
+                                            stop-color="#ffffff"
+                                            stop-opacity="0"
+                                        />
+
+                                        <stop
+                                            offset="100%"
+                                            stop-color="#ffffff"
+                                            stop-opacity="0.12"
+                                        />
+                                    </linearGradient>
                                 </defs>
+
+                                <path
+                                    class="atelier-puzzle-piece__resin-rim"
+                                    d="{{ $puzzlePaths[$piece['shape']] }}"
+                                ></path>
 
                                 <image
                                     href="{{ asset('img/hero/' . $piece['file']) }}"
@@ -533,6 +895,13 @@
                                 ></image>
 
                                 <path
+                                    d="{{ $puzzlePaths[$piece['shape']] }}"
+                                    fill="url(#{{ $clipId }}-shine)"
+                                    clip-path="url(#{{ $clipId }})"
+                                    opacity="0.34"
+                                ></path>
+
+                                <path
                                     class="atelier-puzzle-piece__edge"
                                     d="{{ $puzzlePaths[$piece['shape']] }}"
                                 ></path>
@@ -541,9 +910,19 @@
                                     class="atelier-puzzle-piece__inner-edge"
                                     d="{{ $puzzlePaths[$piece['shape']] }}"
                                 ></path>
+
+                                <path
+                                    class="atelier-puzzle-piece__shine"
+                                    d="{{ $puzzlePaths[$piece['shape']] }}"
+                                ></path>
                             </svg>
                         </figure>
                     @endforeach
+
+                    <div
+                        class="atelier-stage-vignette"
+                        aria-hidden="true"
+                    ></div>
 
                     <div
                         class="absolute bottom-[4.5%] right-[3.5%] z-40 hidden h-24 w-24 items-center justify-center rounded-full border border-[#b68b45]/55 bg-[#f7f0e5]/95 text-center shadow-xl backdrop-blur xl:flex"
