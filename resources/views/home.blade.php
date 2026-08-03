@@ -1,39 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <!-- EROU (HERO) SECTION -->
-    <section class="relative min-h-[90vh] flex flex-col justify-center overflow-hidden bg-dark-brown border-b border-vintage-gold/30">
-        <div class="absolute inset-0 z-0">
-            <img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&q=80&w=2070"
-                 class="w-full h-full object-cover opacity-40 mix-blend-luminosity scale-105 transform origin-center" alt="Artă din rășină">
-            <div class="absolute inset-0 bg-gradient-to-t from-dark-brown via-transparent to-dark-brown/60"></div>
-        </div>
-        
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-20">
-            <div class="max-w-3xl">
-                <span class="block text-vintage-gold tracking-[0.3em] text-xs font-semibold uppercase mb-6 drop-shadow-sm">Studio de Artă și Design</span>
-                <h1 class="font-serif text-6xl md:text-8xl text-white leading-[1.1] mb-8 drop-shadow-lg">
-                    Eleganță<br>
-                    <span class="italic text-white/90">în Rășină</span>
-                </h1>
-                <p class="text-white/80 text-lg md:text-xl font-light tracking-wide mb-12 max-w-xl leading-relaxed">
-                    Descoperă obiecte de cult și piese de mobilier unicat, create manual pentru a dăinui o viață. O fuziune între tradiție și minimalism modern.
-                </p>
-                <div class="flex flex-col sm:flex-row gap-6">
-                    <a href="{{ route('shop.index') }}"
-                       class="group relative inline-flex items-center justify-center px-10 py-4 bg-vintage-gold text-white font-medium uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-dark-brown transition duration-500 overflow-hidden shadow-lg shadow-vintage-gold/20">
-                        <span class="relative z-10">Explorați Galeria</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Scroll indicator -->
-        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce text-white/50">
-            <span class="text-[10px] uppercase tracking-[0.3em]">Descoperă</span>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-        </div>
-    </section>
+    <x-atelier-hero />
 
     <!-- COLECȚII PRINCIPALE -->
     <section class="max-w-7xl mx-auto py-32 px-4 sm:px-6 lg:px-8 bg-ivory">
@@ -84,7 +52,6 @@
                     @foreach($latestProducts as $product)
                         <div class="group bg-ivory shadow-sm border border-black/5 hover:shadow-md transition-all duration-300">
                             <a href="{{ route('shop.show', $product->slug) }}" class="block">
-                                <!-- Modificat object-cover in object-contain -->
                                 <div class="aspect-[3/4] overflow-hidden bg-white relative p-4 flex items-center justify-center">
                                     <img src="{{ $product->image ? asset('storage/' . $product->image) : 'https://via.placeholder.com/500' }}" 
                                          class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 ease-out">
