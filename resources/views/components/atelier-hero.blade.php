@@ -68,63 +68,73 @@
                 </div>
             </div>
 
-            <div class="relative min-h-[640px] overflow-hidden bg-[#dfd4c7] lg:min-h-0">
-                <div class="absolute inset-0 grid grid-cols-[43%_57%]">
-                    <figure class="relative overflow-hidden border-l border-white/45 bg-[#ded3c5]">
-                        <img src="{{ asset('img/hero/atelier-shelf.webp') }}"
-                             alt="Raftul atelierului MTD Art cu pigmenți și materiale pentru rășină"
-                             width="1200" height="1600"
-                             fetchpriority="high" decoding="async"
-                             class="h-full w-full object-cover object-center">
-                        <div class="absolute inset-0 bg-gradient-to-r from-[#f4eee4]/10 via-transparent to-black/5"></div>
+            <div class="relative min-h-[680px] overflow-hidden bg-[#ddd1c3] lg:min-h-0">
+                <div class="hero-puzzle-stage absolute inset-0">
+                    <figure class="hero-puzzle-piece hero-puzzle-piece--shelf absolute left-[0%] top-[1.5%] h-[97%] w-[41%]">
+                        <div class="hero-puzzle-piece__media">
+                            <img src="{{ asset('img/hero/atelier-shelf.webp') }}"
+                                 alt="Raftul atelierului MTD Art cu pigmenți și materiale pentru rășină"
+                                 width="1200" height="1600"
+                                 fetchpriority="high" decoding="async"
+                                 class="h-full w-full object-cover object-center">
+                        </div>
                     </figure>
 
-                    <div class="relative overflow-hidden bg-[#d9cec1]">
-                        <img src="{{ asset('img/hero/atelier-tools.webp') }}"
-                             alt="Unelte, recipiente și accesorii folosite la turnarea rășinii"
-                             width="1200" height="900"
-                             loading="eager" decoding="async"
-                             class="absolute inset-0 h-full w-full object-cover object-center">
-                        <div class="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-[#36271e]/10"></div>
+                    <figure class="hero-puzzle-piece hero-puzzle-piece--tools absolute right-[3.5%] top-[3.5%] h-[93%] w-[53%]">
+                        <div class="hero-puzzle-piece__media">
+                            <img src="{{ asset('img/hero/atelier-tools.webp') }}"
+                                 alt="Unelte, recipiente și accesorii folosite la turnarea rășinii"
+                                 width="1200" height="900"
+                                 loading="eager" decoding="async"
+                                 class="h-full w-full object-cover object-center">
+                        </div>
+                    </figure>
 
-                        <figure class="absolute left-[5%] top-[4%] z-20 w-[58%] overflow-hidden rounded-[1.45rem] border-[5px] border-white/90 bg-white shadow-2xl">
+                    <figure class="hero-puzzle-piece hero-puzzle-piece--prayer absolute left-[47%] top-[6%] z-20 w-[26%]">
+                        <div class="hero-puzzle-piece__media aspect-[4/5]">
                             <img src="{{ asset('img/hero/atelier-prayer-mold.webp') }}"
                                  alt="Matriță albastră cu motivul mâinilor împreunate"
                                  width="900" height="1200"
                                  loading="eager" decoding="async"
-                                 class="aspect-[4/3] w-full object-cover object-[50%_48%]">
-                        </figure>
+                                 class="h-full w-full object-cover object-[50%_48%]">
+                        </div>
+                    </figure>
 
-                        <figure class="absolute bottom-[3%] left-[-1%] z-10 w-[62%] overflow-hidden rounded-[1.45rem] border-[5px] border-white/90 bg-white shadow-2xl">
+                    <figure class="hero-puzzle-piece hero-puzzle-piece--red-cross absolute bottom-[5%] left-[42%] z-20 w-[31%]">
+                        <div class="hero-puzzle-piece__media aspect-[4/5]">
                             <img src="{{ asset('img/hero/atelier-red-cross.webp') }}"
                                  alt="Cruce roșie din rășină aflată în procesul de turnare"
                                  width="900" height="1200"
                                  loading="eager" decoding="async"
-                                 class="aspect-[4/3] w-full object-cover object-[50%_54%]">
-                        </figure>
+                                 class="h-full w-full object-cover object-[50%_54%]">
+                        </div>
+                    </figure>
 
-                        <figure class="absolute right-[4%] top-[38%] z-30 w-[34%] overflow-hidden rounded-[1.2rem] border-4 border-white/90 bg-white shadow-xl">
+                    <figure class="hero-puzzle-piece hero-puzzle-piece--cured absolute right-[7%] top-[37%] z-30 w-[22%]">
+                        <div class="hero-puzzle-piece__media aspect-[4/5]">
                             <img src="{{ asset('img/hero/atelier-cured-crosses.webp') }}"
                                  alt="Piese în formă de cruce scoase din matrițe și pregătite pentru finisare"
                                  width="900" height="1200"
                                  loading="lazy" decoding="async"
-                                 class="aspect-[4/5] w-full object-cover object-center">
-                        </figure>
+                                 class="h-full w-full object-cover object-center">
+                        </div>
+                    </figure>
 
-                        <figure class="absolute bottom-[-7%] right-[-3%] z-20 w-[31%] overflow-hidden rounded-tl-[1.2rem] border-[5px] border-white/90 bg-white shadow-2xl">
+                    <figure class="hero-puzzle-piece hero-puzzle-piece--white-cross absolute bottom-[-1%] right-[1.5%] z-20 w-[19%]">
+                        <div class="hero-puzzle-piece__media aspect-[3/4]">
                             <img src="{{ asset('img/hero/atelier-white-cross-mold.webp') }}"
                                  alt="Matriță albă în formă de cruce și instrumente de atelier"
                                  width="900" height="1200"
                                  loading="lazy" decoding="async"
-                                 class="aspect-[3/4] w-full object-cover object-[52%_82%]">
-                        </figure>
+                                 class="h-full w-full object-cover object-[52%_82%]">
+                        </div>
+                    </figure>
 
-                        <div class="absolute bottom-[5%] left-[4%] z-40 hidden h-24 w-24 items-center justify-center rounded-full border border-[#b68b45]/50 bg-[#f7f0e5]/95 text-center shadow-xl backdrop-blur xl:flex">
-                            <div>
-                                <p class="text-[8px] font-semibold uppercase tracking-[0.16em] text-[#a37639]">Din atelierul</p>
-                                <p class="mt-1 font-serif text-base tracking-[0.1em] text-dark-brown">MTD ART</p>
-                                <span class="mt-0.5 block text-[#bf8179]" aria-hidden="true">♡</span>
-                            </div>
+                    <div class="absolute bottom-[9%] left-[40%] z-40 hidden h-24 w-24 items-center justify-center rounded-full border border-[#b68b45]/55 bg-[#f7f0e5]/95 text-center shadow-xl backdrop-blur xl:flex">
+                        <div>
+                            <p class="text-[8px] font-semibold uppercase tracking-[0.16em] text-[#a37639]">Din atelierul</p>
+                            <p class="mt-1 font-serif text-base tracking-[0.1em] text-dark-brown">MTD ART</p>
+                            <span class="mt-0.5 block text-[#bf8179]" aria-hidden="true">♡</span>
                         </div>
                     </div>
                 </div>
@@ -148,3 +158,150 @@
         </div>
     </div>
 </section>
+
+<style>
+    .hero-puzzle-stage {
+        background:
+            radial-gradient(circle at 16% 14%, rgba(244, 238, 228, 0.65), transparent 23%),
+            radial-gradient(circle at 82% 22%, rgba(215, 179, 111, 0.18), transparent 20%),
+            linear-gradient(180deg, #ddd1c3 0%, #d7cbbe 100%);
+    }
+
+    .hero-puzzle-piece {
+        --piece-bg: #ddd1c3;
+        position: absolute;
+        padding: 10px;
+        border-radius: 2rem;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 24px 40px rgba(76, 49, 28, 0.12);
+        overflow: visible;
+    }
+
+    .hero-puzzle-piece__media {
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        border-radius: 1.5rem;
+        background: #f8f2e8;
+    }
+
+    .hero-puzzle-piece::before,
+    .hero-puzzle-piece::after {
+        content: '';
+        position: absolute;
+        border-radius: 999px;
+    }
+
+    .hero-puzzle-piece::before {
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 14px 28px rgba(76, 49, 28, 0.09);
+        z-index: -1;
+    }
+
+    .hero-puzzle-piece::after {
+        background: var(--piece-bg);
+        box-shadow: inset 0 0 0 8px rgba(255, 255, 255, 0.08);
+        z-index: 3;
+    }
+
+    .hero-puzzle-piece--shelf::before {
+        top: 29%;
+        right: -16px;
+        height: 54px;
+        width: 54px;
+    }
+
+    .hero-puzzle-piece--shelf::after {
+        bottom: 12%;
+        left: -16px;
+        height: 54px;
+        width: 54px;
+    }
+
+    .hero-puzzle-piece--tools::before {
+        top: 18%;
+        left: -16px;
+        height: 48px;
+        width: 48px;
+    }
+
+    .hero-puzzle-piece--tools::after {
+        bottom: 16%;
+        right: -16px;
+        height: 52px;
+        width: 52px;
+    }
+
+    .hero-puzzle-piece--prayer::before {
+        top: calc(50% - 20px);
+        left: -14px;
+        height: 40px;
+        width: 40px;
+    }
+
+    .hero-puzzle-piece--prayer::after {
+        bottom: -14px;
+        left: calc(50% - 22px);
+        height: 44px;
+        width: 44px;
+    }
+
+    .hero-puzzle-piece--red-cross::before {
+        top: -15px;
+        left: calc(50% - 24px);
+        height: 48px;
+        width: 48px;
+    }
+
+    .hero-puzzle-piece--red-cross::after {
+        right: -14px;
+        top: calc(50% - 22px);
+        height: 44px;
+        width: 44px;
+    }
+
+    .hero-puzzle-piece--cured::before {
+        top: calc(50% - 18px);
+        right: -12px;
+        height: 36px;
+        width: 36px;
+    }
+
+    .hero-puzzle-piece--cured::after {
+        top: -12px;
+        left: calc(50% - 18px);
+        height: 36px;
+        width: 36px;
+    }
+
+    .hero-puzzle-piece--white-cross::before {
+        left: -14px;
+        top: calc(50% - 21px);
+        height: 42px;
+        width: 42px;
+    }
+
+    .hero-puzzle-piece--white-cross::after {
+        top: -13px;
+        left: calc(50% - 20px);
+        height: 40px;
+        width: 40px;
+    }
+
+    @media (max-width: 1023px) {
+        .hero-puzzle-piece {
+            padding: 8px;
+            border-radius: 1.5rem;
+        }
+
+        .hero-puzzle-piece__media {
+            border-radius: 1.1rem;
+        }
+
+        .hero-puzzle-piece::before,
+        .hero-puzzle-piece::after {
+            transform: scale(0.85);
+            transform-origin: center;
+        }
+    }
+</style>
