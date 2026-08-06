@@ -21,10 +21,11 @@ class CheckoutController extends Controller
 
         if (empty($cart)) {
             return redirect()->route('cart.index')
-                ->with('error', 'Colecția dumneavoastră este goală.');
+                ->with('error', 'Coșul dumneavoastră este gol.');
         }
 
         $order = $this->reusableOrder($request, $cart);
+        $paymentIntent = null;
 
         try {
             $stripe = new StripeClient((string) config('services.stripe.secret'));
@@ -37,6 +38,7 @@ class CheckoutController extends Controller
 
                     return redirect()->route('checkout.success', [
                         'payment_intent' => $paymentIntent->id,
+                        'order' => $order->public_token,
                     ]);
                 }
 
@@ -53,6 +55,7 @@ class CheckoutController extends Controller
                 if ($completedOrder) {
                     return redirect()->route('checkout.success', [
                         'payment_intent' => $completedOrder->stripe_transaction_id,
+                        'order' => $completedOrder->public_token,
                     ]);
                 }
 
@@ -61,7 +64,11 @@ class CheckoutController extends Controller
                 $paymentIntent = $stripe->paymentIntents->create([
                     'amount' => (int) round((float) $order->total_amount * 100),
                     'currency' => 'ron',
-                    'automatic_payment_methods' => ['enabled' => true],
+                    'automatic_payment_methods' => [
+                        'enabled' => true,
+                        'allow_redirects' => 'never',
+                    ],
+                    'description' => 'Comanda '.$order->order_number.' - '.config('shop.brand_name'),
                     'metadata' => [
                         'order_id' => (string) $order->id,
                         'order_number' => $order->order_number,
@@ -79,6 +86,7 @@ class CheckoutController extends Controller
                 'stripeKey' => (string) config('services.stripe.key'),
                 'orderToken' => $order->public_token,
                 'totalAmount' => (float) $order->total_amount,
+                'order' => $order->loadMissing('items.product'),
             ]);
         } catch (\Throwable $exception) {
             if ($order && ! $order->stripe_transaction_id) {
@@ -103,6 +111,8 @@ class CheckoutController extends Controller
             'accept_terms' => ['accepted'],
             'acknowledge_privacy' => ['accepted'],
         ], [
+            'order_token.required' => 'Sesiunea de plată lipsește. Reîncărcați pagina.',
+            'order_token.uuid' => 'Sesiunea de plată nu este validă. Reîncărcați pagina.',
             'accept_terms.accepted' => 'Trebuie să acceptați Termenii și Condițiile.',
             'acknowledge_privacy.accepted' => 'Trebuie să confirmați că ați citit Politica de Confidențialitate.',
         ]);
@@ -134,14 +144,20 @@ class CheckoutController extends Controller
     public function success(Request $request, OrderPaymentService $payments): View
     {
         $paymentIntentId = $request->string('payment_intent')->toString();
-        $order = $paymentIntentId
-            ? Order::where('stripe_transaction_id', $paymentIntentId)->first()
+        $orderToken = $request->string('order')->toString();
+        $stripeStatus = null;
+        $order = $paymentIntentId && $orderToken
+            ? Order::query()
+                ->where('public_token', $orderToken)
+                ->where('stripe_transaction_id', $paymentIntentId)
+                ->first()
             : null;
 
-        if ($paymentIntentId) {
+        if ($order) {
             try {
                 $stripe = new StripeClient((string) config('services.stripe.secret'));
                 $paymentIntent = $stripe->paymentIntents->retrieve($paymentIntentId);
+                $stripeStatus = $paymentIntent->status;
 
                 if ($paymentIntent->status === 'succeeded') {
                     $order = $payments->completePaymentIntent($paymentIntent) ?? $order;
@@ -154,11 +170,23 @@ class CheckoutController extends Controller
             }
         }
 
-        if ($order?->payment_status === 'paid') {
+        $sessionOrderToken = (string) $request->session()->get('checkout_order_token');
+
+        if ($order?->payment_status === 'paid'
+            && $sessionOrderToken !== ''
+            && hash_equals($sessionOrderToken, $orderToken)) {
             $request->session()->forget(['cart', 'checkout_order_token']);
         }
 
-        return view('checkout.success', compact('order'));
+        $paymentState = match (true) {
+            ! $order => 'invalid',
+            $order->payment_status === 'paid' => 'paid',
+            $order->payment_status === 'failed' => 'failed',
+            in_array($stripeStatus, ['requires_payment_method', 'canceled'], true) => 'failed',
+            default => 'pending',
+        };
+
+        return view('checkout.success', compact('order', 'paymentState'));
     }
 
     public function cancel(Request $request): RedirectResponse
@@ -205,7 +233,7 @@ class CheckoutController extends Controller
                 throw new \RuntimeException('Un produs din coș nu mai există.');
             }
 
-            $totalAmount = 0.0;
+            $subtotalCents = 0;
             $validatedItems = [];
 
             foreach ($cart as $productId => $cartItem) {
@@ -217,14 +245,22 @@ class CheckoutController extends Controller
                     throw new \RuntimeException('Produsul „'.($product?->name ?? '#'.$productId).'” nu mai este disponibil în cantitatea cerută.');
                 }
 
-                $unitPrice = (float) $product->price;
-                $totalAmount += $unitPrice * $quantity;
+                $unitPriceCents = (int) round((float) $product->price * 100);
+                $unitPrice = $unitPriceCents / 100;
+                $subtotalCents += $unitPriceCents * $quantity;
                 $validatedItems[] = compact('product', 'quantity', 'unitPrice');
             }
 
+            $shippingCents = (int) round(max(0, (float) config('shop.shipping_cost', 0)) * 100);
+            $discountCents = 0;
+            $totalCents = $subtotalCents + $shippingCents - $discountCents;
+
             $order = Order::create([
                 'order_number' => 'MTD-'.now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(4))),
-                'total_amount' => round($totalAmount, 2),
+                'subtotal_amount' => $subtotalCents / 100,
+                'shipping_amount' => $shippingCents / 100,
+                'discount_amount' => $discountCents / 100,
+                'total_amount' => $totalCents / 100,
                 'payment_status' => 'pending',
                 'shipping_status' => 'processing',
                 'customer_details' => [],

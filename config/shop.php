@@ -14,7 +14,11 @@ return [
         'bank' => env('SHOP_LEGAL_BANK'),
     ],
 
-    'terms_version' => env('SHOP_TERMS_VERSION', '2026-08-05'),
+    'terms_version' => env('SHOP_TERMS_VERSION', '2026-08-06'),
 
     'checkout_reservation_minutes' => (int) env('SHOP_CHECKOUT_RESERVATION_MINUTES', 31),
+
+    // The amount charged once per order, in RON. Keep this aligned with the
+    // delivery promise shown in the cart, checkout and legal pages.
+    'shipping_cost' => max(0, (float) env('SHOP_SHIPPING_COST', 0)),
 ];

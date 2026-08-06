@@ -186,12 +186,13 @@
                         <form action="{{ route('cart.add') }}" method="POST" class="space-y-4 add-to-cart-ajax-form mb-6">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
-                            <div class="flex gap-4">
-                                <button type="submit" name="redirect_to_checkout" value="0" class="flex-1 bg-white border border-black/10 text-dark-brown px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold hover:border-vintage-gold hover:text-vintage-gold transition-colors duration-300 shadow-sm">
-                                    Adaugă în Colecție
+                            <input type="hidden" name="request_token" value="{{ (string) \Illuminate\Support\Str::uuid() }}">
+                            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                                <button type="submit" name="redirect_to_checkout" value="0" class="flex-1 bg-white border border-black/10 text-dark-brown px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold hover:border-vintage-gold hover:text-vintage-gold transition-colors duration-300 shadow-sm disabled:opacity-60">
+                                    Adaugă în coș
                                 </button>
-                                <button type="submit" name="redirect_to_checkout" value="1" class="flex-1 bg-vintage-gold border border-vintage-gold text-white px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold hover:bg-dark-brown hover:border-dark-brown transition-colors duration-300 shadow-sm">
-                                    Cumpără Acum
+                                <button type="submit" name="redirect_to_checkout" value="1" class="flex-1 bg-vintage-gold border border-vintage-gold text-white px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold hover:bg-dark-brown hover:border-dark-brown transition-colors duration-300 shadow-sm disabled:opacity-60">
+                                    Cumpără acum
                                 </button>
                             </div>
                         </form>

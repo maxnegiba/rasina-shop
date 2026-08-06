@@ -137,6 +137,13 @@ class OrderPaymentService
         $email = filter_var($customerDetails['email'] ?? null, FILTER_VALIDATE_EMAIL) ?: null;
         $mailClaimedAt = null;
 
+        if (! $order->terms_accepted_at || ! $order->privacy_acknowledged_at) {
+            Log::critical('A succeeded Stripe payment has no recorded legal acceptance.', [
+                'order_id' => $order->id,
+                'payment_intent_id' => $transactionId,
+            ]);
+        }
+
         DB::transaction(function () use (
             $order,
             $transactionId,
@@ -147,6 +154,12 @@ class OrderPaymentService
         ): void {
             /** @var Order $lockedOrder */
             $lockedOrder = Order::query()->lockForUpdate()->findOrFail($order->id);
+
+            if ($lockedOrder->stripe_transaction_id
+                && ! $checkoutSessionId
+                && ! hash_equals((string) $lockedOrder->stripe_transaction_id, $transactionId)) {
+                throw new RuntimeException('PaymentIntent does not belong to this order.');
+            }
 
             $updates = [
                 'payment_status' => 'paid',
@@ -174,7 +187,7 @@ class OrderPaymentService
 
         if ($mailClaimedAt && $email) {
             try {
-                Mail::to($email)->send(new OrderConfirmationMail($order));
+                Mail::to($email)->queue(new OrderConfirmationMail($order));
             } catch (\Throwable $exception) {
                 Order::query()
                     ->whereKey($order->id)
@@ -195,16 +208,36 @@ class OrderPaymentService
     {
         $paymentIntentId = $paymentIntent->id ?? null;
         $orderId = $paymentIntent->metadata->order_id ?? null;
+        $orderNumber = $paymentIntent->metadata->order_number ?? null;
 
         if (! $paymentIntentId && ! $orderId) {
             return null;
         }
 
-        return Order::query()
-            ->when($paymentIntentId, fn ($query) => $query->where('stripe_transaction_id', $paymentIntentId))
-            ->when($paymentIntentId && $orderId, fn ($query) => $query->orWhere('id', $orderId))
-            ->when(! $paymentIntentId && $orderId, fn ($query) => $query->where('id', $orderId))
-            ->first();
+        $order = $paymentIntentId
+            ? Order::query()->where('stripe_transaction_id', $paymentIntentId)->first()
+            : null;
+
+        if (! $order && $orderId) {
+            $order = Order::query()
+                ->whereKey($orderId)
+                ->whereNull('stripe_transaction_id')
+                ->first();
+        }
+
+        if (! $order) {
+            return null;
+        }
+
+        if ($orderId && (int) $orderId !== (int) $order->id) {
+            return null;
+        }
+
+        if ($orderNumber && ! hash_equals((string) $order->order_number, (string) $orderNumber)) {
+            return null;
+        }
+
+        return $order;
     }
 
     private function findOrderForCheckoutSession(object $checkoutSession): ?Order
@@ -218,11 +251,22 @@ class OrderPaymentService
             return null;
         }
 
-        return Order::query()
-            ->when($sessionId, fn ($query) => $query->where('stripe_checkout_session_id', $sessionId))
-            ->when($sessionId && $orderId, fn ($query) => $query->orWhere('id', $orderId))
-            ->when(! $sessionId && $orderId, fn ($query) => $query->where('id', $orderId))
-            ->first();
+        $order = $sessionId
+            ? Order::query()->where('stripe_checkout_session_id', $sessionId)->first()
+            : null;
+
+        if (! $order && $orderId) {
+            $order = Order::query()
+                ->whereKey($orderId)
+                ->whereNull('stripe_checkout_session_id')
+                ->first();
+        }
+
+        if ($order && $orderId && (int) $orderId !== (int) $order->id) {
+            return null;
+        }
+
+        return $order;
     }
 
     private function paymentIntentCustomerDetails(object $paymentIntent): array

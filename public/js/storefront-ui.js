@@ -86,18 +86,35 @@
         closeDrawer(SELECTORS.mobileOverlay, SELECTORS.mobilePanel);
     }
 
-    function showError(message) {
-        const existing = document.getElementById('storefront-error-toast');
+    function showToast(message, type = 'success') {
+        const existing = document.getElementById('storefront-toast');
         existing?.remove();
 
         const toast = document.createElement('div');
-        toast.id = 'storefront-error-toast';
-        toast.setAttribute('role', 'alert');
-        toast.className = 'fixed bottom-6 left-1/2 z-[100] max-w-[calc(100%-2rem)] -translate-x-1/2 bg-dark-brown px-5 py-4 text-center text-xs text-white shadow-2xl';
-        toast.textContent = message || 'A apărut o eroare. Vă rugăm să încercați din nou.';
+        toast.id = 'storefront-toast';
+        toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+        toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+        toast.className = `fixed bottom-6 left-1/2 z-[100] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 border px-5 py-4 text-center text-xs shadow-2xl ${
+            type === 'error'
+                ? 'border-red-200 bg-red-50 text-red-800'
+                : 'border-emerald-200 bg-emerald-50 text-emerald-800'
+        }`;
+        toast.textContent = message || (type === 'error'
+            ? 'A apărut o eroare. Vă rugăm să încercați din nou.'
+            : 'Modificarea a fost salvată.');
         document.body.appendChild(toast);
 
         window.setTimeout(() => toast.remove(), 5000);
+    }
+
+    function requestFormData(form, submitter = null) {
+        const data = new FormData(form);
+
+        if (submitter?.name && !data.has(submitter.name)) {
+            data.append(submitter.name, submitter.value);
+        }
+
+        return data;
     }
 
     async function parseResponse(response) {
@@ -154,7 +171,7 @@
         try {
             const response = await fetch(form.action, {
                 method: (form.method || 'POST').toUpperCase(),
-                body: new FormData(form),
+                body: requestFormData(form, submitter),
                 credentials: 'same-origin',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
@@ -165,14 +182,21 @@
             const data = await parseResponse(response);
 
             if (!data.success) {
-                throw new Error(data.message || 'Produsul nu a putut fi adăugat în colecție.');
+                throw new Error(data.message || 'Produsul nu a putut fi adăugat în coș.');
             }
 
             updateCartUI(data.cart_count, data.html);
+            showToast(data.message || 'Produsul a fost adăugat în coș.');
+
+            if (data.redirect_url) {
+                window.location.assign(data.redirect_url);
+                return;
+            }
+
             openCart();
         } catch (error) {
             console.error('MTD cart add failed:', error);
-            showError(error instanceof Error ? error.message : String(error));
+            showToast(error instanceof Error ? error.message : String(error), 'error');
         } finally {
             delete form.dataset.cartSubmitting;
             submitter?.removeAttribute('aria-busy');
@@ -190,7 +214,7 @@
         const removeUrl = cartRoot?.dataset.cartRemoveUrl;
 
         if (!productId || !removeUrl) {
-            showError('Produsul nu a putut fi identificat în colecție.');
+            showToast('Produsul nu a putut fi identificat în coș.', 'error');
             return;
         }
 
@@ -220,12 +244,49 @@
             }
 
             updateCartUI(data.cart_count, data.html);
+            showToast(data.message || 'Produsul a fost eliminat din coș.');
         } catch (error) {
             console.error('MTD cart remove failed:', error);
-            showError(error instanceof Error ? error.message : String(error));
+            showToast(error instanceof Error ? error.message : String(error), 'error');
             button.removeAttribute('disabled');
             button.removeAttribute('aria-busy');
             delete button.dataset.cartRemoving;
+        }
+    }
+
+    async function updateCart(form, submitter) {
+        if (form.dataset.cartUpdating === 'true') {
+            return;
+        }
+
+        form.dataset.cartUpdating = 'true';
+        submitter?.setAttribute('aria-busy', 'true');
+        submitter?.setAttribute('disabled', 'disabled');
+
+        try {
+            const response = await fetch(form.action, {
+                method: (form.method || 'POST').toUpperCase(),
+                body: requestFormData(form, submitter),
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    Accept: 'application/json',
+                },
+            });
+            const data = await parseResponse(response);
+
+            updateCartUI(data.cart_count, data.html);
+            showToast(data.message || 'Cantitatea a fost actualizată.');
+
+            if (window.location.pathname.includes('/cos')) {
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error('MTD cart update failed:', error);
+            showToast(error instanceof Error ? error.message : String(error), 'error');
+            submitter?.removeAttribute('disabled');
+            submitter?.removeAttribute('aria-busy');
+            delete form.dataset.cartUpdating;
         }
     }
 
@@ -283,15 +344,22 @@
         }
 
         const submitter = event.submitter instanceof HTMLButtonElement ? event.submitter : null;
-        const redirectToCheckout = submitter?.name === 'redirect_to_checkout' && submitter.value === '1';
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        void addToCart(form, submitter);
+    }, true);
 
-        if (redirectToCheckout) {
+    document.addEventListener('submit', (event) => {
+        const form = event.target;
+
+        if (!(form instanceof HTMLFormElement) || !form.matches('.cart-quantity-form')) {
             return;
         }
 
         event.preventDefault();
         event.stopImmediatePropagation();
-        void addToCart(form, submitter);
+        const submitter = event.submitter instanceof HTMLButtonElement ? event.submitter : null;
+        void updateCart(form, submitter);
     }, true);
 
     document.addEventListener('keydown', (event) => {

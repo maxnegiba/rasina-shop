@@ -13,7 +13,8 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'order_number', 'total_amount', 'payment_status', 
+        'user_id', 'order_number', 'subtotal_amount', 'shipping_amount',
+        'discount_amount', 'total_amount', 'payment_status',
         'shipping_status', 'customer_details', 'stripe_transaction_id',
         'stripe_checkout_session_id', 'proforma_number', 'public_token',
         'stock_reserved_at', 'stock_released_at', 'terms_accepted_at',
@@ -22,6 +23,9 @@ class Order extends Model
 
     protected $casts = [
         'customer_details' => 'array', // Transformă automat JSON-ul din DB în array PHP
+        'subtotal_amount' => 'decimal:2',
+        'shipping_amount' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'stock_reserved_at' => 'datetime',
         'stock_released_at' => 'datetime',
