@@ -21,4 +21,29 @@ class StorefrontRenderingTest extends TestCase
             ->assertDontSee('@php', false)
             ->assertDontSee('{{', false);
     }
+
+    public function test_checkout_view_renders_its_payment_button_label(): void
+    {
+        $this->withoutVite();
+
+        $order = (object) [
+            'items' => collect(),
+            'subtotal_amount' => 123.45,
+            'shipping_amount' => 0,
+            'discount_amount' => 0,
+            'total_amount' => 123.45,
+        ];
+
+        $html = view('checkout.index', [
+            'clientSecret' => 'pi_test_secret_test',
+            'stripeKey' => 'pk_test_example',
+            'orderToken' => '00000000-0000-4000-8000-000000000000',
+            'totalAmount' => 123.45,
+            'order' => $order,
+        ])->render();
+
+        $this->assertStringContainsString('Plătește 123,45 RON', $html);
+        $this->assertStringContainsString('const paymentButtonLabel = ', $html);
+        $this->assertStringNotContainsString('@json(', $html);
+    }
 }
