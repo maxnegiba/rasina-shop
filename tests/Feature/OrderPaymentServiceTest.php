@@ -32,7 +32,7 @@ class OrderPaymentServiceTest extends TestCase
         $this->assertSame('pi_test_123', $order->stripe_transaction_id);
         $this->assertSame('PROFORMA-'.now()->format('Y').'-'.str_pad((string) $order->id, 6, '0', STR_PAD_LEFT), $order->proforma_number);
         $this->assertSame(0, $product->stock);
-        Mail::assertSent(OrderConfirmationMail::class, 1);
+        Mail::assertQueued(OrderConfirmationMail::class, 1);
     }
 
     public function test_canceled_payment_intent_releases_reserved_stock_only_once(): void
@@ -104,7 +104,7 @@ class OrderPaymentServiceTest extends TestCase
 
         $this->assertSame('paid', $order->fresh()->payment_status);
         $this->assertSame('pi_test_legacy', $order->fresh()->stripe_transaction_id);
-        Mail::assertSent(OrderConfirmationMail::class, 1);
+        Mail::assertQueued(OrderConfirmationMail::class, 1);
     }
 
     private function reservedOrder(): array

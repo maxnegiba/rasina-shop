@@ -40,10 +40,9 @@ Route::group(['prefix' => 'jurnal', 'as' => 'blog.'], function () {
 
 // --- Cos de Cumparaturi (Cart) ---
 Route::group(['prefix' => 'cos', 'as' => 'cart.'], function () {
-    Route::get('/', function() {
-        return redirect()->route('home'); // Pagina de cart separata a fost inlocuita de sidebar
-    })->name('index');
+    Route::get('/', [CartController::class, 'index'])->name('index');
     Route::post('/adauga', [CartController::class, 'add'])->name('add');
+    Route::post('/actualizeaza', [CartController::class, 'update'])->name('update');
     Route::post('/sterge', [CartController::class, 'remove'])->name('remove');
 });
 

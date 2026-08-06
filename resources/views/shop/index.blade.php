@@ -55,7 +55,8 @@
                 @if($products->count() > 0)
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
                         @foreach($products as $product)
-                            <a href="{{ route('shop.show', $product->slug) }}" class="group block">
+                            <article class="group flex h-full flex-col">
+                                <a href="{{ route('shop.show', $product->slug) }}" class="block">
                                 <!-- Imagine incadrata elegant pe fundal alb, fara trunchiere -->
                                 <div class="aspect-[3/4] overflow-hidden bg-white relative ring-1 ring-inset ring-black/5 p-4 flex items-center justify-center group-hover:shadow-md transition-all duration-500 mb-6">
                                     
@@ -89,16 +90,39 @@
                                         </div>
                                     @endif
                                 </div>
-                                
+                                </a>
+
                                 <div class="text-left px-1">
-                                    <h2 class="font-serif text-lg text-dark-brown mb-2 leading-snug group-hover:text-vintage-gold transition-colors duration-300 truncate">
-                                        {{ $product->name }}
-                                    </h2>
+                                    <a href="{{ route('shop.show', $product->slug) }}" class="block">
+                                        <h2 class="font-serif text-lg text-dark-brown mb-2 leading-snug group-hover:text-vintage-gold transition-colors duration-300 truncate">
+                                            {{ $product->name }}
+                                        </h2>
+                                    </a>
                                     <p class="text-dark-brown/60 font-sans text-xs tracking-[0.15em] uppercase font-medium">
                                         {{ $product->displayPrice() }}
                                     </p>
                                 </div>
-                            </a>
+
+                                <div class="mt-auto pt-5 px-1">
+                                    @if($product->isPurchasable())
+                                        <form action="{{ route('cart.add') }}" method="POST" class="add-to-cart-ajax-form grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            @csrf
+                                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                            <input type="hidden" name="request_token" value="{{ (string) \Illuminate\Support\Str::uuid() }}">
+                                            <button type="submit" name="redirect_to_checkout" value="0" class="min-h-11 border border-dark-brown px-3 py-3 text-[9px] uppercase tracking-[0.12em] font-semibold text-dark-brown hover:bg-dark-brown hover:text-white transition-colors disabled:opacity-60">
+                                                Adaugă în coș
+                                            </button>
+                                            <button type="submit" name="redirect_to_checkout" value="1" class="min-h-11 bg-vintage-gold border border-vintage-gold px-3 py-3 text-[9px] uppercase tracking-[0.12em] font-semibold text-white hover:bg-dark-brown hover:border-dark-brown transition-colors disabled:opacity-60">
+                                                Cumpără acum
+                                            </button>
+                                        </form>
+                                    @else
+                                        <a href="{{ route('shop.show', $product->slug) }}" class="min-h-11 w-full flex items-center justify-center border border-black/10 bg-black/[0.03] px-3 py-3 text-[9px] uppercase tracking-[0.12em] font-semibold text-dark-brown/50 hover:text-dark-brown transition-colors">
+                                            {{ $product->isSold() ? 'Vezi piesa vândută' : 'Vezi detaliile' }}
+                                        </a>
+                                    @endif
+                                </div>
+                            </article>
                         @endforeach
                     </div>
                     

@@ -158,6 +158,20 @@
             <td style="width: 70%;"></td>
             <td style="width: 30%;">
                 <table style="width: 100%;">
+                    <tr>
+                        <td style="text-align: right; padding-right: 10px;">Subtotal:</td>
+                        <td style="text-align: right;">{{ number_format($order->subtotal_amount, 2, ',', '.') }}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; padding-right: 10px;">Livrare:</td>
+                        <td style="text-align: right;">{{ (float) $order->shipping_amount > 0 ? number_format($order->shipping_amount, 2, ',', '.') : '0,00' }}</td>
+                    </tr>
+                    @if((float) $order->discount_amount > 0)
+                        <tr>
+                            <td style="text-align: right; padding-right: 10px;">Reducere:</td>
+                            <td style="text-align: right;">-{{ number_format($order->discount_amount, 2, ',', '.') }}</td>
+                        </tr>
+                    @endif
                     <tr class="total-row">
                         <td style="text-align: right; padding-right: 10px;">TOTAL (RON):</td>
                         <td style="text-align: right;">{{ number_format($order->total_amount, 2, ',', '.') }}</td>
