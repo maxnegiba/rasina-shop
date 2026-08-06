@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-@php $settings = app(\App\Settings\GeneralSettings::class); @endphp
+@php
+    $settings = app(\App\Settings\GeneralSettings::class);
+@endphp
 <div class="bg-ivory min-h-screen py-16 sm:py-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
