@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@php
+    $paymentButtonLabel = 'Plătește '.number_format($totalAmount, 2, ',', '.').' RON';
+@endphp
+
 @section('content')
 <div class="bg-ivory min-h-screen py-12 md:py-20">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -93,7 +97,7 @@
                     <div id="error-message" role="alert" aria-live="assertive" class="text-red-800 text-sm hidden bg-red-50 border border-red-200 p-4"></div>
 
                     <button id="submit" type="submit" class="w-full min-h-14 bg-dark-brown text-white px-5 py-4 uppercase tracking-[0.16em] text-[10px] font-semibold hover:bg-vintage-gold transition-colors shadow-sm flex justify-center items-center disabled:opacity-60 disabled:cursor-wait">
-                        <span id="button-text">Plătește {{ number_format($totalAmount, 2, ',', '.') }} RON</span>
+                        <span id="button-text">{{ $paymentButtonLabel }}</span>
                         <span id="spinner" class="hidden ml-3" aria-hidden="true">
                             <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -154,9 +158,9 @@
 <script src="https://js.stripe.com/v3/"></script>
 <script>
 (() => {
-    const stripe = Stripe(@json($stripeKey), {locale: 'ro'});
+    const stripe = Stripe({{ Illuminate\Support\Js::from($stripeKey) }}, {locale: 'ro'});
     const elements = stripe.elements({
-        clientSecret: @json($clientSecret),
+        clientSecret: {{ Illuminate\Support\Js::from($clientSecret) }},
         locale: 'ro',
         appearance: {
             theme: 'stripe',
@@ -202,6 +206,7 @@
     const termsInput = document.getElementById('accept-terms');
     const privacyInput = document.getElementById('acknowledge-privacy');
     const storageKey = 'mtd-checkout-email';
+    const paymentButtonLabel = {{ Illuminate\Support\Js::from($paymentButtonLabel) }};
     let isSubmitting = false;
 
     try {
@@ -254,7 +259,7 @@
         spinner.classList.toggle('hidden', !loading);
         buttonText.textContent = loading
             ? 'Se procesează plata…'
-            : @json('Plătește '.number_format($totalAmount, 2, ',', '.').' RON');
+            : paymentButtonLabel;
     }
 
     function validateCustomerFields() {
@@ -278,16 +283,16 @@
     }
 
     async function saveAcceptances() {
-        const response = await fetch(@json(route('checkout.accept-terms')), {
+        const response = await fetch({{ Illuminate\Support\Js::from(route('checkout.accept-terms')) }}, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': @json(csrf_token()),
+                'X-CSRF-TOKEN': {{ Illuminate\Support\Js::from(csrf_token()) }},
             },
             credentials: 'same-origin',
             body: JSON.stringify({
-                order_token: @json($orderToken),
+                order_token: {{ Illuminate\Support\Js::from($orderToken) }},
                 accept_terms: termsInput.checked,
                 acknowledge_privacy: privacyInput.checked,
             }),
@@ -335,7 +340,7 @@
             const {error} = await stripe.confirmPayment({
                 elements,
                 confirmParams: {
-                    return_url: @json(route('checkout.success', ['order' => $orderToken])),
+                    return_url: {{ Illuminate\Support\Js::from(route('checkout.success', ['order' => $orderToken])) }},
                     receipt_email: email,
                     payment_method_data: {
                         billing_details: {email},
