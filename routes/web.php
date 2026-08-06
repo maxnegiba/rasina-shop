@@ -49,15 +49,20 @@ Route::group(['prefix' => 'cos', 'as' => 'cart.'], function () {
 
 // --- Checkout & Plăți (Stripe) ---
 Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
-    Route::match(['get', 'post'], '/', [CheckoutController::class, 'index'])->name('index');
+    Route::get('/', [CheckoutController::class, 'index'])->name('index');
+    Route::post('/', [CheckoutController::class, 'start'])->name('start');
     Route::get('/succes', [CheckoutController::class, 'success'])->name('success');
-    Route::get('/anulare', [CheckoutController::class, 'cancel'])->name('cancel');
+    Route::get('/anulare/{order:public_token}', [CheckoutController::class, 'cancel'])
+        ->middleware('signed')
+        ->name('cancel');
 });
 
 Route::post('/webhook/stripe', [\App\Http\Controllers\WebhookController::class, 'handleStripeWebhook'])->name('webhook.stripe');
 
 // --- Descarcare Proforma ---
-Route::get('/proforma/{order}', [\App\Http\Controllers\ProformaController::class, 'download'])->name('order.proforma.download');
+Route::get('/proforma/{order:public_token}', [\App\Http\Controllers\ProformaController::class, 'download'])
+    ->middleware('signed')
+    ->name('order.proforma.download');
 
 
 // Notă: Rutele pentru Filament (Admin) sunt gestionate automat de pachet, 

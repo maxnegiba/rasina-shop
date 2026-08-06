@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Support\Facades\URL;
 
 class OrderResource extends Resource
 {
@@ -42,10 +43,12 @@ class OrderResource extends Resource
                         Forms\Components\TextInput::make('customer_details.phone')
                             ->label('Telefon')
                             ->disabled(),
-                        Forms\Components\Textarea::make('customer_details.address')
+                        Forms\Components\Placeholder::make('shipping_address')
                             ->label('Adresa de Livrare')
-                            ->columnSpanFull()
-                            ->disabled(),
+                            ->content(fn (?Order $record): string => collect($record?->customer_details['address'] ?? [])
+                                ->filter()
+                                ->implode(', ') ?: '—')
+                            ->columnSpanFull(),
                     ])->columns(3),
 
                     Forms\Components\Section::make('Informații Plată & Stripe')->schema([
@@ -86,11 +89,11 @@ class OrderResource extends Resource
                             ->native(false),
                     ]),
 
-                    Forms\Components\Section::make('Factură Proforma')->schema([
+                    Forms\Components\Section::make('Document Proforma')->schema([
                         Forms\Components\TextInput::make('proforma_number')->label('Număr Proforma')->disabled(),
                         Forms\Components\Placeholder::make('proforma_info')
                             ->label('Status')
-                            ->content('Factura Proforma este generată automat la crearea comenzii.'),
+                            ->content('Documentul proforma nefiscal este generat automat după confirmarea plății Stripe.'),
                     ]),
                 ])->columnSpan(['lg' => 1]),
             ])
@@ -163,7 +166,12 @@ class OrderResource extends Resource
                     ->label('Descarcă Proforma')
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('gray')
-                    ->url(fn (Order $record): string => route('order.proforma.download', $record))
+                    ->visible(fn (Order $record): bool => $record->payment_status === 'paid')
+                    ->url(fn (Order $record): string => URL::temporarySignedRoute(
+                        'order.proforma.download',
+                        now()->addMinutes(15),
+                        ['order' => $record->public_token],
+                    ))
                     ->openUrlInNewTab(),
             ]);
     }

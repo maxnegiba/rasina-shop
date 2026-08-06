@@ -10,21 +10,20 @@ use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class OrderConfirmationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public Order $order;
-    public string $pdfPath;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Order $order, string $pdfPath)
+    public function __construct(Order $order)
     {
         $this->order = $order;
-        $this->pdfPath = $pdfPath;
     }
 
     /**
@@ -33,7 +32,7 @@ class OrderConfirmationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Confirmare Comandă ' . $this->order->order_number . ' - Ivory Vintage Art Gallery',
+            subject: 'Confirmare comandă ' . $this->order->order_number . ' - ' . config('shop.brand_name'),
         );
     }
 
@@ -43,7 +42,7 @@ class OrderConfirmationMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.order_confirmation', // Trebuie să creăm acest view
+            view: 'emails.order_confirmation',
         );
     }
 
@@ -55,7 +54,12 @@ class OrderConfirmationMail extends Mailable
     public function attachments(): array
     {
         return [
-            Attachment::fromPath($this->pdfPath)
+            Attachment::fromData(
+                fn (): string => Pdf::loadView('pdf.proforma', [
+                    'order' => $this->order->loadMissing('items.product'),
+                ])->output(),
+                'Proforma_' . $this->order->proforma_number . '.pdf',
+            )
                 ->as('Proforma_' . $this->order->proforma_number . '.pdf')
                 ->withMime('application/pdf'),
         ];

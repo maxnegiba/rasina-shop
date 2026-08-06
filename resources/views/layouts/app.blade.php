@@ -107,6 +107,14 @@
         </div>
     </nav>
 
+    @if(session('success') || session('error'))
+        <div class="fixed top-28 left-1/2 -translate-x-1/2 z-[70] w-[calc(100%-2rem)] max-w-xl" role="status" aria-live="polite">
+            <div class="px-5 py-4 shadow-xl border text-sm {{ session('error') ? 'bg-red-50 border-red-200 text-red-800' : 'bg-emerald-50 border-emerald-200 text-emerald-800' }}">
+                {{ session('error') ?? session('success') }}
+            </div>
+        </div>
+    @endif
+
     <!-- Mobile Sidebar -->
     <div id="mobile-sidebar" class="fixed inset-0 z-50 bg-dark-brown/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
         <div id="mobile-sidebar-content" class="fixed top-0 right-0 bottom-0 w-64 bg-ivory shadow-2xl border-l border-black/5 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
