@@ -2,7 +2,7 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <title>Factura Proforma {{ $order->proforma_number }}</title>
+    <title>Proforma {{ $order->proforma_number }}</title>
     <style>
         body {
             font-family: 'DejaVu Sans', sans-serif;
@@ -83,14 +83,18 @@
     <table class="header">
         <tr>
             <td>
-                <div class="logo">Ivory Vintage Art Gallery</div>
-                <div>[Nume Firma SRL]</div>
-                <div>CUI: [RO...]</div>
-                <div>J.../.../...</div>
-                <div>[Adresa Sediu]</div>
+                <div class="logo">{{ config('shop.brand_name') }}</div>
+                <div>{{ config('shop.legal.business_name') }}</div>
+                <div>CUI/CIF: {{ config('shop.legal.tax_id') }}</div>
+                <div>Registrul Comerțului: {{ config('shop.legal.trade_register') }}</div>
+                <div>{{ config('shop.legal.address') }}</div>
+                <div>{{ config('shop.legal.email') }} · {{ config('shop.legal.phone') }}</div>
+                @if(config('shop.legal.iban'))
+                    <div>IBAN: {{ config('shop.legal.iban') }}{{ config('shop.legal.bank') ? ' · '.config('shop.legal.bank') : '' }}</div>
+                @endif
             </td>
             <td>
-                <div class="title">FACTURĂ PROFORMA</div>
+                <div class="title">PROFORMA</div>
                 <div style="text-align: right; margin-top: 10px;">
                     <strong>Seria/Nr:</strong> {{ $order->proforma_number }}<br>
                     <strong>Data:</strong> {{ $order->created_at->format('d.m.Y') }}<br>
@@ -168,7 +172,7 @@
     </div>
 
     <div class="footer">
-        Document generat automat. Nu necesită semnătură și ștampilă.
+        Document comercial nefiscal, generat automat. Nu reprezintă factură fiscală și nu poate fi folosit pentru deducerea TVA.
     </div>
 
 </body>
