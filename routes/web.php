@@ -50,11 +50,9 @@ Route::group(['prefix' => 'cos', 'as' => 'cart.'], function () {
 // --- Checkout & Plăți (Stripe) ---
 Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
     Route::get('/', [CheckoutController::class, 'index'])->name('index');
-    Route::post('/', [CheckoutController::class, 'start'])->name('start');
+    Route::post('/acceptare', [CheckoutController::class, 'acceptTerms'])->name('accept-terms');
     Route::get('/succes', [CheckoutController::class, 'success'])->name('success');
-    Route::get('/anulare/{order:public_token}', [CheckoutController::class, 'cancel'])
-        ->middleware('signed')
-        ->name('cancel');
+    Route::post('/anulare', [CheckoutController::class, 'cancel'])->name('cancel');
 });
 
 Route::post('/webhook/stripe', [\App\Http\Controllers\WebhookController::class, 'handleStripeWebhook'])->name('webhook.stripe');

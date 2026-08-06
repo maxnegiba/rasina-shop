@@ -15,4 +15,6 @@ return [
     ],
 
     'terms_version' => env('SHOP_TERMS_VERSION', '2026-08-05'),
+
+    'checkout_reservation_minutes' => (int) env('SHOP_CHECKOUT_RESERVATION_MINUTES', 31),
 ];

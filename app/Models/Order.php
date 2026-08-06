@@ -17,7 +17,7 @@ class Order extends Model
         'shipping_status', 'customer_details', 'stripe_transaction_id',
         'stripe_checkout_session_id', 'proforma_number', 'public_token',
         'stock_reserved_at', 'stock_released_at', 'terms_accepted_at',
-        'terms_version', 'confirmation_sent_at',
+        'privacy_acknowledged_at', 'terms_version', 'confirmation_sent_at',
     ];
 
     protected $casts = [
@@ -26,6 +26,7 @@ class Order extends Model
         'stock_reserved_at' => 'datetime',
         'stock_released_at' => 'datetime',
         'terms_accepted_at' => 'datetime',
+        'privacy_acknowledged_at' => 'datetime',
         'confirmation_sent_at' => 'datetime',
     ];
 

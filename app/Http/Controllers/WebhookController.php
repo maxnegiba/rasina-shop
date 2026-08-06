@@ -27,11 +27,13 @@ class WebhookController extends Controller
 
         try {
             match ($event->type) {
+                'payment_intent.succeeded' => $payments->completePaymentIntent($event->data->object),
+                'payment_intent.payment_failed' => $payments->recordFailedAttempt($event->data->object),
+                'payment_intent.canceled' => $payments->cancelPayment($event->data->object),
                 'checkout.session.completed',
-                'checkout.session.async_payment_succeeded' => $payments->completeCheckout($event->data->object),
+                'checkout.session.async_payment_succeeded' => $payments->completeLegacyCheckout($event->data->object),
                 'checkout.session.expired',
-                'checkout.session.async_payment_failed' => $payments->expireCheckout($event->data->object),
-                'payment_intent.payment_failed' => $payments->failPayment($event->data->object),
+                'checkout.session.async_payment_failed' => $payments->expireLegacyCheckout($event->data->object),
                 default => Log::debug('Ignored Stripe event.', ['type' => $event->type]),
             };
         } catch (\Throwable $exception) {
