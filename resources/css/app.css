@@ -6,6 +6,14 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --color-ivory: #fffff0;
+    --color-cream-white: #fffdd0;
+    --color-warm-beige: #f5f5dc;
+    --color-vintage-gold: #cfb53b;
+    --color-deep-oak: #3b2818;
+    --color-dark-brown: #2c1e16;
+
+    --font-serif: 'Cormorant Garamond', Georgia, serif;
+    --font-editorial: 'Libre Baskerville', Georgia, serif;
+    --font-sans: Manrope, ui-sans-serif, system-ui, sans-serif;
 }

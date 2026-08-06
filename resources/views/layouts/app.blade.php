@@ -14,28 +14,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'ivory': '#FFFFF0',
-                        'cream-white': '#FFFDD0',
-                        'warm-beige': '#F5F5DC',
-                        'vintage-gold': '#CFB53B',
-                        'deep-oak': '#3B2818',
-                        'dark-brown': '#2C1E16',
-                    },
-                    fontFamily: {
-                        serif: ['Cormorant Garamond', 'Georgia', 'serif'],
-                        editorial: ['Libre Baskerville', 'Georgia', 'serif'],
-                        sans: ['Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
 
     <style>
         h1, h2, .font-serif {
@@ -93,7 +73,10 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
-                        @php($cartItemCount = collect(session('cart', []))->sum(fn ($item) => (int) ($item['quantity'] ?? 0)))
+                        @php
+                            $cartItemCount = collect(session('cart', []))
+                                ->sum(static fn (array $item): int => (int) ($item['quantity'] ?? 0));
+                        @endphp
                         <span id="cart-count-badge" class="absolute -top-1 -right-2 bg-vintage-gold text-white text-[9px] min-w-4 h-4 px-1 flex items-center justify-center rounded-full opacity-100 transition-opacity {{ $cartItemCount > 0 ? '' : 'hidden' }}">
                             {{ $cartItemCount }}
                         </span>
@@ -172,7 +155,9 @@
                     <p class="font-light text-white/60 text-sm leading-relaxed mb-6 max-w-sm mx-auto md:mx-0">
                         O fuziune atemporală între esența naturală a lemnului și eleganța translucidă a rășinii. Piese de artă unicat, lucrate manual cu pasiune și măiestrie în România.
                     </p>
-                    @php $settings = app(\App\Settings\GeneralSettings::class); @endphp
+                    @php
+                        $settings = app(\App\Settings\GeneralSettings::class);
+                    @endphp
                     <a href="mailto:{{ $settings->contact_email ?? 'contact@mtdart.ro' }}" class="text-vintage-gold hover:text-white transition-colors duration-300 text-sm font-medium tracking-wide">
                         {{ $settings->contact_email ?? 'contact@mtdart.ro' }}
                     </a>
@@ -227,6 +212,7 @@
     </footer>
 
     @livewire('custom-order-modal')
+    @livewireScripts
     <script src="{{ asset('js/storefront-ui.js') }}" defer></script>
     <script src="{{ asset('js/product-gallery.js') }}" defer></script>
 </body>
