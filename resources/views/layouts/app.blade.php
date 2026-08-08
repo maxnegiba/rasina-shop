@@ -81,7 +81,7 @@
                             {{ $cartItemCount }}
                         </span>
                     </button>
-                    <button id="mobile-menu-btn" class="md:hidden text-dark-brown focus:outline-none">
+                    <button id="mobile-menu-btn" type="button" aria-label="Deschide meniul" aria-controls="mobile-sidebar" class="md:hidden text-dark-brown focus:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
@@ -100,14 +100,14 @@
     @endif
 
     <!-- Mobile Sidebar -->
-    <div id="mobile-sidebar" class="fixed inset-0 z-50 bg-dark-brown/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
-        <div id="mobile-sidebar-content" class="fixed top-0 right-0 bottom-0 w-64 bg-ivory shadow-2xl border-l border-black/5 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+    <div id="mobile-sidebar" aria-hidden="true" class="fixed inset-0 z-50 bg-dark-brown/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div id="mobile-sidebar-content" role="dialog" aria-modal="true" aria-label="Meniu principal" class="fixed top-0 right-0 bottom-0 w-64 bg-ivory shadow-2xl border-l border-black/5 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
             <div class="flex justify-between items-center p-6 border-b border-black/5">
                 <span class="font-serif text-lg tracking-[0.1em] uppercase text-dark-brown flex items-center gap-2">
                     <img src="/img/logo.png" alt="Logo" class="h-8 w-auto object-contain mr-2">
                     Meniu
                 </span>
-                <button id="mobile-close-btn" class="text-dark-brown/60 hover:text-dark-brown focus:outline-none transition-colors">
+                <button id="mobile-close-btn" type="button" aria-label="Închide meniul" class="text-dark-brown/60 hover:text-dark-brown focus:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -124,7 +124,7 @@
 
     <!-- Cart Sidebar -->
     <div id="cart-sidebar" aria-hidden="true" class="fixed inset-0 z-[60] bg-dark-brown/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
-        <div id="cart-sidebar-content" class="fixed top-0 right-0 bottom-0 w-full sm:w-96 bg-ivory shadow-2xl border-l border-black/5 transform translate-x-full transition-transform duration-300 ease-in-out">
+        <div id="cart-sidebar-content" role="dialog" aria-modal="true" aria-label="Coș de cumpărături" class="fixed top-0 right-0 bottom-0 w-full sm:w-96 bg-ivory shadow-2xl border-l border-black/5 transform translate-x-full transition-transform duration-300 ease-in-out">
             <div id="cart-sidebar-inner" class="h-full">
                 @if(View::exists('cart._sidebar_content'))
                     @include('cart._sidebar_content')
@@ -185,10 +185,10 @@
                     <h3 class="font-sans text-[10px] uppercase tracking-[0.2em] text-vintage-gold mb-6 font-semibold">Social</h3>
                     <ul class="space-y-4 font-light text-white/70 text-sm">
                         @if(!empty($settings->instagram_url))
-                        <li><a href="{{ $settings->instagram_url }}" target="_blank" class="hover:text-white transition-colors duration-300 flex items-center justify-center md:justify-start gap-2">Instagram</a></li>
+                        <li><a href="{{ $settings->instagram_url }}" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors duration-300 flex items-center justify-center md:justify-start gap-2">Instagram</a></li>
                         @endif
                         @if(!empty($settings->facebook_url))
-                        <li><a href="{{ $settings->facebook_url }}" target="_blank" class="hover:text-white transition-colors duration-300 flex items-center justify-center md:justify-start gap-2">Facebook</a></li>
+                        <li><a href="{{ $settings->facebook_url }}" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors duration-300 flex items-center justify-center md:justify-start gap-2">Facebook</a></li>
                         @endif
                     </ul>
                 </div>

@@ -42,20 +42,24 @@ class WebhookController extends Controller
             'updated_at' => now(),
         ]);
 
-        $shouldProcess = $inserted === 1 || DB::transaction(function () use ($eventId): bool {
+        $processingDecision = $inserted === 1 ? 'process' : DB::transaction(function () use ($eventId): string {
             $record = DB::table('stripe_webhook_events')
                 ->where('id', $eventId)
                 ->lockForUpdate()
                 ->first();
 
-            if (! $record || $record->status === 'completed') {
-                return false;
+            if (! $record) {
+                return 'process';
+            }
+
+            if ($record->status === 'completed') {
+                return 'completed';
             }
 
             if ($record->status === 'processing'
                 && $record->updated_at
                 && now()->diffInMinutes(Carbon::parse($record->updated_at)) < 5) {
-                return false;
+                return 'in_progress';
             }
 
             DB::table('stripe_webhook_events')
@@ -67,11 +71,17 @@ class WebhookController extends Controller
                     'updated_at' => now(),
                 ]);
 
-            return true;
+            return 'process';
         });
 
-        if (! $shouldProcess) {
+        if ($processingDecision === 'completed') {
             return response()->json(['status' => 'already_processed']);
+        }
+
+        if ($processingDecision === 'in_progress') {
+            return response()
+                ->json(['status' => 'retry_later'], 503)
+                ->header('Retry-After', '60');
         }
 
         try {

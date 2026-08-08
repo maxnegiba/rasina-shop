@@ -270,6 +270,8 @@ class CheckoutController extends Controller
             foreach ($validatedItems as $item) {
                 $order->items()->create([
                     'product_id' => $item['product']->id,
+                    'product_name' => (string) $item['product']->name,
+                    'product_code' => $item['product']->product_code,
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unitPrice'],
                 ]);
@@ -344,6 +346,10 @@ class CheckoutController extends Controller
         }
 
         if ($order->payment_status !== 'pending') {
+            if ($order->stock_reserved_at && ! $order->stock_released_at) {
+                $order->releaseReservedStock();
+            }
+
             $request->session()->forget('checkout_order_token');
 
             return null;

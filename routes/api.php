@@ -1,8 +1,4 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+// No public API is currently exposed. Keeping the unused Laravel template
+// route would reference Sanctum even though this storefront does not install it.

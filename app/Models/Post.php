@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 use RalphJSmit\Laravel\SEO\Support\HasSEO;
 use RalphJSmit\Laravel\SEO\Support\SEOData;
 use Spatie\Translatable\HasTranslations;
@@ -54,7 +55,11 @@ class Post extends Model
         return new SEOData(
             title: $localizedSeo['title'] ?? $this->title,
             description: $localizedSeo['description']
-                ?? ($this->seo_meta_description ?: strip_tags(mb_substr((string) $this->content, 0, 160))),
+                ?? ($this->seo_meta_description ?: Str::limit(
+                    preg_replace('/\s+/u', ' ', strip_tags((string) $this->content)) ?: '',
+                    160,
+                    '',
+                )),
             author: $translations['author'] ?? ($this->author ?: 'MTD ART'),
             image: $imagePath,
             robots: $translations['robots'] ?? 'index, follow',

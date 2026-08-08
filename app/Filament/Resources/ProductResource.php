@@ -82,6 +82,10 @@ class ProductResource extends Resource
                             Forms\Components\FileUpload::make('image_path')
                                 ->label('Imagine')
                                 ->image()
+                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->maxSize(10240)
+                                ->disk('public')
+                                ->visibility('public')
                                 ->directory('products')
                                 ->required(),
                             Forms\Components\Toggle::make('is_featured')

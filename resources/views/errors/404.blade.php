@@ -1,0 +1,5 @@
+@extends('errors.layout')
+@section('title', 'Pagina nu a fost găsită')
+@section('code', 'EROARE 404')
+@section('heading', 'Pagina nu a fost găsită')
+@section('message', 'Este posibil ca adresa să fie greșită sau conținutul să nu mai fie disponibil.')

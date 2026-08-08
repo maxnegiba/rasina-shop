@@ -1,0 +1,5 @@
+@extends('errors.layout')
+@section('title', 'Eroare temporară')
+@section('code', 'EROARE 500')
+@section('heading', 'Ceva nu a funcționat')
+@section('message', 'A apărut o problemă temporară. Nu reluați plata dacă ați fost deja debitat; contactați-ne pentru verificare.')

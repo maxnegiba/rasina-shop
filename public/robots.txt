@@ -1,2 +1,3 @@
 User-agent: *
 Disallow:
+Sitemap: https://mtdart.ro/sitemap.xml

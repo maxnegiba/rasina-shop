@@ -18,8 +18,10 @@
                 @foreach($featuredCategories as $index => $category)
                     <div class="group block {{ $index === 1 ? 'md:mt-16' : '' }}">
                         <a href="{{ route('shop.category', $category->slug ?? '#') }}" class="block relative overflow-hidden aspect-[4/5] mb-8 bg-warm-beige/30 ring-1 ring-inset ring-black/5">
-                            <img src="{{ $category->image ? asset('storage/' . $category->image) : 'https://via.placeholder.com/600x800' }}" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" alt="{{ $category->name }}">
+                            <img src="{{ $category->image ? asset('storage/' . $category->image) : asset('img/logo.png') }}"
+                                 loading="lazy"
+                                 decoding="async"
+                                 class="w-full h-full {{ $category->image ? 'object-cover' : 'object-contain p-12 opacity-40' }} group-hover:scale-105 transition-transform duration-700 ease-out" alt="{{ $category->name }}">
                         </a>
                         <div class="flex items-center justify-between">
                             <h3 class="font-serif text-2xl text-dark-brown">{{ $category->name }}</h3>
@@ -50,10 +52,20 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 @if(isset($latestProducts))
                     @foreach($latestProducts as $product)
+                        @php
+                            $homeImage = $product->images->firstWhere('is_featured', true)
+                                ?? $product->images->first();
+                            $homeImageUrl = $homeImage
+                                ? asset('storage/'.$homeImage->image_path)
+                                : ($product->image ? asset('storage/'.$product->image) : asset('img/logo.png'));
+                        @endphp
                         <div class="group bg-ivory shadow-sm border border-black/5 hover:shadow-md transition-all duration-300">
                             <a href="{{ route('shop.show', $product->slug) }}" class="block">
                                 <div class="aspect-[3/4] overflow-hidden bg-white relative p-4 flex items-center justify-center">
-                                    <img src="{{ $product->image ? asset('storage/' . $product->image) : 'https://via.placeholder.com/500' }}" 
+                                    <img src="{{ $homeImageUrl }}"
+                                         alt="{{ $product->name }}"
+                                         loading="lazy"
+                                         decoding="async"
                                          class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 ease-out">
                                     
                                     @if($product->is_custom)

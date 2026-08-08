@@ -1,0 +1,5 @@
+@extends('errors.layout')
+@section('title', 'Acces restricționat')
+@section('code', 'EROARE 403')
+@section('heading', 'Acces restricționat')
+@section('message', 'Nu aveți permisiunea necesară pentru a deschide această pagină.')

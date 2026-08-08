@@ -47,12 +47,12 @@
         <!-- Imagine Principală - Object Contain pentru a nu trunchia arta -->
         @if($post->featured_image)
             <div class="w-full h-auto max-h-[70vh] mx-auto flex items-center justify-center bg-warm-beige/20 p-4 sm:p-8 mb-20 relative overflow-hidden rounded-sm ring-1 ring-inset ring-black/5 shadow-sm group">
-                <img src="{{ Storage::url($post->featured_image) }}" alt="{{ $post->title }}" class="w-full max-h-[65vh] object-contain group-hover:scale-[1.02] transition-transform duration-700 ease-out">
+                <img src="{{ Storage::url($post->featured_image) }}" alt="{{ $post->title }}" fetchpriority="high" decoding="async" class="w-full max-h-[65vh] object-contain group-hover:scale-[1.02] transition-transform duration-700 ease-out">
             </div>
         @else
             <!-- Placeholder elegant -->
             <div class="w-full h-auto max-h-[50vh] aspect-video bg-warm-beige/20 mb-20 relative overflow-hidden rounded-sm flex items-center justify-center border border-black/5">
-                <img src="{{ asset('/img/logo.png') }}" alt="{{ $post->title }}" class="w-1/4 h-auto object-contain opacity-40">
+                <img src="{{ asset('/img/logo.png') }}" alt="{{ $post->title }}" decoding="async" class="w-1/4 h-auto object-contain opacity-40">
             </div>
         @endif
 
@@ -67,15 +67,15 @@
                 <span>Distribuiți această poveste</span>
             </div>
             <div class="flex space-x-4">
-                <button class="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center text-dark-brown hover:border-vintage-gold hover:text-vintage-gold hover:shadow-md transition-all duration-300">
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(request()->url()) }}" target="_blank" rel="noopener noreferrer" aria-label="Distribuie pe Facebook" class="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center text-dark-brown hover:border-vintage-gold hover:text-vintage-gold hover:shadow-md transition-all duration-300">
                     F
-                </button>
-                <button class="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center text-dark-brown hover:border-vintage-gold hover:text-vintage-gold hover:shadow-md transition-all duration-300">
+                </a>
+                <a href="https://twitter.com/intent/tweet?url={{ urlencode(request()->url()) }}&text={{ urlencode((string) $post->title) }}" target="_blank" rel="noopener noreferrer" aria-label="Distribuie pe X" class="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center text-dark-brown hover:border-vintage-gold hover:text-vintage-gold hover:shadow-md transition-all duration-300">
                     T
-                </button>
-                <button class="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center text-dark-brown hover:border-vintage-gold hover:text-vintage-gold hover:shadow-md transition-all duration-300">
+                </a>
+                <a href="https://pinterest.com/pin/create/button/?url={{ urlencode(request()->url()) }}&description={{ urlencode((string) $post->title) }}" target="_blank" rel="noopener noreferrer" aria-label="Distribuie pe Pinterest" class="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center text-dark-brown hover:border-vintage-gold hover:text-vintage-gold hover:shadow-md transition-all duration-300">
                     P
-                </button>
+                </a>
             </div>
         </div>
 
@@ -96,9 +96,9 @@
                 <a href="{{ route('blog.show', $recentPost->slug) }}" class="group block bg-ivory shadow-sm border border-black/5 hover:border-vintage-gold/40 hover:shadow-md transition-all duration-300">
                     <div class="aspect-[4/3] bg-white relative overflow-hidden flex items-center justify-center p-4 border-b border-black/5">
                         @if($recentPost->featured_image)
-                            <img src="{{ Storage::url($recentPost->featured_image) }}" alt="{{ $recentPost->title }}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 ease-out">
+                            <img src="{{ Storage::url($recentPost->featured_image) }}" alt="{{ $recentPost->title }}" loading="lazy" decoding="async" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 ease-out">
                         @else
-                            <img src="{{ asset('/img/logo.png') }}" alt="{{ $recentPost->title }}" class="w-1/2 h-auto object-contain opacity-30">
+                            <img src="{{ asset('/img/logo.png') }}" alt="{{ $recentPost->title }}" loading="lazy" decoding="async" class="w-1/2 h-auto object-contain opacity-30">
                         @endif
                         <div class="absolute top-4 right-4 bg-ivory/90 backdrop-blur-sm px-3 py-1 text-[10px] font-sans tracking-widest text-vintage-gold uppercase shadow-sm">
                             {{ $recentPost->published_at->translatedFormat('d M') }}

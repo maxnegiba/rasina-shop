@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 use RalphJSmit\Laravel\SEO\Support\HasSEO;
 use RalphJSmit\Laravel\SEO\Support\SEOData;
 use Spatie\Translatable\HasTranslations;
@@ -61,7 +62,10 @@ class Product extends Model
             return 'Preț la cerere';
         }
 
-        return number_format((float) $this->price, 0, ',', '.') . ' RON';
+        $price = (float) $this->price;
+        $decimals = abs($price - round($price)) < 0.001 ? 0 : 2;
+
+        return number_format($price, $decimals, ',', '.').' RON';
     }
 
     public function isPurchasable(): bool
@@ -90,12 +94,18 @@ class Product extends Model
             ?? $this->images->first();
 
         $imagePath = $featuredImage
-            ? asset('storage/' . $featuredImage->image_path)
-            : asset('/img/logo.png');
+            ? asset('storage/'.$featuredImage->image_path)
+            : ($this->image ? asset('storage/'.$this->image) : asset('/img/logo.png'));
+
+        $description = Str::limit(
+            preg_replace('/\s+/u', ' ', strip_tags((string) $this->description)) ?: '',
+            160,
+            '',
+        );
 
         return new SEOData(
             title: $localizedSeo['title'] ?? $this->name,
-            description: $localizedSeo['description'] ?? strip_tags((string) $this->description),
+            description: $localizedSeo['description'] ?? $description,
             author: $translations['author'] ?? 'MTD ART',
             image: $imagePath,
             robots: $translations['robots'] ?? 'index, follow',

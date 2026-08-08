@@ -65,6 +65,8 @@
                                         if (isset($product->images) && $product->images->count() > 0) {
                                             $firstImage = $product->images->where('is_featured', true)->first() ?? $product->images->first();
                                             $imageUrl = asset('storage/' . $firstImage->image_path);
+                                        } elseif ($product->image) {
+                                            $imageUrl = asset('storage/'.$product->image);
                                         } else {
                                             $imageUrl = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iODAwIiBmaWxsPSIjRkRGQkY3Ij48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjgwMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiNDNUE4ODAiPkl2b3J5IFZpbnRhZ2U8L3RleHQ+PC9zdmc+';
                                         }
@@ -73,6 +75,8 @@
                                     <!-- object-contain repara problema taierii marginilor -->
                                     <img src="{{ $imageUrl }}" 
                                          alt="{{ $product->name }}" 
+                                         loading="lazy"
+                                         decoding="async"
                                          class="w-full h-full object-contain group-hover:scale-[1.03] transition-transform duration-700 ease-out">
 
                                     <!-- Badges premium -->
@@ -161,10 +165,14 @@
                                                 $soldImage = $product->images->where('is_featured', true)->first() ?? $product->images->first();
                                                 $soldImageUrl = $soldImage
                                                     ? asset('storage/' . $soldImage->image_path)
-                                                    : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iODAwIiBmaWxsPSIjRkRGQkY3Ij48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjgwMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiNDNUE4ODAiPkl2b3J5IFZpbnRhZ2U8L3RleHQ+PC9zdmc+';
+                                                    : ($product->image
+                                                        ? asset('storage/'.$product->image)
+                                                        : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iODAwIiBmaWxsPSIjRkRGQkY3Ij48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjgwMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiNDNUE4ODAiPkl2b3J5IFZpbnRhZ2U8L3RleHQ+PC9zdmc+');
                                             @endphp
                                             <img src="{{ $soldImageUrl }}"
                                                  alt="{{ $product->name }}"
+                                                 loading="lazy"
+                                                 decoding="async"
                                                  class="w-full h-full object-contain opacity-80 grayscale-[20%] group-hover:scale-[1.03] group-hover:grayscale-0 transition-all duration-700 ease-out">
                                             <div class="absolute top-4 left-4 bg-dark-brown/90 backdrop-blur-sm text-white border border-black/10 text-[9px] px-3 py-1.5 uppercase tracking-[0.2em] font-semibold shadow-sm">
                                                 Vândut
@@ -181,7 +189,7 @@
                                         </div>
                                     </a>
 
-                                    <button x-data
+                                    <button type="button" x-data
                                             @click="$dispatch('open-custom-modal', { productId: {{ $product->id }} })"
                                             class="w-full border border-dark-brown text-dark-brown px-5 py-4 uppercase tracking-[0.16em] text-[9px] font-semibold hover:bg-dark-brown hover:text-white transition-colors duration-300">
                                         Comandă o piesă asemănătoare

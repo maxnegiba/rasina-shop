@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\CustomRequest;
 use App\Models\Product;
+use Illuminate\Support\Facades\RateLimiter;
 
 class CustomOrderModal extends Component
 {
@@ -50,8 +51,14 @@ class CustomOrderModal extends Component
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'nullable|string|max:20',
-            'message' => 'required|string',
+            'message' => 'required|string|max:5000',
         ]);
+
+        if (! RateLimiter::attempt('custom-request:'.request()->ip(), 5, fn (): bool => true, 60)) {
+            $this->addError('message', 'Ați trimis prea multe cereri. Încercați din nou peste un minut.');
+
+            return;
+        }
 
         CustomRequest::create([
             'customer_name' => $this->name,

@@ -6,6 +6,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CustomRequestController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,7 +19,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/despre-noi', [PageController::class, 'about'])->name('about');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
-Route::post('/contact', [PageController::class, 'submitContact'])->name('contact.submit');
+Route::post('/contact', [PageController::class, 'submitContact'])
+    ->middleware('throttle:5,1')
+    ->name('contact.submit');
+
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 
 // --- Magazin (Shop) ---
 Route::group(['prefix' => 'magazin', 'as' => 'shop.'], function () {
@@ -29,7 +34,9 @@ Route::group(['prefix' => 'magazin', 'as' => 'shop.'], function () {
 
 // --- Cereri Personalizate (Custom Requests) ---
 // Aici trimitem datele din formularul pentru produse unicat
-Route::post('/cerere-personalizata', [CustomRequestController::class, 'store'])->name('custom-request.store');
+Route::post('/cerere-personalizata', [CustomRequestController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('custom-request.store');
 Route::view('/custom-orders', 'custom-orders')->name('custom-orders');
 
 // --- Jurnal de Atelier (Blog) ---
@@ -41,17 +48,17 @@ Route::group(['prefix' => 'jurnal', 'as' => 'blog.'], function () {
 // --- Cos de Cumparaturi (Cart) ---
 Route::group(['prefix' => 'cos', 'as' => 'cart.'], function () {
     Route::get('/', [CartController::class, 'index'])->name('index');
-    Route::post('/adauga', [CartController::class, 'add'])->name('add');
-    Route::post('/actualizeaza', [CartController::class, 'update'])->name('update');
-    Route::post('/sterge', [CartController::class, 'remove'])->name('remove');
+    Route::post('/adauga', [CartController::class, 'add'])->middleware('throttle:30,1')->name('add');
+    Route::post('/actualizeaza', [CartController::class, 'update'])->middleware('throttle:30,1')->name('update');
+    Route::post('/sterge', [CartController::class, 'remove'])->middleware('throttle:30,1')->name('remove');
 });
 
 // --- Checkout & Plăți (Stripe) ---
 Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
     Route::get('/', [CheckoutController::class, 'index'])->name('index');
-    Route::post('/acceptare', [CheckoutController::class, 'acceptTerms'])->name('accept-terms');
+    Route::post('/acceptare', [CheckoutController::class, 'acceptTerms'])->middleware('throttle:30,1')->name('accept-terms');
     Route::get('/succes', [CheckoutController::class, 'success'])->name('success');
-    Route::post('/anulare', [CheckoutController::class, 'cancel'])->name('cancel');
+    Route::post('/anulare', [CheckoutController::class, 'cancel'])->middleware('throttle:30,1')->name('cancel');
 });
 
 Route::post('/webhook/stripe', [\App\Http\Controllers\WebhookController::class, 'handleStripeWebhook'])->name('webhook.stripe');
