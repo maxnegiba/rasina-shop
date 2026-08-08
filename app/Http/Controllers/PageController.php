@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ContactMessageMail;
 use App\Models\Product;
 use App\Models\Post;
 use App\Models\Category;
 use App\Models\Page;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class PageController extends Controller
 {
@@ -25,7 +28,7 @@ class PageController extends Controller
         $latestProducts = Product::where('status', 'published')
             ->where('stock', '>', 0)
             ->with('images')
-            ->latest()
+            ->latest('published_at')
             ->take(6)
             ->get();
 
@@ -64,11 +67,23 @@ class PageController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'subject' => 'nullable|string|max:255',
-            'message' => 'required|string',
+            'message' => 'required|string|max:5000',
         ]);
 
-        // Aici s-ar putea trimite un email. Pentru moment doar returnăm cu succes.
-        // Mail::to('contact@ivoryvintage.ro')->send(new ContactFormMail($validated));
+        $recipient = app(\App\Settings\GeneralSettings::class)->contact_email
+            ?: config('shop.legal.email');
+
+        try {
+            Mail::to($recipient)->queue(new ContactMessageMail($validated));
+        } catch (\Throwable $exception) {
+            Log::error('Contact message could not be queued.', [
+                'exception' => $exception->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Mesajul nu a putut fi trimis momentan. Încercați din nou sau folosiți datele de contact afișate.');
+        }
 
         return redirect()->back()->with('success', 'Vă mulțumim pentru mesaj! Vă vom contacta în curând.');
     }

@@ -10,7 +10,14 @@ class OrderItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['order_id', 'product_id', 'quantity', 'unit_price'];
+    protected $fillable = [
+        'order_id',
+        'product_id',
+        'product_name',
+        'product_code',
+        'quantity',
+        'unit_price',
+    ];
 
     protected $appends = ['subtotal'];
 
@@ -21,6 +28,12 @@ class OrderItem extends Model
     public function getSubtotalAttribute(): float
     {
         return (float) $this->unit_price * (int) $this->quantity;
+    }
+
+    public function displayName(): string
+    {
+        return $this->product_name
+            ?: (string) ($this->product?->name ?: 'Produs indisponibil');
     }
 
     public function order(): BelongsTo

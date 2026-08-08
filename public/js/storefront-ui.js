@@ -14,6 +14,7 @@
         cartPanel: '#cart-sidebar-content',
         cartInner: '#cart-sidebar-inner',
     };
+    const drawerTriggers = new Map();
 
     const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 
@@ -32,12 +33,14 @@
 
         overlay.classList.remove('hidden');
         overlay.setAttribute('aria-hidden', 'false');
+        drawerTriggers.set(overlaySelector, document.activeElement);
         setPageLocked(true);
 
         window.requestAnimationFrame(() => {
             window.requestAnimationFrame(() => {
                 overlay.classList.remove('opacity-0');
                 panel.classList.remove('translate-x-full');
+                panel.querySelector('button, a[href], input, select, textarea')?.focus({ preventScroll: true });
             });
         });
     }
@@ -65,6 +68,15 @@
                 .some((element) => element && !element.classList.contains('hidden'));
 
             setPageLocked(anotherDrawerIsOpen);
+
+            if (!anotherDrawerIsOpen) {
+                const trigger = drawerTriggers.get(overlaySelector);
+                if (trigger instanceof HTMLElement && trigger.isConnected) {
+                    trigger.focus({ preventScroll: true });
+                }
+            }
+
+            drawerTriggers.delete(overlaySelector);
         }, 300);
     }
 

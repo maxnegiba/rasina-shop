@@ -4,7 +4,7 @@
     <section class="relative min-h-[60vh] flex flex-col justify-center overflow-hidden bg-dark-brown border-b border-vintage-gold/30">
         <div class="absolute inset-0 z-0">
             <img src="https://images.unsplash.com/photo-1455390582262-044cdead27d8?auto=format&fit=crop&q=80&w=2000"
-                 class="w-full h-full object-cover opacity-30 mix-blend-luminosity scale-105 transform origin-center" alt="Jurnal de Atelier">
+                 fetchpriority="high" decoding="async" class="w-full h-full object-cover opacity-30 mix-blend-luminosity scale-105 transform origin-center" alt="Jurnal de Atelier">
             <div class="absolute inset-0 bg-gradient-to-t from-dark-brown via-transparent to-dark-brown/60"></div>
         </div>
         
@@ -31,10 +31,12 @@
                         <a href="{{ route('blog.show', $post->slug) }}" class="block relative overflow-hidden aspect-[4/5] mb-8 bg-warm-beige/30 ring-1 ring-inset ring-black/5 flex items-center justify-center p-4">
                             @if($post->featured_image)
                                 <img src="{{ asset('storage/' . $post->featured_image) }}"
+                                     loading="lazy" decoding="async"
                                      class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 ease-out"
                                      alt="{{ $post->title }}">
                             @else
                                 <img src="{{ asset('/img/logo.png') }}"
+                                     loading="lazy" decoding="async"
                                      class="w-1/2 h-auto object-contain group-hover:scale-105 transition-transform duration-700 ease-out opacity-50"
                                      alt="{{ $post->title }}">
                             @endif
@@ -47,7 +49,7 @@
                                 </span>
                                 <span class="w-4 h-px bg-dark-brown/20"></span>
                                 <span class="text-dark-brown/50 text-[10px] uppercase tracking-[0.1em]">
-                                    {{ $post->created_at->format('d M, Y') }}
+                                    {{ $post->published_at->translatedFormat('d M Y') }}
                                 </span>
                             </div>
 

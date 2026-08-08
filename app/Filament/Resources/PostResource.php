@@ -77,6 +77,10 @@ class PostResource extends Resource
                     Forms\Components\FileUpload::make('featured_image')
                         ->label('Imagine Reprezentativă')
                         ->image()
+                        ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                        ->maxSize(10240)
+                        ->disk('public')
+                        ->visibility('public')
                         ->directory('blog')
                         ->required(),
                     Forms\Components\DateTimePicker::make('published_at')

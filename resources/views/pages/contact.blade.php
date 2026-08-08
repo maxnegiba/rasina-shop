@@ -99,26 +99,26 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
                             <div class="space-y-3">
                                 <label for="name" class="block text-[10px] uppercase tracking-[0.2em] font-semibold text-dark-brown/70">Nume Complet <span class="text-vintage-gold">*</span></label>
-                                <input type="text" name="name" id="name" required class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown placeholder:text-black/20" placeholder="Ex: Ion Popescu">
+                                <input type="text" name="name" id="name" value="{{ old('name') }}" autocomplete="name" required class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown placeholder:text-black/20" placeholder="Ex: Ion Popescu">
                                 @error('name') <span class="text-red-900/80 text-xs mt-2 block font-light">{{ $message }}</span> @enderror
                             </div>
 
                             <div class="space-y-3">
                                 <label for="email" class="block text-[10px] uppercase tracking-[0.2em] font-semibold text-dark-brown/70">Adresa de Email <span class="text-vintage-gold">*</span></label>
-                                <input type="email" name="email" id="email" required class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown placeholder:text-black/20" placeholder="Ex: contact@email.ro">
+                                <input type="email" name="email" id="email" value="{{ old('email') }}" autocomplete="email" required class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown placeholder:text-black/20" placeholder="Ex: contact@email.ro">
                                 @error('email') <span class="text-red-900/80 text-xs mt-2 block font-light">{{ $message }}</span> @enderror
                             </div>
                         </div>
 
                         <div class="space-y-3">
                             <label for="subject" class="block text-[10px] uppercase tracking-[0.2em] font-semibold text-dark-brown/70">Subiect</label>
-                            <input type="text" name="subject" id="subject" class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown placeholder:text-black/20" placeholder="Întrebare despre un produs existent">
+                            <input type="text" name="subject" id="subject" value="{{ old('subject') }}" class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown placeholder:text-black/20" placeholder="Întrebare despre un produs existent">
                             @error('subject') <span class="text-red-900/80 text-xs mt-2 block font-light">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="space-y-3">
                             <label for="message" class="block text-[10px] uppercase tracking-[0.2em] font-semibold text-dark-brown/70">Mesajul Dumneavoastră <span class="text-vintage-gold">*</span></label>
-                            <textarea name="message" id="message" rows="4" required class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown placeholder:text-black/20 resize-none" placeholder="Cum vă putem ajuta?"></textarea>
+                            <textarea name="message" id="message" rows="4" maxlength="5000" required class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown placeholder:text-black/20 resize-none" placeholder="Cum vă putem ajuta?">{{ old('message') }}</textarea>
                             @error('message') <span class="text-red-900/80 text-xs mt-2 block font-light">{{ $message }}</span> @enderror
                         </div>
 
@@ -156,12 +156,12 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
                         <div class="space-y-3">
                             <label for="custom_name" class="block text-[10px] uppercase tracking-[0.2em] font-semibold text-dark-brown/70">Nume Complet <span class="text-vintage-gold">*</span></label>
-                            <input type="text" name="customer_name" id="custom_name" required class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown">
+                            <input type="text" name="customer_name" id="custom_name" value="{{ old('customer_name') }}" autocomplete="name" required class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown">
                             @error('customer_name') <span class="text-red-900/80 text-xs mt-2 block font-light">{{ $message }}</span> @enderror
                         </div>
                         <div class="space-y-3">
                             <label for="custom_email" class="block text-[10px] uppercase tracking-[0.2em] font-semibold text-dark-brown/70">Email <span class="text-vintage-gold">*</span></label>
-                            <input type="email" name="customer_email" id="custom_email" required class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown">
+                            <input type="email" name="customer_email" id="custom_email" value="{{ old('customer_email') }}" autocomplete="email" required class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown">
                             @error('customer_email') <span class="text-red-900/80 text-xs mt-2 block font-light">{{ $message }}</span> @enderror
                         </div>
                     </div>
@@ -169,25 +169,25 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
                         <div class="space-y-3">
                             <label for="custom_phone" class="block text-[10px] uppercase tracking-[0.2em] font-semibold text-dark-brown/70">Telefon</label>
-                            <input type="text" name="customer_phone" id="custom_phone" class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown">
+                            <input type="tel" name="customer_phone" id="custom_phone" value="{{ old('customer_phone') }}" autocomplete="tel" class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown">
                             @error('customer_phone') <span class="text-red-900/80 text-xs mt-2 block font-light">{{ $message }}</span> @enderror
                         </div>
                         <div class="space-y-3">
                             <label for="custom_dimensions" class="block text-[10px] uppercase tracking-[0.2em] font-semibold text-dark-brown/70">Dimensiuni Dorite</label>
-                            <input type="text" name="dimensions_requested" id="custom_dimensions" class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown placeholder:text-black/20" placeholder="Ex: 120 x 60 cm">
+                            <input type="text" name="dimensions_requested" id="custom_dimensions" value="{{ old('dimensions_requested') }}" class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown placeholder:text-black/20" placeholder="Ex: 120 x 60 cm">
                             @error('dimensions_requested') <span class="text-red-900/80 text-xs mt-2 block font-light">{{ $message }}</span> @enderror
                         </div>
                     </div>
 
                     <div class="space-y-3">
                         <label for="custom_colors" class="block text-[10px] uppercase tracking-[0.2em] font-semibold text-dark-brown/70">Preferințe Culori / Rășină</label>
-                        <input type="text" name="color_preferences" id="custom_colors" class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown placeholder:text-black/20" placeholder="Ex: Rășină turcoaz translucidă, lemn nuc">
+                        <input type="text" name="color_preferences" id="custom_colors" value="{{ old('color_preferences') }}" class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown placeholder:text-black/20" placeholder="Ex: Rășină turcoaz translucidă, lemn nuc">
                         @error('color_preferences') <span class="text-red-900/80 text-xs mt-2 block font-light">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="space-y-3">
                         <label for="custom_details" class="block text-[10px] uppercase tracking-[0.2em] font-semibold text-dark-brown/70">Mesaj Special / Alte Detalii</label>
-                        <textarea name="special_message" id="custom_details" rows="5" class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown resize-none"></textarea>
+                        <textarea name="special_message" id="custom_details" rows="5" maxlength="5000" class="w-full bg-transparent border-b border-black/10 pb-3 pt-2 focus:border-vintage-gold focus:ring-0 transition-colors rounded-none font-light text-sm text-dark-brown resize-none">{{ old('special_message') }}</textarea>
                         @error('special_message') <span class="text-red-900/80 text-xs mt-2 block font-light">{{ $message }}</span> @enderror
                     </div>
 

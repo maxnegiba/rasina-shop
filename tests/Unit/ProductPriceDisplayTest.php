@@ -27,6 +27,13 @@ class ProductPriceDisplayTest extends TestCase
         $this->assertSame('Preț la cerere', $product->displayPrice());
     }
 
+    public function test_price_display_does_not_drop_fractional_bani(): void
+    {
+        $product = new Product(['price' => 1250.50]);
+
+        $this->assertSame('1.250,50 RON', $product->displayPrice());
+    }
+
     public function test_a_unique_product_uses_the_normal_purchase_flow_when_priced_and_in_stock(): void
     {
         $product = new Product([

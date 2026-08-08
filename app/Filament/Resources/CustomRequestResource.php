@@ -2,109 +2,99 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\OrderResource\Pages;
-use App\Models\Order;
+use App\Filament\Resources\CustomRequestResource\Pages;
+use App\Models\CustomRequest;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\URL;
 
-class CustomRequestResource extends Resource{
-    protected static ?string $model = Order::class;
+class CustomRequestResource extends Resource
+{
+    protected static ?string $model = CustomRequest::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
+    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+
     protected static ?string $navigationGroup = 'Vânzări & Ofertare';
-    protected static ?string $modelLabel = 'Comandă';
-    protected static ?string $pluralModelLabel = 'Comenzi Standard';
-    
-    // Notificare vizuală pentru comenzile care așteaptă să fie expediate
-    protected static ?string $navigationBadgeTooltip = 'Comenzi de expediat';
+
+    protected static ?string $modelLabel = 'Cerere personalizată';
+
+    protected static ?string $pluralModelLabel = 'Cereri personalizate';
+
+    protected static ?int $navigationSort = 2;
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::where('payment_status', 'paid')
-            ->where('shipping_status', 'processing')
-            ->count() ?: null;
+        $count = CustomRequest::query()->where('status', 'new')->count();
+
+        return $count > 0 ? (string) $count : null;
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Group::make()->schema([
-                    Forms\Components\Section::make('Detalii Client (Facturare & Livrare)')->schema([
-                        // Folosim "dot notation" pentru a citi din coloana JSON customer_details
-                        Forms\Components\TextInput::make('customer_details.name')
-                            ->label('Nume Complet')
-                            ->disabled(),
-                        Forms\Components\TextInput::make('customer_details.email')
+                Forms\Components\Section::make('Client și solicitare')
+                    ->schema([
+                        Forms\Components\Select::make('product_id')
+                            ->label('Produs de referință')
+                            ->relationship('product', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->nullable(),
+                        Forms\Components\TextInput::make('customer_name')
+                            ->label('Nume complet')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('customer_email')
                             ->label('Email')
-                            ->disabled(),
-                        Forms\Components\TextInput::make('customer_details.phone')
+                            ->email()
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('customer_phone')
                             ->label('Telefon')
-                            ->disabled(),
-                        Forms\Components\Placeholder::make('shipping_address')
-                            ->label('Adresa de Livrare')
-                            ->content(fn (?Order $record): string => collect($record?->customer_details['address'] ?? [])
-                                ->filter()
-                                ->implode(', ') ?: '—')
+                            ->tel()
+                            ->maxLength(20),
+                        Forms\Components\TextInput::make('dimensions_requested')
+                            ->label('Dimensiuni dorite')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('color_preferences')
+                            ->label('Preferințe de culoare / rășină')
+                            ->maxLength(255),
+                        Forms\Components\Textarea::make('special_message')
+                            ->label('Mesaj / detalii')
+                            ->rows(6)
+                            ->maxLength(5000)
                             ->columnSpanFull(),
-                    ])->columns(3),
+                        Forms\Components\FileUpload::make('reference_image_path')
+                            ->label('Imagine de referință')
+                            ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize(5120)
+                            ->disk('public')
+                            ->directory('custom_requests')
+                            ->downloadable()
+                            ->openable()
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2)
+                    ->columnSpan(['lg' => 2]),
 
-                    Forms\Components\Section::make('Informații Plată & Stripe')->schema([
-                        Forms\Components\TextInput::make('total_amount')
-                            ->label('Total Încasat (RON)')
-                            ->numeric()
-                            ->prefix('RON')
-                            ->disabled(),
-                        Forms\Components\TextInput::make('stripe_transaction_id')
-                            ->label('ID Tranzacție Stripe')
-                            ->helperText('Folosește acest ID în contul tău Stripe pentru rambursări (refunds).')
-                            ->disabled(),
-                    ])->columns(2),
-                ])->columnSpan(['lg' => 2]),
-
-                Forms\Components\Group::make()->schema([
-                    Forms\Components\Section::make('Gestiune Livrare')->schema([
-                        Forms\Components\TextInput::make('order_number')
-                            ->label('Număr Comandă')
-                            ->disabled()
-                            ->dehydrated(false), // Să nu încerce să-l salveze accidental
-
-                        Forms\Components\Select::make('payment_status')
-                            ->label('Status Plată')
-                            ->options([
-                                'pending' => 'În așteptare (Neplătit)',
-                                'paid' => 'Plătit (Confirmat)',
-                                'failed' => 'Plată Eșuată',
-                            ])
-                            ->disabled() // Doar Stripe schimbă asta via Webhook
+                Forms\Components\Section::make('Ofertare')
+                    ->schema([
+                        Forms\Components\Select::make('status')
+                            ->label('Status')
+                            ->options(self::statusOptions())
+                            ->required()
                             ->native(false),
-
-                        Forms\Components\Select::make('shipping_status')
-                            ->label('Status Livrare')
-                            ->options([
-                                'processing' => 'În Procesare (Pregătire colet)',
-                                'shipped' => 'Expediat (Predat curierului)',
-                                'delivered' => 'Livrat',
-                            ])
-                            ->native(false)
-                            ->required(),
-                    ]),
-
-                    Forms\Components\Section::make('Document Proforma')->schema([
-                        Forms\Components\TextInput::make('proforma_number')
-                            ->label('Număr Proforma')
-                            ->disabled(),
-                        
-                        Forms\Components\Placeholder::make('proforma_info')
-                            ->label('Sistem Automatizat')
-                            ->content('Documentul proforma nefiscal este generat automat după confirmarea plății Stripe.'),
-                    ]),
-                ])->columnSpan(['lg' => 1]),
+                        Forms\Components\TextInput::make('quoted_price')
+                            ->label('Preț ofertat')
+                            ->numeric()
+                            ->minValue(0)
+                            ->prefix('RON'),
+                    ])
+                    ->columnSpan(['lg' => 1]),
             ])
             ->columns(3);
     }
@@ -114,101 +104,67 @@ class CustomRequestResource extends Resource{
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Data')
-                    ->dateTime('d M Y, H:i')
+                    ->label('Primită la')
+                    ->dateTime('d.m.Y, H:i')
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('order_number')
-                    ->label('Nr. Comandă')
+                Tables\Columns\TextColumn::make('customer_name')
+                    ->label('Client')
                     ->searchable()
                     ->weight('bold'),
-
-                Tables\Columns\TextColumn::make('customer_details.name')
-                    ->label('Client')
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('total_amount')
-                    ->label('Total')
+                Tables\Columns\TextColumn::make('customer_email')
+                    ->label('Email')
+                    ->searchable()
+                    ->copyable(),
+                Tables\Columns\TextColumn::make('product.name')
+                    ->label('Produs de referință')
+                    ->placeholder('Cerere generală')
+                    ->limit(35),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => self::statusOptions()[$state] ?? $state)
+                    ->color(fn (string $state): string => match ($state) {
+                        'new' => 'danger',
+                        'in_discussion' => 'warning',
+                        'quote_sent' => 'info',
+                        'accepted' => 'success',
+                        'rejected' => 'gray',
+                        default => 'gray',
+                    }),
+                Tables\Columns\TextColumn::make('quoted_price')
+                    ->label('Ofertă')
                     ->money('RON')
-                    ->sortable(),
-
-                Tables\Columns\BadgeColumn::make('payment_status')
-                    ->label('Plată')
-                    ->colors([
-                        'warning' => 'pending',
-                        'success' => 'paid',
-                        'danger' => 'failed',
-                    ])
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'pending' => 'Neplătită',
-                        'paid' => 'Plătită',
-                        'failed' => 'Eșuată',
-                        default => $state,
-                    }),
-
-                Tables\Columns\BadgeColumn::make('shipping_status')
-                    ->label('Livrare')
-                    ->colors([
-                        'warning' => 'processing',
-                        'primary' => 'shipped',
-                        'success' => 'delivered',
-                    ])
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'processing' => 'În Pregătire',
-                        'shipped' => 'Expediată',
-                        'delivered' => 'Livrată',
-                        default => $state,
-                    }),
+                    ->placeholder('—'),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                Tables\Filters\SelectFilter::make('payment_status')
-                    ->label('Filtrează după Plată')
-                    ->options([
-                        'pending' => 'Neplătită',
-                        'paid' => 'Plătită',
-                    ]),
-                Tables\Filters\SelectFilter::make('shipping_status')
-                    ->label('Filtrează după Livrare')
-                    ->options([
-                        'processing' => 'În Pregătire',
-                        'shipped' => 'Expediată',
-                        'delivered' => 'Livrată',
-                    ]),
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Status')
+                    ->options(self::statusOptions()),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('Gestionează'),
-                
-                Tables\Actions\Action::make('download_proforma')
-                    ->label('Descarcă Proforma')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->color('gray')
-                    ->visible(fn (Order $record): bool => $record->payment_status === 'paid')
-                    ->url(fn (Order $record): string => URL::temporarySignedRoute(
-                        'order.proforma.download',
-                        now()->addMinutes(15),
-                        ['order' => $record->public_token],
-                    ))
-                    ->openUrlInNewTab(),
             ])
-            ->bulkActions([
-                // Fără ștergere în masă la comenzi, pentru siguranța datelor contabile!
-            ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            // Aici vom putea adăuga un RelationManager pentru a vedea exact ce produse a cumpărat clientul în comanda respectivă
-        ];
+            ->bulkActions([]);
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListOrders::route('/'),
-            'edit' => Pages\EditOrder::route('/{record}/edit'),
-            // Nu avem ruta 'create' pentru că tu nu creezi comenzi manual din panou. Clienții le creează de pe site.
+            'index' => Pages\ListCustomRequests::route('/'),
+            'create' => Pages\CreateCustomRequest::route('/create'),
+            'edit' => Pages\EditCustomRequest::route('/{record}/edit'),
+        ];
+    }
+
+    private static function statusOptions(): array
+    {
+        return [
+            'new' => 'Nouă',
+            'in_discussion' => 'În discuție',
+            'quote_sent' => 'Ofertă trimisă',
+            'accepted' => 'Acceptată',
+            'rejected' => 'Respinsă',
         ];
     }
 }

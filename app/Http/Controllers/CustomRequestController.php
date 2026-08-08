@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\CustomRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class CustomRequestController extends Controller
 {
@@ -21,7 +20,7 @@ class CustomRequestController extends Controller
             'customer_phone' => 'nullable|string|max:20',
             'dimensions_requested' => 'nullable|string|max:255',
             'color_preferences' => 'nullable|string|max:255',
-            'special_message' => 'nullable|string',
+            'special_message' => 'nullable|string|max:5000',
             'reference_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120', // Max 5MB
         ], [
             // Mesaje de eroare personalizate în română
@@ -40,14 +39,14 @@ class CustomRequestController extends Controller
         }
 
         // 3. Crearea înregistrării în Baza de Date
-        $customRequest = CustomRequest::create([
-            'product_id' => $validatedData['product_id'],
+        CustomRequest::create([
+            'product_id' => $validatedData['product_id'] ?? null,
             'customer_name' => $validatedData['customer_name'],
             'customer_email' => $validatedData['customer_email'],
-            'customer_phone' => $validatedData['customer_phone'],
-            'dimensions_requested' => $validatedData['dimensions_requested'],
-            'color_preferences' => $validatedData['color_preferences'],
-            'special_message' => $validatedData['special_message'],
+            'customer_phone' => $validatedData['customer_phone'] ?? null,
+            'dimensions_requested' => $validatedData['dimensions_requested'] ?? null,
+            'color_preferences' => $validatedData['color_preferences'] ?? null,
+            'special_message' => $validatedData['special_message'] ?? null,
             'reference_image_path' => $imagePath,
             'status' => 'new', // Apare automat ca "Nouă" în Filament
         ]);

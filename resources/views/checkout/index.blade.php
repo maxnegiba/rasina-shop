@@ -127,7 +127,7 @@
                     @foreach($order->items as $item)
                         <div class="flex justify-between gap-4 text-xs">
                             <div class="min-w-0">
-                                <p class="text-dark-brown line-clamp-2">{{ $item->product?->name ?? 'Produs' }}</p>
+                                <p class="text-dark-brown line-clamp-2">{{ $item->displayName() }}</p>
                                 <p class="mt-1 text-dark-brown/45">{{ $item->quantity }} × {{ number_format($item->unit_price, 2, ',', '.') }} RON</p>
                             </div>
                             <p class="font-medium text-dark-brown whitespace-nowrap">{{ number_format($item->quantity * $item->unit_price, 2, ',', '.') }} RON</p>
@@ -262,6 +262,22 @@
             : paymentButtonLabel;
     }
 
+    function paymentErrorMessage(error) {
+        const messages = {
+            card_declined: 'Cardul a fost refuzat. Încercați un alt card sau contactați banca.',
+            expired_card: 'Cardul este expirat. Folosiți un alt card.',
+            incorrect_cvc: 'Codul de securitate al cardului este incorect.',
+            processing_error: 'Plata nu a putut fi procesată momentan. Încercați din nou.',
+            incomplete_number: 'Numărul cardului este incomplet.',
+            incomplete_expiry: 'Data expirării este incompletă.',
+            incomplete_cvc: 'Codul de securitate este incomplet.',
+        };
+
+        return messages[error?.code]
+            || (error?.type === 'validation_error' ? error.message : null)
+            || 'Plata nu a putut fi procesată. Verificați datele și încercați din nou.';
+    }
+
     function validateCustomerFields() {
         let valid = true;
         const email = emailInput.value.trim();
@@ -352,8 +368,7 @@
                 throw error;
             }
         } catch (error) {
-            const message = error?.message || 'Plata nu a putut fi procesată. Verificați datele și încercați din nou.';
-            showGlobalError(message);
+            showGlobalError(paymentErrorMessage(error));
             setLoading(false);
         }
     });

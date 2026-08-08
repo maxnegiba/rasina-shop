@@ -48,6 +48,11 @@
                         }
                     }
 
+                    if (empty($images) && $product->image) {
+                        $images[] = asset('storage/'.$product->image);
+                        $imageAlts[] = $product->name;
+                    }
+
                     if (empty($images)) {
                         $images[] = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iODAwIiBmaWxsPSIjRkRGQkY3Ij48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjgwMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiNDNUE4ODAiPkl2b3J5IFZpbnRhZ2U8L3RleHQ+PC9zdmc+';
                         $imageAlts[] = $product->name;
@@ -66,6 +71,7 @@
                                      alt="{{ $imageAlts[$index] ?? $product->name }}"
                                      loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
                                      fetchpriority="{{ $index === 0 ? 'high' : 'auto' }}"
+                                     decoding="async"
                                      class="w-full h-full object-contain drop-shadow-sm transition-transform duration-700">
                             </div>
                         @endforeach
@@ -122,6 +128,7 @@
                                 <img src="{{ $imageUrl }}"
                                      alt=""
                                      loading="lazy"
+                                     decoding="async"
                                      class="w-full h-full object-contain transition duration-500 {{ $index === 0 ? 'opacity-100' : 'opacity-70 hover:opacity-100' }}">
                             </button>
                         @endforeach
@@ -201,7 +208,7 @@
                             Disponibil pentru livrare
                         </p>
                     @else
-                        <button disabled class="w-full border border-black/5 text-dark-brown/40 bg-black/5 px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold cursor-not-allowed mb-6 shadow-inner">
+                        <button type="button" disabled class="w-full border border-black/5 text-dark-brown/40 bg-black/5 px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold cursor-not-allowed mb-6 shadow-inner">
                             {{ $product->isSold() ? 'Vândut' : 'Indisponibil momentan' }}
                         </button>
                     @endif
@@ -211,7 +218,7 @@
                         <span class="px-4 text-[10px] uppercase tracking-[0.2em] text-dark-brown/40 font-semibold">{{ $product->isSold() ? 'DORIȚI UNA ASEMĂNĂTOARE?' : 'SAU' }}</span>
                         <span class="w-full h-px bg-black/5"></span>
                     </div>
-                    <button x-data @click="$dispatch('open-custom-modal', { productId: {{ $product->id }} })" class="w-full mt-6 bg-transparent border border-dark-brown text-dark-brown px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold hover:bg-dark-brown hover:text-white transition-colors duration-500 shadow-sm">
+                    <button type="button" x-data @click="$dispatch('open-custom-modal', { productId: {{ $product->id }} })" class="w-full mt-6 bg-transparent border border-dark-brown text-dark-brown px-8 py-5 uppercase tracking-[0.2em] text-[10px] font-semibold hover:bg-dark-brown hover:text-white transition-colors duration-500 shadow-sm">
                         {{ $product->isSold() ? 'Comandă o piesă asemănătoare' : 'Comandă Variantă Personalizată' }}
                     </button>
                 </div>

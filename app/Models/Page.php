@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 use RalphJSmit\Laravel\SEO\Support\HasSEO;
 use RalphJSmit\Laravel\SEO\Support\SEOData;
+use Illuminate\Support\Str;
 
 class Page extends Model
 {
@@ -31,7 +32,11 @@ class Page extends Model
 
         return new SEOData(
             title: $this->title,
-            description: strip_tags(substr($this->content, 0, 160)),
+            description: Str::limit(
+                preg_replace('/\s+/u', ' ', strip_tags((string) $this->content)) ?: '',
+                160,
+                '',
+            ),
         );
     }
 }

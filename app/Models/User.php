@@ -45,6 +45,7 @@ class User extends Authenticatable implements FilamentUser
     {
         return [
             'email_verified_at' => 'datetime',
+            'is_admin' => 'boolean',
             'password' => 'hashed',
         ];
     }
@@ -54,7 +55,6 @@ class User extends Authenticatable implements FilamentUser
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        // Returnăm 'true' pentru a-ți permite accesul cu contul creat anterior
-        return true;
+        return $this->is_admin === true;
     }
 }

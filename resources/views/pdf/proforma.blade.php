@@ -139,7 +139,7 @@
                 @foreach($order->items as $index => $item)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ $item->product ? $item->product->name : 'Produs #' . $item->product_id }}</td>
+                    <td>{{ $item->displayName() }}{{ $item->product_code ? ' ('.$item->product_code.')' : '' }}</td>
                     <td class="right">{{ $item->quantity }}</td>
                     <td class="right">{{ number_format($item->unit_price, 2, ',', '.') }}</td>
                     <td class="right">{{ number_format($item->subtotal, 2, ',', '.') }}</td>

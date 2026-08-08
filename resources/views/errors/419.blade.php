@@ -1,0 +1,5 @@
+@extends('errors.layout')
+@section('title', 'Sesiune expirată')
+@section('code', 'EROARE 419')
+@section('heading', 'Sesiunea a expirat')
+@section('message', 'Pentru siguranță, sesiunea formularului a expirat. Reveniți la pagina anterioară, reîncărcați și încercați din nou.')

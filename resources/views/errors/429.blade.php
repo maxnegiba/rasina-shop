@@ -1,0 +1,5 @@
+@extends('errors.layout')
+@section('title', 'Prea multe solicitări')
+@section('code', 'EROARE 429')
+@section('heading', 'Vă rugăm să așteptați')
+@section('message', 'Au fost trimise prea multe solicitări într-un timp scurt. Încercați din nou peste un minut.')
