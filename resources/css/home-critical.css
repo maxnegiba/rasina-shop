@@ -56,6 +56,27 @@
 }
 
 /*
+ * Desktop-only atelier stability.
+ *
+ * Lighthouse was attributing almost the entire desktop CLS to the animated
+ * resin pseudo-element. Keep the exact first-frame resin appearance, but do
+ * not move that oversized pseudo-element on desktop. Containing the collage
+ * also prevents its decorative layers from participating in layout outside
+ * the already fixed hero column. Mobile/tablet are intentionally untouched.
+ */
+@media (min-width: 1024px) {
+    #atelier .atelier-puzzle-stage {
+        contain: layout paint;
+    }
+
+    #atelier .atelier-resin-layer::before {
+        animation: none !important;
+        transform: translate3d(-2%, -1%, 0) rotate(-8deg) scale(1.1) !important;
+        will-change: auto !important;
+    }
+}
+
+/*
  * Keep the premium footer visually stable even while the full homepage bundle
  * is loading asynchronously. The previous arbitrary Tailwind gradient could be
  * absent during the critical-CSS phase, leaving white text on the ivory body.
