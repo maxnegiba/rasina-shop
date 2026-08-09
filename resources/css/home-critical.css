@@ -58,18 +58,40 @@
 /*
  * Desktop-only atelier stability.
  *
- * Lighthouse was attributing almost the entire desktop CLS to the animated
- * resin pseudo-element. Keep the exact first-frame resin appearance, but do
- * not move that oversized pseudo-element on desktop. Containing the collage
- * also prevents its decorative layers from participating in layout outside
- * the already fixed hero column. Mobile/tablet are intentionally untouched.
+ * The decorative resin is defined in the hero component, but Lighthouse can
+ * paint the desktop shell before every detail of that component has settled.
+ * Reserve the exact final stage/resin geometry in the head-critical CSS so
+ * loading the complete hero styling cannot create or resize the oversized
+ * resin pseudo-element after first paint.
+ *
+ * These values intentionally mirror atelier-hero.blade.php. Visual paint
+ * details (gradients, blur, blend modes) stay in the component; only geometry
+ * and the fixed first animation frame live here. Mobile/tablet are untouched.
  */
 @media (min-width: 1024px) {
     #atelier .atelier-puzzle-stage {
+        position: absolute;
+        inset: 0;
+        isolation: isolate;
+        overflow: hidden;
         contain: layout paint;
     }
 
+    #atelier .atelier-resin-layer {
+        position: absolute;
+        inset: -8%;
+        z-index: 2;
+        pointer-events: none;
+        overflow: hidden;
+        opacity: 0.98;
+        transform: translateZ(0);
+    }
+
     #atelier .atelier-resin-layer::before {
+        content: "";
+        position: absolute;
+        inset: -20%;
+        opacity: 0.76;
         animation: none !important;
         transform: translate3d(-2%, -1%, 0) rotate(-8deg) scale(1.1) !important;
         will-change: auto !important;
