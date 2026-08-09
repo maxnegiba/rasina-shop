@@ -5,12 +5,6 @@
 
     @once
         <style>
-            /*
-             * Mobile/tablet override for the atelier puzzle hero.
-             * Desktop keeps the original absolute-positioned collage.
-             * Below 1024px we use a dense intrinsic grid so the artwork remains
-             * visible without forcing the user through several screens of images.
-             */
             @media (max-width: 1023px) {
                 #atelier {
                     min-height: 0;
@@ -145,14 +139,25 @@
                     <article class="group block {{ $index === 1 ? 'md:mt-16' : '' }}">
                         <a href="{{ route('shop.category', $category->slug ?? '#') }}" class="block relative overflow-hidden aspect-[4/5] mb-8 bg-warm-beige/30 ring-1 ring-inset ring-black/5">
                             @if($category->image)
-                                <img src="{{ asset('storage/' . $category->image) }}"
-                                     width="800"
-                                     height="1000"
+                                @php
+                                    $categorySource = 'storage:'.ltrim($category->image, '/');
+                                    $categoryImage = \App\Support\OptimizedImage::url($categorySource, 560, 72);
+                                    $categorySrcset = \App\Support\OptimizedImage::srcset($categorySource, [360, 560, 800], 72);
+                                @endphp
+                                <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
+                                     data-src="{{ $categoryImage }}"
+                                     data-srcset="{{ $categorySrcset }}"
+                                     data-sizes="(min-width: 768px) 30vw, 92vw"
+                                     width="560"
+                                     height="700"
                                      loading="lazy"
                                      fetchpriority="low"
                                      decoding="async"
                                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                                      alt="{{ $category->name }}">
+                                <noscript>
+                                    <img src="{{ $categoryImage }}" width="560" height="700" class="w-full h-full object-cover" alt="{{ $category->name }}">
+                                </noscript>
                             @else
                                 <div class="w-full h-full flex items-center justify-center bg-warm-beige/40 text-dark-brown/60 font-serif text-3xl" aria-hidden="true">MTD ART</div>
                             @endif
@@ -189,22 +194,37 @@
                         @php
                             $homeImage = $product->images->firstWhere('is_featured', true)
                                 ?? $product->images->first();
-                            $homeImageUrl = $homeImage
-                                ? asset('storage/'.$homeImage->image_path)
-                                : ($product->image ? asset('storage/'.$product->image) : null);
+                            $homeImagePath = $homeImage
+                                ? $homeImage->image_path
+                                : ($product->image ?: null);
+
+                            if ($homeImagePath) {
+                                $homeImageSource = 'storage:'.ltrim($homeImagePath, '/');
+                                $homeImageUrl = \App\Support\OptimizedImage::url($homeImageSource, 480, 70);
+                                $homeImageSrcset = \App\Support\OptimizedImage::srcset($homeImageSource, [320, 480, 720], 70);
+                            } else {
+                                $homeImageUrl = null;
+                                $homeImageSrcset = null;
+                            }
                         @endphp
                         <article class="group bg-ivory shadow-sm border border-black/5 hover:shadow-md transition-all duration-300">
                             <a href="{{ route('shop.show', $product->slug) }}" class="block">
                                 <div class="aspect-[3/4] overflow-hidden bg-white relative p-4 flex items-center justify-center">
                                     @if($homeImageUrl)
-                                        <img src="{{ $homeImageUrl }}"
+                                        <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
+                                             data-src="{{ $homeImageUrl }}"
+                                             data-srcset="{{ $homeImageSrcset }}"
+                                             data-sizes="(min-width: 1024px) 22vw, (min-width: 640px) 46vw, 92vw"
                                              alt="{{ $product->name }}"
-                                             width="600"
-                                             height="800"
+                                             width="480"
+                                             height="640"
                                              loading="lazy"
                                              fetchpriority="low"
                                              decoding="async"
                                              class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 ease-out">
+                                        <noscript>
+                                            <img src="{{ $homeImageUrl }}" alt="{{ $product->name }}" width="480" height="640" class="w-full h-full object-contain">
+                                        </noscript>
                                     @else
                                         <div class="w-full h-full flex items-center justify-center bg-warm-beige/30 text-dark-brown/60 font-serif text-2xl" aria-hidden="true">MTD ART</div>
                                     @endif
