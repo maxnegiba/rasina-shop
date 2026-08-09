@@ -10,18 +10,22 @@
         {!! seo() !!}
     @endif
 
-    {{-- Keep the original MTD ART typefaces, but do not block first paint on Google Fonts. --}}
+    @php
+        $isHomePage = request()->routeIs('home');
+        $fontStylesheet = $isHomePage
+            ? 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@400;500;600&display=optional'
+            : 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700&display=swap';
+    @endphp
+
+    {{-- Preserve the MTD ART typefaces without making the homepage H1 wait for them on slow connections. --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload"
-          as="style"
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700&display=swap">
     <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700&display=swap"
+          href="{{ $fontStylesheet }}"
           media="print"
           onload="this.media='all'">
     <noscript>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700&display=swap">
+        <link rel="stylesheet" href="{{ $fontStylesheet }}">
     </noscript>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -67,6 +71,11 @@
         Sari la conținut
     </a>
 
+    @php
+        $logo192 = \App\Support\OptimizedImage::public('img/logo.png', 192, 76);
+        $logo384 = \App\Support\OptimizedImage::public('img/logo.png', 384, 76);
+    @endphp
+
     <!-- Navbar cu efect premium de sticlă -->
     <nav aria-label="Navigație principală" class="bg-ivory/80 backdrop-blur-2xl sticky top-0 z-50 border-b border-black/[0.03] shadow-sm transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -74,7 +83,9 @@
                 <div class="flex-shrink-0 flex items-center h-full">
                     <a href="{{ route('home') }}" aria-label="MTD ART — pagina principală" class="font-serif text-lg md:text-2xl tracking-[0.2em] uppercase text-dark-brown hover:text-vintage-gold transition-colors duration-300 flex items-center gap-2 md:gap-3">
                         <div class="relative h-24 w-24 md:w-32 flex items-center justify-center">
-                            <img src="/img/logo.png"
+                            <img src="{{ $logo192 }}"
+                                 srcset="{{ $logo192 }} 192w, {{ $logo384 }} 384w"
+                                 sizes="(min-width: 768px) 128px, 96px"
                                  alt="MTD Art Logo"
                                  width="128"
                                  height="128"
@@ -131,7 +142,7 @@
         <div id="mobile-sidebar-content" role="dialog" aria-modal="true" aria-label="Meniu principal" class="fixed top-0 right-0 bottom-0 w-64 bg-ivory shadow-2xl border-l border-black/5 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
             <div class="flex justify-between items-center p-6 border-b border-black/5">
                 <span class="font-serif text-lg tracking-[0.1em] uppercase text-dark-brown flex items-center gap-2">
-                    <img src="/img/logo.png" alt="" width="32" height="32" loading="lazy" decoding="async" class="h-8 w-auto object-contain mr-2">
+                    <img src="{{ $logo192 }}" alt="" width="32" height="32" loading="lazy" decoding="async" class="h-8 w-auto object-contain mr-2">
                     Meniu
                 </span>
                 <button id="mobile-close-btn" type="button" aria-label="Închide meniul" class="text-dark-brown/60 hover:text-dark-brown focus:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold transition-colors">
