@@ -22,6 +22,11 @@
         $homeStylesheet = $canUseHomeCriticalCss
             ? \Illuminate\Support\Facades\Vite::asset('resources/css/home.css')
             : null;
+        $settings = app(\App\Settings\GeneralSettings::class);
+        $contactEmail = trim((string) ($settings->contact_email ?? ''));
+        $contactEmail = $contactEmail !== ''
+            ? $contactEmail
+            : (string) config('shop.legal.email', 'contact@mtdart.ro');
     @endphp
 
     {{-- Preserve the MTD ART typefaces without making the homepage H1 wait for them on slow connections. --}}
@@ -220,13 +225,6 @@
                     <p class="font-light text-white/60 text-sm leading-relaxed mb-6 max-w-sm mx-auto md:mx-0">
                         O fuziune atemporală între esența naturală a lemnului și eleganța translucidă a rășinii. Piese de artă unicat, lucrate manual cu pasiune și măiestrie în România.
                     </p>
-                    @php
-                        $settings = app(\App\Settings\GeneralSettings::class);
-                        $contactEmail = trim((string) ($settings->contact_email ?? ''));
-                        $contactEmail = $contactEmail !== ''
-                            ? $contactEmail
-                            : (string) config('shop.legal.email', 'contact@mtdart.ro');
-                    @endphp
                     <a href="mailto:{{ $contactEmail }}" aria-label="Trimite un e-mail către {{ $contactEmail }}" class="text-vintage-gold hover:text-white transition-colors duration-300 text-sm font-medium tracking-wide">
                         {{ $contactEmail }}
                     </a>
