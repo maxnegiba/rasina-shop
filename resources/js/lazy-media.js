@@ -59,7 +59,12 @@ const bootDeferredMedia = () => {
     observe(deferredImages, loadDeferredImage, '240px 0px');
 
     const deferredSvgRoots = [...document.querySelectorAll('[data-deferred-svg-root]')];
-    observe(deferredSvgRoots, loadDeferredSvgImages, '180px 0px');
+    const isCompactViewport = window.matchMedia('(max-width: 1023px)').matches;
+    const puzzleMargin = isCompactViewport
+        ? '0px 0px -28% 0px'
+        : '180px 0px';
+
+    observe(deferredSvgRoots, loadDeferredSvgImages, puzzleMargin);
 };
 
 if (document.readyState === 'loading') {
