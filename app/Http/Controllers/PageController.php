@@ -24,12 +24,13 @@ class PageController extends Controller
             ->take(3)
             ->get();
 
-        // 2. Luăm ultimele 6 produse publicate pentru secțiunea "Noutăți în Galerie"
+        // Homepage keeps one complete desktop row. This reduces below-the-fold image
+        // payload while preserving a useful recent-work preview.
         $latestProducts = Product::where('status', 'published')
             ->where('stock', '>', 0)
             ->with('images')
             ->latest()
-            ->take(6)
+            ->take(4)
             ->get();
 
         // 3. Luăm cele mai recente 3 articole de blog pentru secțiunea "Jurnal de Atelier"
