@@ -28,7 +28,11 @@
         <link rel="stylesheet" href="{{ $fontStylesheet }}">
     </noscript>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if($isHomePage)
+        @vite(['resources/css/home.css', 'resources/js/app.js'])
+    @else
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
 
     @php
         $needsCustomOrderLivewire = request()->routeIs('shop.*') || request()->routeIs('custom-orders');
