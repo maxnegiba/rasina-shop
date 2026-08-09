@@ -12,9 +12,9 @@
 
     @php
         $isHomePage = request()->routeIs('home');
-        $fontStylesheet = $isHomePage
-            ? 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@400;500;600&display=optional'
-            : 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700&display=swap';
+        $homeCormorantStylesheet = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=optional';
+        $homeManropeStylesheet = 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=optional';
+        $fontStylesheet = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700&display=swap';
         $homeCriticalCss = $isHomePage
             ? \App\Support\CriticalCss::fromViteManifest('resources/css/home-critical.css')
             : null;
@@ -29,16 +29,62 @@
             : (string) config('shop.legal.email', 'contact@mtdart.ro');
     @endphp
 
-    {{-- Preserve the MTD ART typefaces without making the homepage H1 wait for them on slow connections. --}}
+    {{-- Preserve the MTD ART typefaces while keeping the homepage LCP font ahead of UI/body fonts. --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet"
-          href="{{ $fontStylesheet }}"
-          media="print"
-          onload="this.media='all'">
-    <noscript>
-        <link rel="stylesheet" href="{{ $fontStylesheet }}">
-    </noscript>
+
+    @if($isHomePage)
+        {{-- Cormorant drives the hero LCP. Fetch its stylesheet first without blocking first paint. --}}
+        <link rel="preload"
+              href="{{ $homeCormorantStylesheet }}"
+              as="style"
+              fetchpriority="high"
+              onload="this.onload=null;this.rel='stylesheet'">
+        <noscript>
+            <link rel="stylesheet" href="{{ $homeCormorantStylesheet }}">
+            <link rel="stylesheet" href="{{ $homeManropeStylesheet }}">
+        </noscript>
+
+        {{--
+            Manrope is UI/body typography, not the LCP font. Start it only after
+            the initial document load so its WOFF2 requests cannot compete with
+            the hero font on Lighthouse Slow 4G. `display=optional` prevents a
+            late font swap from introducing CLS on constrained connections.
+        --}}
+        <script>
+            (() => {
+                const loadHomeManrope = () => {
+                    if (document.querySelector('link[data-home-manrope]')) {
+                        return;
+                    }
+
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = '{{ $homeManropeStylesheet }}';
+                    link.media = 'print';
+                    link.dataset.homeManrope = 'true';
+                    link.onload = function () {
+                        this.media = 'all';
+                    };
+                    document.head.appendChild(link);
+                };
+
+                if (document.readyState === 'complete') {
+                    loadHomeManrope();
+                } else {
+                    window.addEventListener('load', loadHomeManrope, { once: true });
+                }
+            })();
+        </script>
+    @else
+        <link rel="stylesheet"
+              href="{{ $fontStylesheet }}"
+              media="print"
+              onload="this.media='all'">
+        <noscript>
+            <link rel="stylesheet" href="{{ $fontStylesheet }}">
+        </noscript>
+    @endif
 
     @if($canUseHomeCriticalCss)
         {{--
@@ -283,7 +329,6 @@
         @livewireScripts
     @endif
 
-    <script src="{{ asset('js/storefront-ui.js') }}" defer></script>
     @if(request()->routeIs('shop.show'))
         <script src="{{ asset('js/product-gallery.js') }}" defer></script>
     @endif
