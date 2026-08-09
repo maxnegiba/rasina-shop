@@ -15,17 +15,3 @@
 @endphp
 
 {!! $atelierHeroHtml !!}
-
-<noscript>
-    <style>
-        #atelier .atelier-puzzle-stage { display: none !important; }
-        #atelier .atelier-noscript-fallback { display: block !important; }
-    </style>
-    <div id="atelier" class="atelier-noscript-fallback hidden overflow-hidden bg-[#d7c7b8] p-2">
-        <img
-            src="{{ asset('img/hero/natural-materials.webp') }}"
-            alt="Materiale naturale și flori pregătite în atelierul MTD ART"
-            class="h-auto w-full object-cover"
-        >
-    </div>
-</noscript>
