@@ -1,0 +1,51 @@
+# MTD ART production performance snippet
+# Merge these directives into the existing mtdart.ro `server { ... }` block.
+# Do not place a second `server {}` around this file.
+
+# Text compression: Lighthouse currently reports the Vite CSS payload at ~77 KiB.
+gzip on;
+gzip_vary on;
+gzip_proxied any;
+gzip_comp_level 6;
+gzip_min_length 1024;
+gzip_types
+    text/plain
+    text/css
+    text/xml
+    application/json
+    application/javascript
+    application/xml
+    application/rss+xml
+    image/svg+xml;
+
+# Fingerprinted Vite files are safe to cache forever because a content change creates a new filename.
+location ^~ /build/assets/ {
+    try_files $uri =404;
+    expires 1y;
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+    access_log off;
+}
+
+# Brand/hero files are not fingerprinted, so use a strong but replaceable cache window.
+location ^~ /img/ {
+    try_files $uri =404;
+    expires 30d;
+    add_header Cache-Control "public, max-age=2592000" always;
+    access_log off;
+}
+
+# Product/category media may be replaced while keeping the same storage path.
+location ^~ /storage/ {
+    try_files $uri =404;
+    expires 30d;
+    add_header Cache-Control "public, max-age=2592000" always;
+    access_log off;
+}
+
+# If local font files are introduced later, they can be cached as immutable versioned assets.
+location ~* \.(?:woff2?|ttf|otf)$ {
+    try_files $uri =404;
+    expires 1y;
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+    access_log off;
+}
