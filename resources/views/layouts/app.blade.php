@@ -15,6 +15,13 @@
         $fontStylesheet = $isHomePage
             ? 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@400;500;600&display=optional'
             : 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700&display=swap';
+        $homeCriticalCss = $isHomePage
+            ? \App\Support\CriticalCss::fromViteManifest('resources/css/home-critical.css')
+            : null;
+        $canUseHomeCriticalCss = $isHomePage && is_string($homeCriticalCss) && $homeCriticalCss !== '';
+        $homeStylesheet = $canUseHomeCriticalCss
+            ? \Illuminate\Support\Facades\Vite::asset('resources/css/home.css')
+            : null;
     @endphp
 
     {{-- Preserve the MTD ART typefaces without making the homepage H1 wait for them on slow connections. --}}
@@ -28,7 +35,23 @@
         <link rel="stylesheet" href="{{ $fontStylesheet }}">
     </noscript>
 
-    @if($isHomePage)
+    @if($canUseHomeCriticalCss)
+        {{--
+            Production homepage: paint the shell/hero immediately from the tiny
+            compiled critical bundle, then fetch the complete homepage stylesheet
+            without keeping it on the render-blocking path.
+        --}}
+        <style data-home-critical>{!! $homeCriticalCss !!}</style>
+        <link rel="preload"
+              href="{{ $homeStylesheet }}"
+              as="style"
+              onload="this.onload=null;this.rel='stylesheet'">
+        <noscript>
+            <link rel="stylesheet" href="{{ $homeStylesheet }}">
+        </noscript>
+        @vite(['resources/js/app.js'])
+    @elseif($isHomePage)
+        {{-- Safe fallback for dev mode, a missing manifest, or an incomplete deploy. --}}
         @vite(['resources/css/home.css', 'resources/js/app.js'])
     @else
         @vite(['resources/css/app.css', 'resources/js/app.js'])

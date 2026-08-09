@@ -1,0 +1,61 @@
+@import 'tailwindcss' source(none);
+
+@source './sources/home-critical.html';
+
+@theme {
+    --color-ivory: #fffff0;
+    --color-cream-white: #fffdd0;
+    --color-warm-beige: #f5f5dc;
+    --color-vintage-gold: #cfb53b;
+    --color-deep-oak: #3b2818;
+    --color-dark-brown: #2c1e16;
+
+    --font-serif: 'Cormorant Garamond', Georgia, serif;
+    --font-editorial: 'Libre Baskerville', Georgia, serif;
+    --font-sans: Manrope, ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+ * First-paint accessibility/brand rules copied from the normal homepage bundle.
+ * These prevent a color/size flash before home.css finishes loading.
+ */
+[class~="text-[9px]"] {
+    font-size: 0.66rem !important;
+    line-height: 0.95rem !important;
+}
+
+[class~="text-[10px]"] {
+    font-size: 0.72rem !important;
+    line-height: 1rem !important;
+}
+
+[class~="text-[11px]"] {
+    font-size: 0.76rem !important;
+    line-height: 1.05rem !important;
+}
+
+.text-vintage-gold {
+    color: #8a641f !important;
+}
+
+[class~="text-dark-brown/60"],
+[class~="text-dark-brown/70"],
+[class~="text-dark-brown/75"],
+[class~="text-dark-brown/80"] {
+    color: #5d3d2b !important;
+}
+
+[class~="text-[#bf8179]"] {
+    color: #a46159 !important;
+}
+
+[class~="text-[#b68b45]"],
+[class~="text-[#aa7a36]"],
+[class~="text-[#9a7037]"] {
+    color: #8a641f !important;
+}
+
+:focus-visible {
+    outline: 2px solid #8a641f;
+    outline-offset: 3px;
+}
