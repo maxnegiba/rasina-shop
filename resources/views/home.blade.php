@@ -3,6 +3,120 @@
 @section('content')
     <x-atelier-hero />
 
+    @once
+        <style>
+            /*
+             * Mobile/tablet override for the atelier puzzle hero.
+             * The component's desktop collage remains untouched; below 1024px
+             * we use intrinsic aspect-ratio tiles instead of fixed row spans.
+             */
+            @media (max-width: 1023px) {
+                #atelier {
+                    min-height: 0;
+                }
+
+                #atelier .atelier-puzzle-stage {
+                    position: relative;
+                    inset: auto;
+                    display: grid;
+                    grid-auto-flow: dense;
+                    grid-auto-rows: auto;
+                    width: 100%;
+                    min-height: 0;
+                    overflow: hidden;
+                }
+
+                #atelier .atelier-puzzle-piece {
+                    position: relative;
+                    left: auto;
+                    top: auto;
+                    width: 100%;
+                    height: auto;
+                    min-width: 0;
+                    grid-row: auto !important;
+                    aspect-ratio: 1 / 1;
+                    transform: none;
+                    will-change: auto;
+                }
+
+                #atelier .atelier-puzzle-piece svg {
+                    position: absolute;
+                    inset: 0;
+                    width: 100%;
+                    height: 100%;
+                }
+
+                #atelier .atelier-puzzle-piece:hover,
+                #atelier .atelier-puzzle-piece:focus-visible {
+                    transform: none;
+                }
+            }
+
+            /* Phones: compact three-column mosaic instead of a very tall masonry wall. */
+            @media (max-width: 639px) {
+                #atelier .atelier-puzzle-stage {
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 4px;
+                    padding: 6px;
+                }
+
+                #atelier .atelier-puzzle-piece {
+                    grid-column: span 1 !important;
+                }
+
+                #atelier .atelier-puzzle-piece:nth-of-type(1),
+                #atelier .atelier-puzzle-piece:nth-of-type(7),
+                #atelier .atelier-puzzle-piece:nth-of-type(11) {
+                    grid-column: span 2 !important;
+                    aspect-ratio: 2 / 1;
+                }
+
+                #atelier .atelier-puzzle-piece:nth-of-type(2),
+                #atelier .atelier-puzzle-piece:nth-of-type(4),
+                #atelier .atelier-puzzle-piece:nth-of-type(12) {
+                    aspect-ratio: 4 / 5;
+                }
+            }
+
+            /* Very narrow phones get two larger columns for better image legibility. */
+            @media (max-width: 374px) {
+                #atelier .atelier-puzzle-stage {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 5px;
+                    padding: 6px;
+                }
+
+                #atelier .atelier-puzzle-piece:nth-of-type(1),
+                #atelier .atelier-puzzle-piece:nth-of-type(7),
+                #atelier .atelier-puzzle-piece:nth-of-type(11) {
+                    grid-column: 1 / -1 !important;
+                    aspect-ratio: 2 / 1;
+                }
+            }
+
+            /* Tablets: four-column collage keeps the hero compact and balanced. */
+            @media (min-width: 640px) and (max-width: 1023px) {
+                #atelier .atelier-puzzle-stage {
+                    grid-template-columns: repeat(4, minmax(0, 1fr));
+                    gap: 7px;
+                    padding: 10px;
+                }
+
+                #atelier .atelier-puzzle-piece {
+                    grid-column: span 1 !important;
+                }
+
+                #atelier .atelier-puzzle-piece:nth-of-type(1),
+                #atelier .atelier-puzzle-piece:nth-of-type(7),
+                #atelier .atelier-puzzle-piece:nth-of-type(11),
+                #atelier .atelier-puzzle-piece:nth-of-type(13) {
+                    grid-column: span 2 !important;
+                    aspect-ratio: 2 / 1;
+                }
+            }
+        </style>
+    @endonce
+
     <!-- COLECȚII PRINCIPALE -->
     <section class="max-w-7xl mx-auto py-32 px-4 sm:px-6 lg:px-8 bg-ivory">
         <div class="text-center mb-24">
