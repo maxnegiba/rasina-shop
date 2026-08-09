@@ -8,6 +8,10 @@ use Throwable;
 
 class OptimizedImageController extends Controller
 {
+    private const WIDTHS = [96, 192, 320, 360, 384, 480, 560, 720, 800, 960, 1280, 1600];
+
+    private const QUALITIES = [70, 72, 74, 76, 80];
+
     public function __invoke(Request $request, string $encoded): BinaryFileResponse
     {
         $source = $this->decodeSource($encoded);
@@ -15,8 +19,8 @@ class OptimizedImageController extends Controller
 
         abort_unless($sourcePath && is_file($sourcePath), 404);
 
-        $width = max(32, min(1600, $request->integer('w', 480)));
-        $quality = max(45, min(88, $request->integer('q', 72)));
+        $width = $this->nearestAllowed((int) $request->integer('w', 480), self::WIDTHS);
+        $quality = $this->nearestAllowed((int) $request->integer('q', 72), self::QUALITIES);
         $mtime = (int) filemtime($sourcePath);
         $cacheKey = hash('sha256', $source.'|'.$mtime.'|'.$width.'|'.$quality);
         $cacheDir = storage_path('app/image-cache');
@@ -44,6 +48,22 @@ class OptimizedImageController extends Controller
         $response->isNotModified($request);
 
         return $response;
+    }
+
+    private function nearestAllowed(int $requested, array $allowed): int
+    {
+        $best = $allowed[0];
+        $distance = abs($requested - $best);
+
+        foreach ($allowed as $candidate) {
+            $candidateDistance = abs($requested - $candidate);
+            if ($candidateDistance < $distance) {
+                $best = $candidate;
+                $distance = $candidateDistance;
+            }
+        }
+
+        return $best;
     }
 
     private function decodeSource(string $encoded): string
