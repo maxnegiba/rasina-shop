@@ -34,21 +34,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     @if($isHomePage)
-        {{--
-            Desktop must know the Cormorant @font-face before first paint. The
-            previous async-only stylesheet allowed the hero to paint in Georgia
-            and then reflow when Cormorant arrived, which Lighthouse reported as
-            a large desktop CLS on the entire vertically-centred hero copy.
-        --}}
-        <link rel="stylesheet"
-              href="{{ $homeCormorantStylesheet }}"
-              media="(min-width: 1024px)">
-
-        {{-- Keep the proven non-blocking path on mobile/tablet. --}}
+        {{-- Cormorant drives the hero LCP. Fetch its stylesheet first without blocking first paint. --}}
         <link rel="preload"
               href="{{ $homeCormorantStylesheet }}"
               as="style"
-              media="(max-width: 1023px)"
               fetchpriority="high"
               onload="this.onload=null;this.rel='stylesheet'">
         <noscript>
