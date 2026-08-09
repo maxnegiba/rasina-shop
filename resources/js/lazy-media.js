@@ -55,11 +55,13 @@ const observe = (elements, loader, rootMargin = '280px 0px') => {
 };
 
 const bootDeferredMedia = () => {
+    const isCompactViewport = window.matchMedia('(max-width: 1023px)').matches;
+
     const deferredImages = [...document.querySelectorAll('img[data-src]')];
-    observe(deferredImages, loadDeferredImage, '240px 0px');
+    const imageMargin = isCompactViewport ? '80px 0px' : '240px 0px';
+    observe(deferredImages, loadDeferredImage, imageMargin);
 
     const deferredSvgRoots = [...document.querySelectorAll('[data-deferred-svg-root]')];
-    const isCompactViewport = window.matchMedia('(max-width: 1023px)').matches;
     const puzzleMargin = isCompactViewport
         ? '0px 0px -28% 0px'
         : '180px 0px';
