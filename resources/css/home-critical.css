@@ -56,18 +56,19 @@
 }
 
 /*
- * Desktop-only atelier stability.
+ * Desktop hero stability.
  *
- * Lighthouse repeatedly identifies the generated resin ::before layer as the
- * source of essentially all desktop CLS (~0.561). Previous attempts to freeze
- * or pre-reserve its geometry did not change that result, so on desktop we do
- * not generate this one decorative pseudo-element at all.
- *
- * The main resin layer, multi-stop resin gradients, particles (::after), gloss,
- * depth, texture, vignette, puzzle images and piece edging remain unchanged.
- * Mobile/tablet keep the original resin pseudo-element and animation.
+ * The hero heading already contains intentional <br> line breaks. Prevent the
+ * fallback typeface from adding an extra wrap inside those lines before
+ * Cormorant Garamond settles. Without this, the vertically centred copy can
+ * temporarily gain a fifth line and then jump when the final font fits back
+ * into the intended four-line composition.
  */
 @media (min-width: 1024px) {
+    #main-content > section:first-child h1 {
+        white-space: nowrap;
+    }
+
     #atelier .atelier-puzzle-stage {
         contain: layout paint;
     }
