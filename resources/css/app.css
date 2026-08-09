@@ -9,11 +9,93 @@
     --color-ivory: #fffff0;
     --color-cream-white: #fffdd0;
     --color-warm-beige: #f5f5dc;
-    --color-vintage-gold: #cfb53b;
-    --color-deep-oak: #3b2818;
-    --color-dark-brown: #2c1e16;
+    /* Dark, warm brown accent: WCAG AAA against ivory/white and still on-brand. */
+    --color-vintage-gold: #6e4727;
+    --color-deep-oak: #3a2418;
+    --color-dark-brown: #24150f;
 
-    --font-serif: 'Cormorant Garamond', Georgia, serif;
-    --font-editorial: 'Libre Baskerville', Georgia, serif;
-    --font-sans: Manrope, ui-sans-serif, system-ui, sans-serif;
+    /* System stacks remove the Google Fonts render-blocking network dependency. */
+    --font-serif: Georgia, 'Times New Roman', serif;
+    --font-editorial: Georgia, 'Times New Roman', serif;
+    --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/*
+ * Storefront readability guardrails.
+ * The visual system previously used 9-11 px labels and 40-60% brown text,
+ * which Lighthouse correctly flagged for legibility/contrast. These rules
+ * preserve the compact editorial look while keeping important copy readable.
+ */
+html {
+    font-size: 17px;
+    text-rendering: optimizeLegibility;
+}
+
+body {
+    color: var(--color-dark-brown);
+}
+
+[class~="text-[9px]"],
+[class~="text-[10px]"] {
+    font-size: 0.76rem !important;
+    line-height: 1.05rem !important;
+}
+
+[class~="text-[11px]"] {
+    font-size: 0.8rem !important;
+    line-height: 1.1rem !important;
+}
+
+[class~="text-dark-brown/40"] {
+    color: #76512d !important;
+}
+
+[class~="text-dark-brown/50"],
+[class~="text-dark-brown/60"] {
+    color: #56351f !important;
+}
+
+[class~="text-dark-brown/70"],
+[class~="text-dark-brown/75"],
+[class~="text-dark-brown/80"] {
+    color: #3a2418 !important;
+}
+
+/* Legacy hero accent values are darkened without forcing a component rewrite. */
+[class~="text-[#bf8179]"] {
+    color: #71463d !important;
+}
+
+[class~="text-[#b68b45]"],
+[class~="text-[#aa7a36]"],
+[class~="text-[#9a7037]"],
+[class~="text-[#a37639]"] {
+    color: #56351f !important;
+}
+
+/* Dark surfaces need the inverse treatment: light text / warm light accent. */
+footer .text-vintage-gold {
+    color: #ead7a6 !important;
+}
+
+footer [class~="text-white/50"],
+footer [class~="text-white/60"],
+footer [class~="text-white/70"] {
+    color: rgba(255, 255, 255, 0.84) !important;
+}
+
+:focus-visible {
+    outline: 2px solid #6e4727;
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
