@@ -9,83 +9,79 @@
     --color-ivory: #fffff0;
     --color-cream-white: #fffdd0;
     --color-warm-beige: #f5f5dc;
-    /* Dark, warm brown accent: WCAG AAA against ivory/white and still on-brand. */
-    --color-vintage-gold: #6e4727;
-    --color-deep-oak: #3a2418;
-    --color-dark-brown: #24150f;
+    --color-vintage-gold: #cfb53b;
+    --color-deep-oak: #3b2818;
+    --color-dark-brown: #2c1e16;
 
-    /* System stacks remove the Google Fonts render-blocking network dependency. */
-    --font-serif: Georgia, 'Times New Roman', serif;
-    --font-editorial: Georgia, 'Times New Roman', serif;
-    --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-serif: 'Cormorant Garamond', Georgia, serif;
+    --font-editorial: 'Libre Baskerville', Georgia, serif;
+    --font-sans: Manrope, ui-sans-serif, system-ui, sans-serif;
 }
 
 /*
- * Storefront readability guardrails.
- * The visual system previously used 9-11 px labels and 40-60% brown text,
- * which Lighthouse correctly flagged for legibility/contrast. These rules
- * preserve the compact editorial look while keeping important copy readable.
+ * Accessibility without redesigning the brand:
+ * - retain the original MTD ART palette for backgrounds, borders and buttons;
+ * - only darken accent colours when they are used as text on light surfaces;
+ * - slightly enlarge the original micro-copy instead of globally scaling the UI.
  */
-html {
-    font-size: 17px;
-    text-rendering: optimizeLegibility;
+[class~="text-[9px]"] {
+    font-size: 0.66rem !important;
+    line-height: 0.95rem !important;
 }
 
-body {
-    color: var(--color-dark-brown);
-}
-
-[class~="text-[9px]"],
 [class~="text-[10px]"] {
+    font-size: 0.72rem !important;
+    line-height: 1rem !important;
+}
+
+[class~="text-[11px]"] {
     font-size: 0.76rem !important;
     line-height: 1.05rem !important;
 }
 
-[class~="text-[11px]"] {
-    font-size: 0.8rem !important;
-    line-height: 1.1rem !important;
+/* Original gold stays intact for bg-vintage-gold / border-vintage-gold. */
+.text-vintage-gold {
+    color: #8a641f !important;
 }
 
-[class~="text-dark-brown/40"] {
-    color: #76512d !important;
+/* Muted brown copy gets sufficient contrast while remaining visibly soft. */
+[class~="text-dark-brown/40"],
+[class~="text-dark-brown/50"] {
+    color: #70513e !important;
 }
 
-[class~="text-dark-brown/50"],
-[class~="text-dark-brown/60"] {
-    color: #56351f !important;
-}
-
+[class~="text-dark-brown/60"],
 [class~="text-dark-brown/70"],
 [class~="text-dark-brown/75"],
 [class~="text-dark-brown/80"] {
-    color: #3a2418 !important;
+    color: #5d3d2b !important;
 }
 
-/* Legacy hero accent values are darkened without forcing a component rewrite. */
+/* Hero keeps its pink/gold identity, only nudged darker for readable text. */
 [class~="text-[#bf8179]"] {
-    color: #71463d !important;
+    color: #a46159 !important;
 }
 
 [class~="text-[#b68b45]"],
 [class~="text-[#aa7a36]"],
 [class~="text-[#9a7037]"],
 [class~="text-[#a37639]"] {
-    color: #56351f !important;
+    color: #8a641f !important;
 }
 
-/* Dark surfaces need the inverse treatment: light text / warm light accent. */
+/* On the dark footer the lighter original gold family remains appropriate. */
 footer .text-vintage-gold {
-    color: #ead7a6 !important;
+    color: #d9c15a !important;
 }
 
 footer [class~="text-white/50"],
 footer [class~="text-white/60"],
 footer [class~="text-white/70"] {
-    color: rgba(255, 255, 255, 0.84) !important;
+    color: rgba(255, 255, 255, 0.78) !important;
 }
 
 :focus-visible {
-    outline: 2px solid #6e4727;
+    outline: 2px solid #8a641f;
     outline-offset: 3px;
 }
 
