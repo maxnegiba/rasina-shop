@@ -9,14 +9,15 @@ final class CriticalCss
 
     public static function fromViteManifest(string $entry, ?string $buildDirectory = null): ?string
     {
-        $buildDirectory ??= public_path('build');
+        $usesDefaultBuildDirectory = $buildDirectory === null;
+        $buildDirectory = $usesDefaultBuildDirectory ? public_path('build') : $buildDirectory;
         $cacheKey = $buildDirectory.'|'.$entry;
 
         if (array_key_exists($cacheKey, self::$cache)) {
             return self::$cache[$cacheKey];
         }
 
-        if ($buildDirectory === public_path('build') && is_file(public_path('hot'))) {
+        if ($usesDefaultBuildDirectory && is_file(public_path('hot'))) {
             return self::$cache[$cacheKey] = null;
         }
 
