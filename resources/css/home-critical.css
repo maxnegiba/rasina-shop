@@ -55,6 +55,39 @@
     color: #8a641f !important;
 }
 
+/*
+ * Keep the premium footer visually stable even while the full homepage bundle
+ * is loading asynchronously. The previous arbitrary Tailwind gradient could be
+ * absent during the critical-CSS phase, leaving white text on the ivory body.
+ */
+footer {
+    background: radial-gradient(ellipse at top, #3b2818 0%, #2c1e16 58%, #1a120d 100%) !important;
+    color: #ffffff !important;
+}
+
+footer h2 {
+    color: #ffffff !important;
+}
+
+footer .text-vintage-gold,
+footer h3,
+footer a[href^="mailto:"] {
+    color: #d9c15a !important;
+}
+
+footer [class~="text-white/50"],
+footer [class~="text-white/60"],
+footer [class~="text-white/70"],
+footer [class~="text-white/80"],
+footer ul,
+footer ul a {
+    color: rgba(255, 255, 255, 0.78) !important;
+}
+
+footer a:hover {
+    color: #ffffff !important;
+}
+
 :focus-visible {
     outline: 2px solid #8a641f;
     outline-offset: 3px;
