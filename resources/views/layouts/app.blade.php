@@ -10,79 +10,55 @@
         {!! seo() !!}
     @endif
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @livewireStyles
 
-    <style>
-        h1, h2, .font-serif {
-            font-family: 'Cormorant Garamond', Georgia, serif;
-        }
-
-        .prose,
-        .font-editorial,
-        .product-description,
-        .article-content {
-            font-family: 'Libre Baskerville', Georgia, serif;
-        }
-
-        .prose h1,
-        .prose h2,
-        .prose h3,
-        .prose h4,
-        .prose h5,
-        .prose h6 {
-            font-family: 'Cormorant Garamond', Georgia, serif;
-        }
-
-        button,
-        input,
-        select,
-        textarea {
-            font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
-        }
-    </style>
+    @php
+        $needsCustomOrderLivewire = request()->routeIs('shop.*') || request()->routeIs('custom-orders');
+    @endphp
+    @if($needsCustomOrderLivewire)
+        @livewireStyles
+    @endif
 </head>
 <body class="bg-ivory text-dark-brown font-sans antialiased selection:bg-vintage-gold selection:text-white flex flex-col min-h-screen">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-white focus:px-4 focus:py-3 focus:text-sm focus:font-semibold focus:text-dark-brown focus:shadow-lg">
+        Sari la conținut
+    </a>
 
     <!-- Navbar cu efect premium de sticlă -->
-    <nav class="bg-ivory/80 backdrop-blur-2xl sticky top-0 z-50 border-b border-black/[0.03] shadow-sm transition-all duration-300">
+    <nav aria-label="Navigație principală" class="bg-ivory/90 backdrop-blur-xl sticky top-0 z-50 border-b border-black/[0.05] shadow-sm transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-24 items-center relative">
                 <div class="flex-shrink-0 flex items-center h-full">
-                    <a href="{{ route('home') ?? '/' }}" class="font-serif text-lg md:text-2xl tracking-[0.2em] uppercase text-dark-brown hover:text-vintage-gold transition-colors duration-300 flex items-center gap-2 md:gap-3">
-                        <div class="relative h-24 w-24 md:w-32 flex items-center justify-center">
-                            <img src="/img/logo.png" alt="MTD Art Logo" class="absolute top-1 md:top-2 h-24 md:h-32 w-auto object-contain transition-all duration-300">
-                        </div>
-                        <span>MTD</span>
+                    <a href="{{ route('home') }}" aria-label="MTD ART — pagina principală" class="font-serif text-xl md:text-2xl tracking-[0.16em] uppercase text-dark-brown hover:text-vintage-gold transition-colors duration-300 flex items-center gap-3">
+                        <span aria-hidden="true" class="inline-flex h-14 w-14 items-center justify-center rounded-full border border-dark-brown/20 bg-white/70 font-serif text-lg font-bold tracking-[0.08em] shadow-sm">MTD</span>
+                        <span>MTD ART</span>
                     </a>
                 </div>
+
                 <div class="hidden md:flex flex-1 justify-center">
-                    <div class="flex items-center space-x-12 font-medium tracking-[0.15em] uppercase text-[11px] text-dark-brown/70">
+                    <div class="flex items-center space-x-10 lg:space-x-12 font-semibold tracking-[0.13em] uppercase text-sm text-dark-brown">
                         <a href="{{ route('shop.index') }}" class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Galerie</a>
                         <a href="{{ route('blog.index') }}" wire:navigate class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Jurnal</a>
                         <a href="{{ route('about') }}" wire:navigate class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Poveste</a>
-                        <a href="{{ route('contact') ?? '#' }}" class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Contact</a>
+                        <a href="{{ route('contact') }}" class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300">Contact</a>
                     </div>
                 </div>
-                <div class="flex items-center space-x-6">
-                    <button id="cart-menu-btn" type="button" aria-label="Deschide coșul" aria-controls="cart-sidebar" class="text-dark-brown/80 hover:text-vintage-gold transition duration-300 relative group focus:outline-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                <div class="flex items-center space-x-5">
+                    <button id="cart-menu-btn" type="button" aria-label="Deschide coșul" aria-controls="cart-sidebar" class="text-dark-brown hover:text-vintage-gold transition duration-300 relative group focus:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold focus-visible:ring-offset-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
                         @php
                             $cartItemCount = collect(session('cart', []))
                                 ->sum(static fn (array $item): int => (int) ($item['quantity'] ?? 0));
                         @endphp
-                        <span id="cart-count-badge" class="absolute -top-1 -right-2 bg-vintage-gold text-white text-[9px] min-w-4 h-4 px-1 flex items-center justify-center rounded-full opacity-100 transition-opacity {{ $cartItemCount > 0 ? '' : 'hidden' }}">
+                        <span id="cart-count-badge" aria-hidden="true" class="absolute -top-2 -right-3 bg-vintage-gold text-white text-xs min-w-5 h-5 px-1 flex items-center justify-center rounded-full font-bold {{ $cartItemCount > 0 ? '' : 'hidden' }}">
                             {{ $cartItemCount }}
                         </span>
                     </button>
-                    <button id="mobile-menu-btn" type="button" aria-label="Deschide meniul" aria-controls="mobile-sidebar" class="md:hidden text-dark-brown focus:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <button id="mobile-menu-btn" type="button" aria-label="Deschide meniul" aria-controls="mobile-sidebar" class="md:hidden text-dark-brown focus:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold focus-visible:ring-offset-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
@@ -93,7 +69,7 @@
 
     @if(session('success') || session('error'))
         <div class="fixed top-28 left-1/2 -translate-x-1/2 z-[70] w-[calc(100%-2rem)] max-w-xl" role="status" aria-live="polite">
-            <div class="px-5 py-4 shadow-xl border text-sm {{ session('error') ? 'bg-red-50 border-red-200 text-red-800' : 'bg-emerald-50 border-emerald-200 text-emerald-800' }}">
+            <div class="px-5 py-4 shadow-xl border text-base {{ session('error') ? 'bg-red-50 border-red-200 text-red-800' : 'bg-emerald-50 border-emerald-200 text-emerald-800' }}">
                 {{ session('error') ?? session('success') }}
             </div>
         </div>
@@ -101,23 +77,20 @@
 
     <!-- Mobile Sidebar -->
     <div id="mobile-sidebar" aria-hidden="true" class="fixed inset-0 z-50 bg-dark-brown/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
-        <div id="mobile-sidebar-content" role="dialog" aria-modal="true" aria-label="Meniu principal" class="fixed top-0 right-0 bottom-0 w-64 bg-ivory shadow-2xl border-l border-black/5 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+        <div id="mobile-sidebar-content" role="dialog" aria-modal="true" aria-label="Meniu principal" class="fixed top-0 right-0 bottom-0 w-72 bg-ivory shadow-2xl border-l border-black/5 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
             <div class="flex justify-between items-center p-6 border-b border-black/5">
-                <span class="font-serif text-lg tracking-[0.1em] uppercase text-dark-brown flex items-center gap-2">
-                    <img src="/img/logo.png" alt="Logo" class="h-8 w-auto object-contain mr-2">
-                    Meniu
-                </span>
-                <button id="mobile-close-btn" type="button" aria-label="Închide meniul" class="text-dark-brown/60 hover:text-dark-brown focus:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <span class="font-serif text-xl font-semibold tracking-[0.1em] uppercase text-dark-brown">MTD ART</span>
+                <button id="mobile-close-btn" type="button" aria-label="Închide meniul" class="text-dark-brown hover:text-vintage-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
-            <div class="flex-grow py-8 px-6 overflow-y-auto flex flex-col space-y-6">
-                <a href="{{ route('shop.index') }}" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown hover:text-vintage-gold transition-colors block">Galerie</a>
-                <a href="{{ route('blog.index') }}" wire:navigate class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown hover:text-vintage-gold transition-colors block">Jurnal</a>
-                <a href="{{ route('about') }}" wire:navigate class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown hover:text-vintage-gold transition-colors block">Poveste</a>
-                <a href="{{ route('contact') ?? '#' }}" class="mobile-link text-sm font-medium tracking-[0.15em] uppercase text-dark-brown hover:text-vintage-gold transition-colors block">Contact</a>
+            <div class="flex-grow py-8 px-6 overflow-y-auto flex flex-col space-y-7">
+                <a href="{{ route('shop.index') }}" class="mobile-link text-base font-semibold tracking-[0.13em] uppercase text-dark-brown hover:text-vintage-gold transition-colors block">Galerie</a>
+                <a href="{{ route('blog.index') }}" wire:navigate class="mobile-link text-base font-semibold tracking-[0.13em] uppercase text-dark-brown hover:text-vintage-gold transition-colors block">Jurnal</a>
+                <a href="{{ route('about') }}" wire:navigate class="mobile-link text-base font-semibold tracking-[0.13em] uppercase text-dark-brown hover:text-vintage-gold transition-colors block">Poveste</a>
+                <a href="{{ route('contact') }}" class="mobile-link text-base font-semibold tracking-[0.13em] uppercase text-dark-brown hover:text-vintage-gold transition-colors block">Contact</a>
             </div>
         </div>
     </div>
@@ -133,48 +106,52 @@
         </div>
     </div>
 
-    <button id="floating-cart-btn" type="button" aria-label="Deschide coșul" class="fixed bottom-6 right-6 z-40 bg-dark-brown text-white p-4 rounded-full shadow-xl border border-vintage-gold/20 hover:bg-vintage-gold hover:-translate-y-1 transition-all duration-300 focus:outline-none {{ $cartItemCount > 0 ? '' : 'hidden' }}">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <button id="floating-cart-btn" type="button" aria-label="Deschide coșul" class="fixed bottom-6 right-6 z-40 bg-dark-brown text-white p-4 rounded-full shadow-xl border border-white/20 hover:bg-vintage-gold hover:-translate-y-1 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold focus-visible:ring-offset-2 {{ $cartItemCount > 0 ? '' : 'hidden' }}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
         </svg>
-        <span id="floating-cart-count" class="absolute -top-1 -right-1 bg-vintage-gold text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-ivory font-bold">
+        <span id="floating-cart-count" aria-hidden="true" class="absolute -top-1 -right-1 bg-vintage-gold text-white text-xs min-w-5 h-5 px-1 flex items-center justify-center rounded-full border-2 border-ivory font-bold">
             {{ $cartItemCount }}
         </span>
     </button>
 
-    <main class="flex-grow">
+    <main id="main-content" class="flex-grow" tabindex="-1">
         @yield('content')
     </main>
 
     <!-- Footer Premium -->
-    <footer class="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-dark-brown via-dark-brown to-[#1a120d] text-white pt-20 pb-10 mt-auto border-t border-vintage-gold/20">
+    <footer class="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-dark-brown via-dark-brown to-[#1a120d] text-white pt-20 pb-10 mt-auto border-t border-white/10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-8 mb-16">
                 <div class="md:col-span-4 text-center md:text-left">
-                    <h2 class="font-serif text-3xl mb-4 tracking-widest text-white uppercase text-xl">MTD Art</h2>
-                    <p class="font-light text-white/60 text-sm leading-relaxed mb-6 max-w-sm mx-auto md:mx-0">
+                    <h2 class="font-serif text-3xl mb-4 tracking-widest text-white uppercase">MTD Art</h2>
+                    <p class="font-light text-white/80 text-base leading-relaxed mb-6 max-w-sm mx-auto md:mx-0">
                         O fuziune atemporală între esența naturală a lemnului și eleganța translucidă a rășinii. Piese de artă unicat, lucrate manual cu pasiune și măiestrie în România.
                     </p>
                     @php
                         $settings = app(\App\Settings\GeneralSettings::class);
+                        $contactEmail = trim((string) ($settings->contact_email ?? ''));
+                        $contactEmail = $contactEmail !== ''
+                            ? $contactEmail
+                            : (string) config('shop.legal.email', 'contact@mtdart.ro');
                     @endphp
-                    <a href="mailto:{{ $settings->contact_email ?? 'contact@mtdart.ro' }}" class="text-vintage-gold hover:text-white transition-colors duration-300 text-sm font-medium tracking-wide">
-                        {{ $settings->contact_email ?? 'contact@mtdart.ro' }}
+                    <a href="mailto:{{ $contactEmail }}" aria-label="Trimite un e-mail către {{ $contactEmail }}" class="text-[#ead7a6] hover:text-white transition-colors duration-300 text-base font-semibold tracking-wide">
+                        {{ $contactEmail }}
                     </a>
                 </div>
 
                 <div class="md:col-span-2 md:col-start-7 text-center md:text-left">
-                    <h3 class="font-sans text-[10px] uppercase tracking-[0.2em] text-vintage-gold mb-6 font-semibold">Explorați</h3>
-                    <ul class="space-y-4 font-light text-white/70 text-sm">
+                    <h3 class="font-sans text-sm uppercase tracking-[0.16em] text-[#ead7a6] mb-6 font-semibold">Explorați</h3>
+                    <ul class="space-y-4 font-light text-white/85 text-base">
                         <li><a href="{{ route('shop.index') }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Galerie Produse</a></li>
                         <li><a href="{{ route('about') }}" wire:navigate class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Povestea Noastră</a></li>
-                        <li><a href="{{ route('contact') ?? '#' }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Comenzi Personalizate</a></li>
+                        <li><a href="{{ route('contact') }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Comenzi Personalizate</a></li>
                     </ul>
                 </div>
 
                 <div class="md:col-span-2 text-center md:text-left">
-                    <h3 class="font-sans text-[10px] uppercase tracking-[0.2em] text-vintage-gold mb-6 font-semibold">Informații Utile</h3>
-                    <ul class="space-y-4 font-light text-white/70 text-sm">
+                    <h3 class="font-sans text-sm uppercase tracking-[0.16em] text-[#ead7a6] mb-6 font-semibold">Informații Utile</h3>
+                    <ul class="space-y-4 font-light text-white/85 text-base">
                         <li><a href="{{ route('page.show', 'termeni-si-conditii') }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Termeni și Condiții</a></li>
                         <li><a href="{{ route('page.show', 'politica-de-confidentialitate') }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Politica de Confidențialitate</a></li>
                         <li><a href="{{ route('page.show', 'politica-de-retur') }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Livrare și Retur</a></li>
@@ -182,38 +159,43 @@
                 </div>
 
                 <div class="md:col-span-2 text-center md:text-left">
-                    <h3 class="font-sans text-[10px] uppercase tracking-[0.2em] text-vintage-gold mb-6 font-semibold">Social</h3>
-                    <ul class="space-y-4 font-light text-white/70 text-sm">
+                    <h3 class="font-sans text-sm uppercase tracking-[0.16em] text-[#ead7a6] mb-6 font-semibold">Social</h3>
+                    <ul class="space-y-4 font-light text-white/85 text-base">
                         @if(!empty($settings->instagram_url))
-                        <li><a href="{{ $settings->instagram_url }}" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors duration-300 flex items-center justify-center md:justify-start gap-2">Instagram</a></li>
+                            <li><a href="{{ $settings->instagram_url }}" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors duration-300 flex items-center justify-center md:justify-start gap-2">Instagram</a></li>
                         @endif
                         @if(!empty($settings->facebook_url))
-                        <li><a href="{{ $settings->facebook_url }}" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors duration-300 flex items-center justify-center md:justify-start gap-2">Facebook</a></li>
+                            <li><a href="{{ $settings->facebook_url }}" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors duration-300 flex items-center justify-center md:justify-start gap-2">Facebook</a></li>
                         @endif
                     </ul>
                 </div>
             </div>
 
-            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
-                <div class="text-[10px] uppercase tracking-[0.2em] text-white/50 text-center md:text-left">
+            <div class="border-t border-white/15 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="text-sm uppercase tracking-[0.14em] text-white/80 text-center md:text-left">
                     &copy; {{ date('Y') }} MTD Art Gallery.<br class="md:hidden"> Toate drepturile rezervate.
                 </div>
-                <div class="flex items-center gap-4 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-                    <div class="flex items-center gap-1 text-[10px] text-white/70 uppercase tracking-[0.1em] mr-2">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                        Plăți Securizate
+                <div class="flex flex-wrap items-center justify-center gap-4 text-white/85">
+                    <div class="flex items-center gap-2 text-sm uppercase tracking-[0.1em] mr-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        Plăți securizate
                     </div>
-                    <span class="text-xs font-bold text-white/80">VISA</span>
-                    <span class="text-xs font-bold text-white/80">Mastercard</span>
-                    <span class="text-xs font-bold text-white/80">Stripe</span>
+                    <span class="text-sm font-bold">VISA</span>
+                    <span class="text-sm font-bold">Mastercard</span>
+                    <span class="text-sm font-bold">Stripe</span>
                 </div>
             </div>
         </div>
     </footer>
 
-    @livewire('custom-order-modal')
-    @livewireScripts
+    @if($needsCustomOrderLivewire)
+        @livewire('custom-order-modal')
+        @livewireScripts
+    @endif
+
     <script src="{{ asset('js/storefront-ui.js') }}" defer></script>
-    <script src="{{ asset('js/product-gallery.js') }}" defer></script>
+    @if(request()->routeIs('shop.show'))
+        <script src="{{ asset('js/product-gallery.js') }}" defer></script>
+    @endif
 </body>
 </html>
