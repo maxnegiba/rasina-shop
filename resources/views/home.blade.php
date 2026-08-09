@@ -7,8 +7,9 @@
         <style>
             /*
              * Mobile/tablet override for the atelier puzzle hero.
-             * The component's desktop collage remains untouched; below 1024px
-             * we use intrinsic aspect-ratio tiles instead of fixed row spans.
+             * Desktop keeps the original absolute-positioned collage.
+             * Below 1024px we use a dense intrinsic grid so the artwork remains
+             * visible without forcing the user through several screens of images.
              */
             @media (max-width: 1023px) {
                 #atelier {
@@ -34,7 +35,7 @@
                     height: auto;
                     min-width: 0;
                     grid-row: auto !important;
-                    aspect-ratio: 1 / 1;
+                    aspect-ratio: 1.15 / 1;
                     transform: none;
                     will-change: auto;
                 }
@@ -52,58 +53,81 @@
                 }
             }
 
-            /* Phones: compact three-column mosaic instead of a very tall masonry wall. */
+            /*
+             * Phones: four compact columns.
+             * The previous two/three-column version made 13 images stack into a
+             * long wall. Four columns keeps every image while cutting the visual
+             * section to roughly four short rows on common phone widths.
+             */
             @media (max-width: 639px) {
                 #atelier .atelier-puzzle-stage {
-                    grid-template-columns: repeat(3, minmax(0, 1fr));
-                    gap: 4px;
-                    padding: 6px;
+                    grid-template-columns: repeat(4, minmax(0, 1fr));
+                    gap: 2px;
+                    padding: 4px;
                 }
 
                 #atelier .atelier-puzzle-piece {
                     grid-column: span 1 !important;
+                    aspect-ratio: 1.12 / 1;
                 }
 
                 #atelier .atelier-puzzle-piece:nth-of-type(1),
                 #atelier .atelier-puzzle-piece:nth-of-type(7),
                 #atelier .atelier-puzzle-piece:nth-of-type(11) {
                     grid-column: span 2 !important;
-                    aspect-ratio: 2 / 1;
+                    aspect-ratio: 2.35 / 1;
                 }
 
                 #atelier .atelier-puzzle-piece:nth-of-type(2),
                 #atelier .atelier-puzzle-piece:nth-of-type(4),
                 #atelier .atelier-puzzle-piece:nth-of-type(12) {
-                    aspect-ratio: 4 / 5;
+                    aspect-ratio: 1 / 1.08;
+                }
+
+                #atelier .atelier-puzzle-piece__resin-rim {
+                    stroke-width: 3.2;
+                }
+
+                #atelier .atelier-puzzle-piece__edge {
+                    stroke-width: 1.65;
                 }
             }
 
-            /* Very narrow phones get two larger columns for better image legibility. */
+            /*
+             * Even the narrowest phones stay at four columns. The old two-column
+             * fallback was the main reason 320–374px devices still needed a lot
+             * of scrolling to get past the puzzle.
+             */
             @media (max-width: 374px) {
                 #atelier .atelier-puzzle-stage {
-                    grid-template-columns: repeat(2, minmax(0, 1fr));
-                    gap: 5px;
-                    padding: 6px;
+                    grid-template-columns: repeat(4, minmax(0, 1fr));
+                    gap: 1px;
+                    padding: 3px;
+                }
+
+                #atelier .atelier-puzzle-piece {
+                    aspect-ratio: 1.08 / 1;
                 }
 
                 #atelier .atelier-puzzle-piece:nth-of-type(1),
                 #atelier .atelier-puzzle-piece:nth-of-type(7),
                 #atelier .atelier-puzzle-piece:nth-of-type(11) {
-                    grid-column: 1 / -1 !important;
-                    aspect-ratio: 2 / 1;
+                    grid-column: span 2 !important;
+                    aspect-ratio: 2.25 / 1;
                 }
             }
 
-            /* Tablets: four-column collage keeps the hero compact and balanced. */
+            /* Tablets: six columns keep the collage closer to a banner than a wall. */
             @media (min-width: 640px) and (max-width: 1023px) {
                 #atelier .atelier-puzzle-stage {
-                    grid-template-columns: repeat(4, minmax(0, 1fr));
-                    gap: 7px;
-                    padding: 10px;
+                    grid-template-columns: repeat(6, minmax(0, 1fr));
+                    gap: 4px;
+                    padding: 7px;
                 }
 
                 #atelier .atelier-puzzle-piece {
                     grid-column: span 1 !important;
+                    aspect-ratio: 1.15 / 1;
                 }
 
                 #atelier .atelier-puzzle-piece:nth-of-type(1),
@@ -111,7 +135,7 @@
                 #atelier .atelier-puzzle-piece:nth-of-type(11),
                 #atelier .atelier-puzzle-piece:nth-of-type(13) {
                     grid-column: span 2 !important;
-                    aspect-ratio: 2 / 1;
+                    aspect-ratio: 2.35 / 1;
                 }
             }
         </style>
