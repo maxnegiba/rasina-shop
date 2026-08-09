@@ -7,6 +7,7 @@ use App\Http\Controllers\CustomRequestController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\OptimizedImageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,6 +25,11 @@ Route::post('/contact', [PageController::class, 'submitContact'])
     ->name('contact.submit');
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
+
+// Responsive image derivatives are generated once, cached on disk and served with immutable cache headers.
+Route::get('/media/optimized/{encoded}', OptimizedImageController::class)
+    ->where('encoded', '[A-Za-z0-9_-]+')
+    ->name('media.optimized');
 
 // --- Magazin (Shop) ---
 Route::group(['prefix' => 'magazin', 'as' => 'shop.'], function () {
