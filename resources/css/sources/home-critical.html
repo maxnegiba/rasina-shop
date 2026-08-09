@@ -1,0 +1,71 @@
+<!--
+  Build-only Tailwind source for the homepage critical CSS entry.
+  This file is never rendered. Keep it limited to utilities required before
+  resources/css/home.css finishes loading asynchronously.
+-->
+<div class="bg-ivory text-dark-brown font-sans antialiased selection:bg-vintage-gold selection:text-white flex flex-col min-h-screen"></div>
+<div class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-white focus:px-4 focus:py-3 focus:text-sm focus:font-semibold focus:text-dark-brown focus:shadow-lg"></div>
+
+<!-- Header / navigation -->
+<div class="bg-ivory/80 backdrop-blur-2xl sticky top-0 z-50 border-b border-black/[0.03] shadow-sm transition-all duration-300"></div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+<div class="flex justify-between h-24 items-center relative"></div>
+<div class="flex-shrink-0 flex items-center h-full"></div>
+<div class="font-serif text-lg md:text-2xl tracking-[0.2em] uppercase text-dark-brown hover:text-vintage-gold transition-colors duration-300 flex items-center gap-2 md:gap-3"></div>
+<div class="relative h-24 w-24 md:w-32 flex items-center justify-center"></div>
+<div class="absolute top-1 md:top-2 h-24 md:h-32 w-auto object-contain transition-all duration-300"></div>
+<div class="hidden md:flex flex-1 justify-center"></div>
+<div class="flex items-center space-x-12 font-medium tracking-[0.15em] uppercase text-[11px] text-dark-brown/70"></div>
+<div class="hover:text-vintage-gold hover:-translate-y-0.5 transition-all duration-300"></div>
+<div class="flex items-center space-x-6"></div>
+<div class="text-dark-brown/80 hover:text-vintage-gold transition duration-300 relative group focus:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold focus-visible:ring-offset-2"></div>
+<div class="h-5 w-5"></div>
+<div class="absolute -top-1 -right-2 bg-vintage-gold text-white text-[9px] min-w-4 h-4 px-1 flex items-center justify-center rounded-full opacity-100 transition-opacity hidden"></div>
+<div class="md:hidden text-dark-brown focus:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold"></div>
+<div class="h-6 w-6"></div>
+
+<!-- Keep off-canvas UI hidden and positioned correctly before async CSS arrives. -->
+<div class="fixed top-28 left-1/2 -translate-x-1/2 z-[70] w-[calc(100%-2rem)] max-w-xl"></div>
+<div class="px-5 py-4 shadow-xl border text-sm bg-red-50 border-red-200 text-red-800 bg-emerald-50 border-emerald-200 text-emerald-800"></div>
+<div class="fixed inset-0 z-50 bg-dark-brown/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300"></div>
+<div class="fixed top-0 right-0 bottom-0 w-64 bg-ivory shadow-2xl border-l border-black/5 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col"></div>
+<div class="fixed inset-0 z-[60] bg-dark-brown/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300"></div>
+<div class="fixed top-0 right-0 bottom-0 w-full sm:w-96 bg-ivory shadow-2xl border-l border-black/5 transform translate-x-full transition-transform duration-300 ease-in-out"></div>
+<div class="fixed bottom-6 right-6 z-40 bg-dark-brown text-white p-4 rounded-full shadow-xl border border-vintage-gold/20 hover:bg-vintage-gold hover:-translate-y-1 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold focus-visible:ring-offset-2 hidden"></div>
+<div class="absolute -top-1 -right-1 bg-vintage-gold text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-ivory font-bold"></div>
+<div class="flex-grow"></div>
+
+<!-- Hero shell -->
+<div class="relative overflow-hidden border-b border-black/5 bg-[#f4eee4] lg:h-[calc(100svh-6rem)] lg:min-h-[680px] lg:max-h-[860px]"></div>
+<div class="pointer-events-none absolute inset-0"></div>
+<div class="absolute -left-24 top-16 h-72 w-72 rounded-full bg-[#d7b36f]/10 blur-3xl"></div>
+<div class="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-[#c98f84]/10 blur-3xl"></div>
+<div class="relative mx-auto flex h-full max-w-[1700px] flex-col lg:grid lg:grid-rows-[minmax(0,1fr)_86px]"></div>
+<div class="grid min-h-0 lg:grid-cols-[38%_62%]"></div>
+<div class="flex items-center px-6 py-12 sm:px-10 lg:px-12 lg:py-7 xl:px-16 2xl:px-20"></div>
+<div class="mx-auto w-full max-w-[540px] lg:mx-0"></div>
+<div class="mb-5"></div>
+<div class="flex items-center gap-3 text-[#aa7a36]"></div>
+<div class="h-7 w-7"></div>
+<div class="font-serif text-[1.35rem] font-semibold leading-none tracking-[0.14em] text-dark-brown"></div>
+<div class="mt-1 text-[9px] font-semibold uppercase tracking-[0.27em] text-[#aa7a36]"></div>
+<div class="mt-4 flex items-center gap-3 text-[#b68b45]"></div>
+<div class="h-px w-10 bg-current"></div>
+<div class="h-1 w-1 rotate-45 bg-current"></div>
+<div class="font-serif text-[clamp(3.05rem,4.35vw,5rem)] font-medium leading-[0.91] tracking-[-0.035em] text-dark-brown"></div>
+<div class="text-[#bf8179] text-[#b68b45]"></div>
+<div class="my-5 h-px w-12 bg-[#bf8179] xl:my-6"></div>
+<div class="max-w-md text-sm font-light leading-6 text-dark-brown/75 xl:text-[15px] xl:leading-7"></div>
+<div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center xl:mt-6"></div>
+<div class="inline-flex min-h-11 items-center justify-center gap-3 rounded-md bg-[#344f3f] px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-[#2b4335] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#344f3f]/30 focus:ring-offset-2"></div>
+<div class="h-4 w-4"></div>
+<div class="inline-flex min-h-11 items-center justify-center gap-3 rounded-md border border-[#b68b45]/70 bg-white/35 px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9a7037] transition duration-300 hover:-translate-y-0.5 hover:bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#b68b45]/25 focus:ring-offset-2"></div>
+<div class="mt-6 grid gap-4 border-t border-dark-brown/10 pt-4 sm:grid-cols-3 xl:mt-7"></div>
+<div class="flex gap-2.5"></div>
+<div class="text-lg leading-none text-[#bf8179] text-[#57735f] text-[#b68b45]"></div>
+<div class="text-[9px] font-bold uppercase tracking-[0.12em]"></div>
+<div class="mt-1 text-[10px] leading-4 text-dark-brown/60"></div>
+
+<!-- Puzzle column shell; detailed puzzle geometry/resin CSS is already inline in the component. -->
+<div class="relative overflow-hidden bg-[#d7c7b8] scroll-mt-24 lg:min-h-0"></div>
+<div class="absolute bottom-[4.5%] right-[3.5%] z-40 hidden h-24 w-24 items-center justify-center rounded-full border border-[#b68b45]/55 bg-[#f7f0e5]/95 text-center shadow-xl backdrop-blur xl:flex"></div>
