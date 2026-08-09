@@ -53,12 +53,6 @@
                 }
             }
 
-            /*
-             * Phones: four compact columns.
-             * The previous two/three-column version made 13 images stack into a
-             * long wall. Four columns keeps every image while cutting the visual
-             * section to roughly four short rows on common phone widths.
-             */
             @media (max-width: 639px) {
                 #atelier .atelier-puzzle-stage {
                     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -93,11 +87,6 @@
                 }
             }
 
-            /*
-             * Even the narrowest phones stay at four columns. The old two-column
-             * fallback was the main reason 320–374px devices still needed a lot
-             * of scrolling to get past the puzzle.
-             */
             @media (max-width: 374px) {
                 #atelier .atelier-puzzle-stage {
                     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -117,7 +106,6 @@
                 }
             }
 
-            /* Tablets: six columns keep the collage closer to a banner than a wall. */
             @media (min-width: 640px) and (max-width: 1023px) {
                 #atelier .atelier-puzzle-stage {
                     grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -142,11 +130,11 @@
     @endonce
 
     <!-- COLECȚII PRINCIPALE -->
-    <section class="max-w-7xl mx-auto py-32 px-4 sm:px-6 lg:px-8 bg-ivory">
-        <div class="text-center mb-24">
+    <section class="max-w-7xl mx-auto py-28 md:py-32 px-4 sm:px-6 lg:px-8 bg-ivory" style="content-visibility:auto; contain-intrinsic-size: 900px;">
+        <div class="text-center mb-20 md:mb-24">
             <h2 class="font-serif text-4xl md:text-5xl text-dark-brown mb-6">Esență & Măiestrie</h2>
-            <div class="w-12 h-px bg-vintage-gold mx-auto mb-8"></div>
-            <p class="text-dark-brown/70 font-light max-w-2xl mx-auto tracking-wide text-sm md:text-base leading-relaxed">
+            <div class="w-12 h-px bg-vintage-gold mx-auto mb-8" aria-hidden="true"></div>
+            <p class="text-dark-brown/70 font-light max-w-2xl mx-auto tracking-wide text-base md:text-lg leading-relaxed">
                 Fiecare colecție reprezintă un studiu al materialului. Lemnul capătă noi valențe prin incluziunea rășinii epoxidice, într-o simbioză perfectă de texturi și transparențe.
             </p>
         </div>
@@ -154,36 +142,44 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-20">
             @if(isset($featuredCategories))
                 @foreach($featuredCategories as $index => $category)
-                    <div class="group block {{ $index === 1 ? 'md:mt-16' : '' }}">
+                    <article class="group block {{ $index === 1 ? 'md:mt-16' : '' }}">
                         <a href="{{ route('shop.category', $category->slug ?? '#') }}" class="block relative overflow-hidden aspect-[4/5] mb-8 bg-warm-beige/30 ring-1 ring-inset ring-black/5">
-                            <img src="{{ $category->image ? asset('storage/' . $category->image) : asset('img/logo.png') }}"
-                                 loading="lazy"
-                                 decoding="async"
-                                 class="w-full h-full {{ $category->image ? 'object-cover' : 'object-contain p-12 opacity-40' }} group-hover:scale-105 transition-transform duration-700 ease-out" alt="{{ $category->name }}">
+                            @if($category->image)
+                                <img src="{{ asset('storage/' . $category->image) }}"
+                                     width="800"
+                                     height="1000"
+                                     loading="lazy"
+                                     fetchpriority="low"
+                                     decoding="async"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                     alt="{{ $category->name }}">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center bg-warm-beige/40 text-dark-brown/60 font-serif text-3xl" aria-hidden="true">MTD ART</div>
+                            @endif
                         </a>
                         <div class="flex items-center justify-between">
-                            <h3 class="font-serif text-2xl text-dark-brown">{{ $category->name }}</h3>
-                            <span class="text-vintage-gold text-sm opacity-0 group-hover:opacity-100 transition duration-300 transform -translate-x-4 group-hover:translate-x-0">
+                            <h3 class="font-serif text-2xl md:text-3xl text-dark-brown">{{ $category->name }}</h3>
+                            <span class="text-vintage-gold text-xl opacity-0 group-hover:opacity-100 transition duration-300 transform -translate-x-4 group-hover:translate-x-0" aria-hidden="true">
                                 &rarr;
                             </span>
                         </div>
-                    </div>
+                    </article>
                 @endforeach
             @endif
         </div>
     </section>
 
-    <!-- PIESE RECENTE (Refăcut pe tematica Ivory) -->
-    <section class="bg-warm-beige/30 py-32 border-t border-black/5">
+    <!-- PIESE RECENTE -->
+    <section class="bg-warm-beige/30 py-28 md:py-32 border-t border-black/5" style="content-visibility:auto; contain-intrinsic-size: 850px;">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 md:mb-20 gap-8">
                 <div class="max-w-2xl">
-                    <span class="text-vintage-gold uppercase tracking-[0.2em] text-xs font-semibold block mb-4">Selecție Curată</span>
+                    <span class="text-vintage-gold uppercase tracking-[0.16em] text-sm font-semibold block mb-4">Selecție Curată</span>
                     <h2 class="font-serif text-4xl md:text-5xl text-dark-brown">Opere Recente</h2>
                 </div>
                 <a href="{{ route('shop.index') }}" class="group inline-flex items-center gap-4 text-dark-brown hover:text-vintage-gold transition-colors duration-300">
-                    <span class="text-xs uppercase tracking-[0.2em] font-medium">Vezi tot portofoliul</span>
-                    <span class="w-12 h-px bg-dark-brown group-hover:bg-vintage-gold transition-colors duration-300"></span>
+                    <span class="text-sm uppercase tracking-[0.16em] font-semibold">Vezi tot portofoliul</span>
+                    <span class="w-12 h-px bg-dark-brown group-hover:bg-vintage-gold transition-colors duration-300" aria-hidden="true"></span>
                 </a>
             </div>
 
@@ -195,31 +191,38 @@
                                 ?? $product->images->first();
                             $homeImageUrl = $homeImage
                                 ? asset('storage/'.$homeImage->image_path)
-                                : ($product->image ? asset('storage/'.$product->image) : asset('img/logo.png'));
+                                : ($product->image ? asset('storage/'.$product->image) : null);
                         @endphp
-                        <div class="group bg-ivory shadow-sm border border-black/5 hover:shadow-md transition-all duration-300">
+                        <article class="group bg-ivory shadow-sm border border-black/5 hover:shadow-md transition-all duration-300">
                             <a href="{{ route('shop.show', $product->slug) }}" class="block">
                                 <div class="aspect-[3/4] overflow-hidden bg-white relative p-4 flex items-center justify-center">
-                                    <img src="{{ $homeImageUrl }}"
-                                         alt="{{ $product->name }}"
-                                         loading="lazy"
-                                         decoding="async"
-                                         class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 ease-out">
-                                    
+                                    @if($homeImageUrl)
+                                        <img src="{{ $homeImageUrl }}"
+                                             alt="{{ $product->name }}"
+                                             width="600"
+                                             height="800"
+                                             loading="lazy"
+                                             fetchpriority="low"
+                                             decoding="async"
+                                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 ease-out">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center bg-warm-beige/30 text-dark-brown/60 font-serif text-2xl" aria-hidden="true">MTD ART</div>
+                                    @endif
+
                                     @if($product->is_custom)
-                                        <span class="absolute top-4 left-4 bg-vintage-gold text-white text-[9px] px-3 py-1.5 uppercase tracking-[0.2em] font-medium shadow-sm">
+                                        <span class="absolute top-4 left-4 bg-vintage-gold text-white text-xs px-3 py-2 uppercase tracking-[0.14em] font-semibold shadow-sm">
                                             Unicat / Comandă
                                         </span>
                                     @endif
                                 </div>
-                                <div class="p-4 border-t border-black/5">
-                                    <h4 class="font-serif text-lg text-dark-brown mb-2 truncate">{{ $product->name }}</h4>
-                                    <p class="text-vintage-gold font-sans text-xs tracking-[0.15em] uppercase font-medium">
+                                <div class="p-5 border-t border-black/5">
+                                    <h3 class="font-serif text-xl md:text-2xl text-dark-brown mb-2 truncate">{{ $product->name }}</h3>
+                                    <p class="text-vintage-gold font-sans text-sm tracking-[0.12em] uppercase font-semibold">
                                         {{ $product->displayPrice() }}
                                     </p>
                                 </div>
                             </a>
-                        </div>
+                        </article>
                     @endforeach
                 @endif
             </div>
