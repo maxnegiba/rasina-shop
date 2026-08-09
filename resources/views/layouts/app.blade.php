@@ -12,8 +12,9 @@
 
     @php
         $isHomePage = request()->routeIs('home');
+        $homeFontText = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzĂÂÎȘȚăâîșț0123456789.,:;!?–—-\'„”()&/@%+©';
         $fontStylesheet = $isHomePage
-            ? 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@400;500;600&display=optional'
+            ? 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@400;500;600&display=optional&text='.rawurlencode($homeFontText)
             : 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700&display=swap';
         $homeCriticalCss = $isHomePage
             ? \App\Support\CriticalCss::fromViteManifest('resources/css/home-critical.css')
@@ -285,7 +286,6 @@
         @livewireScripts
     @endif
 
-    <script src="{{ asset('js/storefront-ui.js') }}" defer></script>
     @if(request()->routeIs('shop.show'))
         <script src="{{ asset('js/product-gallery.js') }}" defer></script>
     @endif
