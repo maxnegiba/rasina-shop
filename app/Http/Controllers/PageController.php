@@ -28,7 +28,7 @@ class PageController extends Controller
         $latestProducts = Product::where('status', 'published')
             ->where('stock', '>', 0)
             ->with('images')
-            ->latest('published_at')
+            ->latest()
             ->take(6)
             ->get();
 
