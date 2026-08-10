@@ -9,19 +9,23 @@ trait SanitizesRichHtml
 {
     public static function bootSanitizesRichHtml(): void
     {
-        static::saving(function (Model $model): void {
-            if (! method_exists($model, 'getTranslations') || ! method_exists($model, 'setTranslations')) {
-                return;
-            }
+        static::saving(fn (Model $model) => self::sanitizeRichHtml($model));
+        static::retrieved(fn (Model $model) => self::sanitizeRichHtml($model));
+    }
 
-            $translations = $model->getTranslations('content');
-            $sanitizer = app(SafeHtmlSanitizer::class);
+    private static function sanitizeRichHtml(Model $model): void
+    {
+        if (! method_exists($model, 'getTranslations') || ! method_exists($model, 'setTranslations')) {
+            return;
+        }
 
-            foreach ($translations as $locale => $html) {
-                $translations[$locale] = $sanitizer->sanitize((string) $html);
-            }
+        $translations = $model->getTranslations('content');
+        $sanitizer = app(SafeHtmlSanitizer::class);
 
-            $model->setTranslations('content', $translations);
-        });
+        foreach ($translations as $locale => $html) {
+            $translations[$locale] = $sanitizer->sanitize((string) $html);
+        }
+
+        $model->setTranslations('content', $translations);
     }
 }
