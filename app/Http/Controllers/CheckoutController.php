@@ -25,12 +25,10 @@ class CheckoutController extends Controller
         }
 
         $order = $this->reusableOrder($request, $cart);
-        $paymentIntent = null;
 
         try {
-            $stripe = new StripeClient((string) config('services.stripe.secret'));
-
             if ($order?->stripe_transaction_id) {
+                $stripe = new StripeClient((string) config('services.stripe.secret'));
                 $paymentIntent = $stripe->paymentIntents->retrieve($order->stripe_transaction_id);
 
                 if ($paymentIntent->status === 'succeeded') {
@@ -50,6 +48,7 @@ class CheckoutController extends Controller
             }
 
             if (! $order) {
+                $stripe = new StripeClient((string) config('services.stripe.secret'));
                 $completedOrder = $this->cancelStaleSessionOrder($request, $stripe, $payments);
 
                 if ($completedOrder) {
@@ -60,32 +59,14 @@ class CheckoutController extends Controller
                 }
 
                 $order = $this->reserveCart($cart);
-
-                $paymentIntent = $stripe->paymentIntents->create([
-                    'amount' => (int) round((float) $order->total_amount * 100),
-                    'currency' => 'ron',
-                    'automatic_payment_methods' => [
-                        'enabled' => true,
-                        'allow_redirects' => 'never',
-                    ],
-                    'description' => 'Comanda '.$order->order_number.' - '.config('shop.brand_name'),
-                    'metadata' => [
-                        'order_id' => (string) $order->id,
-                        'order_number' => $order->order_number,
-                    ],
-                ], [
-                    'idempotency_key' => 'mtd-payment-intent-'.$order->id,
-                ]);
-
-                $order->update(['stripe_transaction_id' => $paymentIntent->id]);
                 $request->session()->put('checkout_order_token', $order->public_token);
             }
 
             return view('checkout.index', [
-                'clientSecret' => $paymentIntent->client_secret,
                 'stripeKey' => (string) config('services.stripe.key'),
                 'orderToken' => $order->public_token,
                 'totalAmount' => (float) $order->total_amount,
+                'totalAmountCents' => (int) round((float) $order->total_amount * 100),
                 'order' => $order->loadMissing('items.product'),
             ]);
         } catch (\Throwable $exception) {
@@ -94,7 +75,7 @@ class CheckoutController extends Controller
                 $order->releaseReservedStock();
             }
 
-            Log::error('Stripe Payment Element could not be initialized.', [
+            Log::error('Checkout could not be initialized.', [
                 'order_id' => $order?->id,
                 'exception' => $exception->getMessage(),
             ]);
@@ -124,21 +105,73 @@ class CheckoutController extends Controller
             return response()->json(['message' => 'Sesiunea de plată nu mai este validă. Reîncărcați pagina.'], 403);
         }
 
-        $updated = Order::query()
-            ->where('public_token', $validated['order_token'])
-            ->where('payment_status', 'pending')
-            ->whereNull('stock_released_at')
-            ->update([
+        $order = DB::transaction(function () use ($validated): ?Order {
+            $order = Order::query()
+                ->where('public_token', $validated['order_token'])
+                ->where('payment_status', 'pending')
+                ->whereNull('stock_released_at')
+                ->lockForUpdate()
+                ->first();
+
+            if (! $order) {
+                return null;
+            }
+
+            $order->update([
                 'terms_accepted_at' => now(),
                 'privacy_acknowledged_at' => now(),
                 'terms_version' => config('shop.terms_version'),
             ]);
 
-        if ($updated !== 1) {
+            return $order->fresh();
+        });
+
+        if (! $order) {
             return response()->json(['message' => 'Comanda nu mai poate fi plătită. Reîncărcați pagina.'], 409);
         }
 
-        return response()->json(['accepted' => true]);
+        try {
+            $stripe = new StripeClient((string) config('services.stripe.secret'));
+
+            if ($order->stripe_transaction_id) {
+                $paymentIntent = $stripe->paymentIntents->retrieve($order->stripe_transaction_id);
+            } else {
+                $paymentIntent = $stripe->paymentIntents->create([
+                    'amount' => (int) round((float) $order->total_amount * 100),
+                    'currency' => 'ron',
+                    'automatic_payment_methods' => [
+                        'enabled' => true,
+                        'allow_redirects' => 'never',
+                    ],
+                    'description' => 'Comanda '.$order->order_number.' - '.config('shop.brand_name'),
+                    'metadata' => [
+                        'order_id' => (string) $order->id,
+                        'order_number' => $order->order_number,
+                    ],
+                ], [
+                    'idempotency_key' => 'mtd-payment-intent-'.$order->id,
+                ]);
+
+                Order::query()
+                    ->whereKey($order->id)
+                    ->whereNull('stripe_transaction_id')
+                    ->update(['stripe_transaction_id' => $paymentIntent->id]);
+            }
+
+            return response()->json([
+                'accepted' => true,
+                'client_secret' => $paymentIntent->client_secret,
+            ]);
+        } catch (\Throwable $exception) {
+            Log::error('PaymentIntent could not be created after legal acceptance.', [
+                'order_id' => $order->id,
+                'exception' => $exception->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'Plata nu a putut fi inițializată. Încercați din nou.',
+            ], 502);
+        }
     }
 
     public function success(Request $request, OrderPaymentService $payments): View
