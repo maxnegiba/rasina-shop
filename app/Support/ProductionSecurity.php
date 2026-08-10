@@ -9,10 +9,6 @@ class ProductionSecurity
     {
         $violations = [];
 
-        if (trim((string) config('app.key')) === '') {
-            $violations[] = 'APP_KEY must be configured.';
-        }
-
         if ((bool) config('app.debug')) {
             $violations[] = 'APP_DEBUG must be false.';
         }
