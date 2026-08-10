@@ -18,13 +18,24 @@ class SecurityHeaders
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
         if (! app()->environment('local')) {
+            $scriptSources = [
+                "'self'",
+                "'unsafe-inline'",
+                'https://js.stripe.com',
+                'https://m.stripe.network',
+            ];
+
+            if ($request->is('admin*') || $request->is('admin-security*')) {
+                $scriptSources[] = "'unsafe-eval'";
+            }
+
             $response->headers->set('Content-Security-Policy', implode('; ', [
                 "default-src 'self'",
                 "base-uri 'self'",
                 "object-src 'none'",
                 "frame-ancestors 'self'",
                 "form-action 'self'",
-                "script-src 'self' 'unsafe-inline' https://js.stripe.com https://m.stripe.network",
+                'script-src '.implode(' ', $scriptSources),
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                 "font-src 'self' data: https://fonts.gstatic.com",
                 "img-src 'self' data: blob: https: https://*.stripe.com",
