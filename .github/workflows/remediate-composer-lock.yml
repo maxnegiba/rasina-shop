@@ -1,0 +1,37 @@
+name: Temporary - Composer Lock Remediation
+
+on:
+  push:
+    branches:
+      - agent/supply-chain-hardening
+
+permissions:
+  contents: read
+
+jobs:
+  update-lock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Update only advisory-affected Composer packages
+        run: composer update dompdf/dompdf guzzlehttp/guzzle league/commonmark --with-all-dependencies --no-install --no-scripts --no-interaction
+
+      - name: Verify advisories are resolved
+        run: composer audit --locked --abandoned=report
+
+      - name: Show remediated versions
+        run: composer show --locked dompdf/dompdf guzzlehttp/guzzle league/commonmark
+
+      - name: Upload remediated lockfile
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: remediated-composer-lock
+          path: composer.lock
+          if-no-files-found: error
+          retention-days: 1
