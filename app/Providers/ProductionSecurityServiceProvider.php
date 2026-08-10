@@ -15,6 +15,10 @@ class ProductionSecurityServiceProvider extends ServiceProvider
 
         $violations = [];
 
+        if (trim((string) config('app.key')) === '') {
+            $violations[] = 'APP_KEY must be configured.';
+        }
+
         if ((bool) config('app.debug')) {
             $violations[] = 'APP_DEBUG must be false.';
         }
@@ -41,6 +45,14 @@ class ProductionSecurityServiceProvider extends ServiceProvider
 
         if (! in_array((string) config('session.same_site'), ['lax', 'strict'], true)) {
             $violations[] = 'SESSION_SAME_SITE must be lax or strict.';
+        }
+
+        if ((string) config('mail.default') === 'log') {
+            $violations[] = 'MAIL_MAILER must deliver email in production; the log mailer would break admin MFA.';
+        }
+
+        if (trim((string) config('services.stripe.key')) === '') {
+            $violations[] = 'STRIPE_KEY must be configured.';
         }
 
         if (trim((string) config('services.stripe.secret')) === '') {
