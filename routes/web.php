@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// --- Pagini Statice & Informaționale ---
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/despre-noi', [PageController::class, 'about'])->name('about');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
@@ -67,7 +66,7 @@ Route::get('/proforma/{order:public_token}', [\App\Http\Controllers\ProformaCont
     ->middleware('signed')
     ->name('order.proforma.download');
 
-Route::middleware(['auth', 'throttle:20,1'])
+Route::middleware('throttle:20,1')
     ->prefix('admin-security')
     ->name('admin.mfa.')
     ->group(function () {
