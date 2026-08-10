@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
+use Stripe\PaymentIntent;
 use Tests\TestCase;
 
 class AdversarialSecurityTest extends TestCase
@@ -150,6 +151,53 @@ HTML;
 
         $this->assertNull($attackerOrder->fresh()->terms_accepted_at);
         $this->assertNull($attackerOrder->fresh()->privacy_acknowledged_at);
+    }
+
+    public function test_client_supplied_amount_cannot_change_server_side_order_total(): void
+    {
+        $order = $this->pendingOrder();
+        $intent = PaymentIntent::constructFrom([
+            'id' => 'pi_amount_tamper_test',
+            'client_secret' => 'pi_amount_tamper_secret',
+        ]);
+
+        $service = Mockery::mock(CheckoutPaymentIntentService::class);
+        $service->shouldReceive('prepare')
+            ->once()
+            ->with(Mockery::on(function (Order $candidate) use ($order): bool {
+                $candidate->refresh();
+
+                return $candidate->is($order)
+                    && (float) $candidate->total_amount === 100.0;
+            }))
+            ->andReturn($intent);
+        $this->app->instance(CheckoutPaymentIntentService::class, $service);
+
+        $this->withSession(['checkout_order_token' => $order->public_token])
+            ->postJson(route('checkout.accept-terms'), [
+                'order_token' => $order->public_token,
+                'accept_terms' => true,
+                'acknowledge_privacy' => true,
+                'amount' => 1,
+                'total_amount' => 1,
+                'price' => 0.01,
+            ])
+            ->assertOk()
+            ->assertJson(['client_secret' => 'pi_amount_tamper_secret']);
+
+        $this->assertSame(100.0, (float) $order->fresh()->total_amount);
+    }
+
+    public function test_csrf_exception_is_scoped_only_to_stripe_webhook(): void
+    {
+        $bootstrap = file_get_contents(base_path('bootstrap/app.php'));
+
+        $this->assertIsString($bootstrap);
+        $this->assertStringContainsString("'webhook/stripe'", $bootstrap);
+        $this->assertStringNotContainsString("'checkout/", $bootstrap);
+        $this->assertStringNotContainsString("'cos/", $bootstrap);
+        $this->assertStringNotContainsString("'admin", $bootstrap);
+        $this->assertStringNotContainsString("'*'", $bootstrap);
     }
 
     public function test_unsigned_proforma_idor_attempt_is_rejected(): void
