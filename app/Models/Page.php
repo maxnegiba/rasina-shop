@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\SanitizesRichHtml;
 use Illuminate\Database\Eloquent\Model;
-
-use Spatie\Translatable\HasTranslations;
+use Illuminate\Support\Str;
 use RalphJSmit\Laravel\SEO\Support\HasSEO;
 use RalphJSmit\Laravel\SEO\Support\SEOData;
-use Illuminate\Support\Str;
+use Spatie\Translatable\HasTranslations;
 
 class Page extends Model
 {
-    use HasTranslations, HasSEO;
+    use HasTranslations, HasSEO, SanitizesRichHtml;
 
     protected $fillable = [
         'title',

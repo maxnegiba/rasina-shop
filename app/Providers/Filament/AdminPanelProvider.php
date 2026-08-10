@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\EnsureAdminMfa;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -9,6 +10,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\SpatieLaravelTranslatablePlugin;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -17,7 +19,6 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Filament\SpatieLaravelTranslatablePlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -27,9 +28,12 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login() // <--- Esențial pentru a permite POST /admin/login
+            ->login()
+            ->authGuard('web')
+            ->revealablePasswords(false)
+            ->databaseTransactions()
             ->colors([
-                'primary' => Color::Amber, // Culoarea care simulează Brass/Auriu
+                'primary' => Color::Amber,
                 'gray' => Color::Slate,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
@@ -52,10 +56,11 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-            ])
+            ], isPersistent: true)
             ->authMiddleware([
                 Authenticate::class,
-            ])
+                EnsureAdminMfa::class,
+            ], isPersistent: true)
             ->plugin(
                 SpatieLaravelTranslatablePlugin::make()
                     ->defaultLocales(['ro'])
