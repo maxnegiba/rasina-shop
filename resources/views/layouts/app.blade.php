@@ -12,8 +12,10 @@
 
     @php
         $isHomePage = request()->routeIs('home');
-        $homeCormorantStylesheet = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=optional';
-        $homeManropeStylesheet = 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=optional';
+        $homeCormorantLatin = 'https://fonts.gstatic.com/s/cormorantgaramond/v21/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYqXtK.woff2';
+        $homeCormorantLatinExtended = 'https://fonts.gstatic.com/s/cormorantgaramond/v21/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYp3tKgS4.woff2';
+        $homeManropeLatin = 'https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSg.woff2';
+        $homeManropeLatinExtended = 'https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggmxSuXd.woff2';
         $fontStylesheet = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700&display=swap';
         $homeCriticalCss = $isHomePage
             ? \App\Support\CriticalCss::fromViteManifest('resources/css/home-critical.css')
@@ -29,44 +31,75 @@
             : (string) config('shop.legal.email', 'contact@mtdart.ro');
     @endphp
 
-    {{-- Preserve the MTD ART typefaces while keeping the homepage LCP font ahead of UI/body fonts. --}}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
     @if($isHomePage)
-        {{-- Cormorant drives the hero LCP. Fetch its stylesheet first without blocking first paint. --}}
-        <link rel="preload"
-              href="{{ $homeCormorantStylesheet }}"
-              as="style"
-              fetchpriority="high"
-              onload="this.onload=null;this.rel='stylesheet'">
-        <noscript>
-            <link rel="stylesheet" href="{{ $homeCormorantStylesheet }}">
-            <link rel="stylesheet" href="{{ $homeManropeStylesheet }}">
-        </noscript>
-
         {{--
-            Manrope is UI/body typography, not the LCP font. Start it only after
-            the initial document load so its WOFF2 requests cannot compete with
-            the hero font on Lighthouse Slow 4G. `display=optional` prevents a
-            late font swap from introducing CLS on constrained connections.
+            Declare the homepage faces before first paint instead of inserting
+            a stylesheet after layout. `font-display: optional` prevents a late
+            font swap, while the LCP face is discovered directly and preloaded.
         --}}
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="preload"
+              href="{{ $homeCormorantLatin }}"
+              as="font"
+              type="font/woff2"
+              crossorigin
+              fetchpriority="high">
+        <link rel="preload"
+              href="{{ $homeCormorantLatinExtended }}"
+              as="font"
+              type="font/woff2"
+              crossorigin
+              fetchpriority="high">
+        <style data-home-fonts>
+            @font-face {
+                font-family: 'Cormorant Garamond';
+                font-style: normal;
+                font-weight: 500 600;
+                font-display: optional;
+                src: url('{{ $homeCormorantLatinExtended }}') format('woff2');
+                unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+            }
+
+            @font-face {
+                font-family: 'Cormorant Garamond';
+                font-style: normal;
+                font-weight: 500 600;
+                font-display: optional;
+                src: url('{{ $homeCormorantLatin }}') format('woff2');
+                unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+            }
+
+        </style>
+        {{-- Keep the proven mobile behavior: body/UI fonts start only after load. --}}
         <script>
             (() => {
                 const loadHomeManrope = () => {
-                    if (document.querySelector('link[data-home-manrope]')) {
+                    if (document.querySelector('style[data-home-manrope-fonts]')) {
                         return;
                     }
 
-                    const link = document.createElement('link');
-                    link.rel = 'stylesheet';
-                    link.href = 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=optional';
-                    link.media = 'print';
-                    link.dataset.homeManrope = 'true';
-                    link.onload = function () {
-                        this.media = 'all';
-                    };
-                    document.head.appendChild(link);
+                    const style = document.createElement('style');
+                    style.dataset.homeManropeFonts = 'true';
+                    style.textContent = `
+                        @font-face {
+                            font-family: 'Manrope';
+                            font-style: normal;
+                            font-weight: 400 600;
+                            font-display: optional;
+                            src: url('{{ $homeManropeLatinExtended }}') format('woff2');
+                            unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+                        }
+
+                        @font-face {
+                            font-family: 'Manrope';
+                            font-style: normal;
+                            font-weight: 400 600;
+                            font-display: optional;
+                            src: url('{{ $homeManropeLatin }}') format('woff2');
+                            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+                        }
+                    `;
+                    document.head.appendChild(style);
                 };
 
                 if (document.readyState === 'complete') {
@@ -77,6 +110,8 @@
             })();
         </script>
     @else
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="stylesheet"
               href="{{ $fontStylesheet }}"
               media="print"
