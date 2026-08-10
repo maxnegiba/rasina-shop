@@ -1,0 +1,71 @@
+name: Security - Supply Chain
+
+on:
+  push:
+    branches:
+      - main
+      - 'agent/**'
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '31 3 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  composer-audit:
+    name: Composer advisory audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP 8.4 and Composer
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+        env:
+          fail-fast: true
+
+      - name: Show PHP and Composer versions
+        run: |
+          php --version
+          composer --version
+
+      - name: Validate Composer manifest and lockfile
+        run: composer validate --strict --no-check-publish
+
+      # Security advisories fail the job. Abandoned packages remain visible as
+      # warnings because replacing a Filament plugin requires a functional migration.
+      - name: Audit locked Composer dependencies
+        run: composer audit --locked --abandoned=report
+
+  npm-audit:
+    name: npm advisory audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version-file: '.nvmrc'
+          package-manager-cache: false
+
+      - name: Verify exact npm lock installation
+        run: npm ci --ignore-scripts
+
+      - name: Audit npm lockfile
+        run: npm audit --audit-level=high
