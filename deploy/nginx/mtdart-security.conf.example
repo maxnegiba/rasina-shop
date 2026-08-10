@@ -1,0 +1,48 @@
+# MTD ART production security snippet
+# Include this INSIDE the existing HTTPS `server { ... }` block for mtdart.ro.
+# Test with `sudo nginx -t` before reloading.
+#
+# Laravel's SecurityHeaders middleware remains the owner of Content-Security-Policy
+# because the Filament admin routes require a slightly different script policy.
+
+server_tokens off;
+autoindex off;
+
+# The public custom-request image limit is 5 MiB. Leave enough room for multipart overhead,
+# while rejecting unexpectedly large request bodies before PHP/Laravel handles them.
+client_max_body_size 8m;
+
+# Modern TLS only. If your hosting panel owns these directives globally, keep the stricter
+# effective configuration and omit duplicates from the per-site include.
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_session_cache shared:MTDART_SSL:20m;
+ssl_session_timeout 1d;
+ssl_session_tickets off;
+
+# Apply browser hardening to static responses too. Dynamic Laravel responses also receive
+# these headers from app/Http/Middleware/SecurityHeaders.php.
+add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+
+# Never serve hidden repository/config files, while preserving ACME certificate challenges.
+location ~ /\.(?!well-known(?:/|$)) {
+    deny all;
+    access_log off;
+    log_not_found off;
+}
+
+# Defense in depth if the document root is ever misconfigured above Laravel's /public dir.
+location ~* ^/(?:artisan|composer\.(?:json|lock)|package(?:-lock)?\.json|phpunit\.xml(?:\.dist)?|vite\.config\.(?:js|ts)|tailwind\.config\.(?:js|ts))$ {
+    deny all;
+    access_log off;
+    log_not_found off;
+}
+
+location ~* \.(?:env|ini|log|sql|sqlite|sqlite3|bak|backup|old|orig|swp)$ {
+    deny all;
+    access_log off;
+    log_not_found off;
+}
