@@ -1,0 +1,109 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\View\View;
+
+class AdminMfaController extends Controller
+{
+    public function show(Request $request): View
+    {
+        $this->ensureAdmin($request);
+        $this->issueCodeIfNeeded($request);
+
+        return view('auth.admin-mfa', [
+            'email' => $this->maskedEmail((string) $request->user()->email),
+        ]);
+    }
+
+    public function verify(Request $request): RedirectResponse
+    {
+        $this->ensureAdmin($request);
+
+        $validated = $request->validate([
+            'code' => ['required', 'digits:6'],
+        ]);
+
+        $key = 'admin-mfa-verify:'.$request->user()->getKey().'|'.$request->ip();
+        if (RateLimiter::tooManyAttempts($key, (int) config('security.admin_mfa.verify_attempts', 5))) {
+            return back()->withErrors(['code' => 'Prea multe încercări. Reîncearcă peste un minut.']);
+        }
+        RateLimiter::hit($key, 60);
+
+        $hash = (string) $request->session()->get('admin_mfa_code_hash', '');
+        $expiresAt = (int) $request->session()->get('admin_mfa_code_expires_at', 0);
+        $userId = (int) $request->session()->get('admin_mfa_code_user_id', 0);
+
+        if ($hash === '' || $expiresAt < time() || $userId !== (int) $request->user()->getKey() || ! Hash::check($validated['code'], $hash)) {
+            return back()->withErrors(['code' => 'Cod invalid sau expirat.']);
+        }
+
+        RateLimiter::clear($key);
+        $request->session()->forget(['admin_mfa_code_hash', 'admin_mfa_code_expires_at', 'admin_mfa_code_user_id']);
+        $request->session()->put([
+            'admin_mfa_verified_at' => time(),
+            'admin_mfa_user_id' => (int) $request->user()->getKey(),
+        ]);
+
+        return redirect('/admin');
+    }
+
+    public function resend(Request $request): RedirectResponse
+    {
+        $this->ensureAdmin($request);
+        $request->session()->forget(['admin_mfa_code_hash', 'admin_mfa_code_expires_at', 'admin_mfa_code_user_id']);
+        $this->issueCodeIfNeeded($request, force: true);
+
+        return back()->with('status', 'A fost trimis un cod nou.');
+    }
+
+    private function issueCodeIfNeeded(Request $request, bool $force = false): void
+    {
+        $expiresAt = (int) $request->session()->get('admin_mfa_code_expires_at', 0);
+        $sameUser = (int) $request->session()->get('admin_mfa_code_user_id', 0) === (int) $request->user()->getKey();
+
+        if (! $force && $sameUser && $expiresAt > time()) {
+            return;
+        }
+
+        $key = 'admin-mfa-send:'.$request->user()->getKey().'|'.$request->ip();
+        $maxAttempts = (int) config('security.admin_mfa.send_attempts', 3);
+
+        if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
+            return;
+        }
+
+        RateLimiter::hit($key, 600);
+        $code = (string) random_int(100000, 999999);
+        $request->session()->put([
+            'admin_mfa_code_hash' => Hash::make($code),
+            'admin_mfa_code_expires_at' => time() + (int) config('security.admin_mfa.code_seconds', 600),
+            'admin_mfa_code_user_id' => (int) $request->user()->getKey(),
+        ]);
+
+        Mail::raw(
+            "Codul tău de securitate pentru panoul MTD ART este: {$code}\n\nCodul expiră în 10 minute. Dacă nu ai încercat să te autentifici, schimbă parola imediat.",
+            fn ($message) => $message
+                ->to((string) $request->user()->email)
+                ->subject('Cod securitate MTD ART'),
+        );
+    }
+
+    private function ensureAdmin(Request $request): void
+    {
+        abort_unless($request->user()?->is_admin === true, 403);
+    }
+
+    private function maskedEmail(string $email): string
+    {
+        [$local, $domain] = array_pad(explode('@', $email, 2), 2, '');
+        $visible = mb_substr($local, 0, min(2, mb_strlen($local)));
+
+        return $visible.str_repeat('•', max(3, mb_strlen($local) - mb_strlen($visible))).'@'.$domain;
+    }
+}
