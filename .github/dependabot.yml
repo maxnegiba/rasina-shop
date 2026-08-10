@@ -1,0 +1,59 @@
+version: 2
+
+updates:
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '05:15'
+      timezone: Europe/Bucharest
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+    groups:
+      composer-non-major:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '05:35'
+      timezone: Europe/Bucharest
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+    groups:
+      npm-non-major:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '05:55'
+      timezone: Europe/Bucharest
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+    groups:
+      actions-non-major:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
