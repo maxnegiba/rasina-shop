@@ -35,7 +35,10 @@ jobs:
         run: composer audit --locked --abandoned=report
 
       - name: Show remediated versions
-        run: composer show --locked dompdf/dompdf guzzlehttp/guzzle league/commonmark
+        run: |
+          composer show --locked dompdf/dompdf
+          composer show --locked guzzlehttp/guzzle
+          composer show --locked league/commonmark
 
       - name: Upload remediated lockfile
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
