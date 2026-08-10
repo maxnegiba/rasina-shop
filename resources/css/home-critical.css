@@ -55,20 +55,8 @@
     color: #8a641f !important;
 }
 
-/*
- * Desktop hero stability.
- *
- * The hero heading already contains intentional <br> line breaks. Prevent the
- * fallback typeface from adding an extra wrap inside those lines before
- * Cormorant Garamond settles. Without this, the vertically centred copy can
- * temporarily gain a fifth line and then jump when the final font fits back
- * into the intended four-line composition.
- */
+/* Desktop-only collage stability; typography is stabilized in the document head. */
 @media (min-width: 1024px) {
-    #main-content > section:first-child h1 {
-        white-space: nowrap;
-    }
-
     #atelier .atelier-puzzle-stage {
         contain: layout paint;
     }

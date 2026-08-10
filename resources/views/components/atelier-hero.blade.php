@@ -886,6 +886,7 @@
 
                                 <image
                                     href="{{ asset('img/hero/' . $piece['file']) }}"
+                                    fetchpriority="{{ $piece['key'] === 'natural-materials' ? 'high' : 'low' }}"
                                     x="0"
                                     y="0"
                                     width="100"

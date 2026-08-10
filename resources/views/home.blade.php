@@ -201,7 +201,7 @@
                             if ($homeImagePath) {
                                 $homeImageSource = 'storage:'.ltrim($homeImagePath, '/');
                                 $homeImageUrl = \App\Support\OptimizedImage::url($homeImageSource, 480, 70);
-                                $homeImageSrcset = \App\Support\OptimizedImage::srcset($homeImageSource, [320, 480, 720], 70);
+                                $homeImageSrcset = \App\Support\OptimizedImage::srcset($homeImageSource, [192, 320, 480, 720], 70);
                             } else {
                                 $homeImageUrl = null;
                                 $homeImageSrcset = null;
@@ -214,7 +214,7 @@
                                         <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
                                              data-src="{{ $homeImageUrl }}"
                                              data-srcset="{{ $homeImageSrcset }}"
-                                             data-sizes="(min-width: 1024px) 22vw, (min-width: 640px) 46vw, 92vw"
+                                             data-sizes="(min-width: 1024px) min(calc(25vw - 4.5rem), 15.5rem), (min-width: 640px) calc(50vw - 4.5rem), calc(100vw - 4rem)"
                                              alt="{{ $product->name }}"
                                              width="480"
                                              height="640"
@@ -230,7 +230,7 @@
                                     @endif
 
                                     @if($product->is_custom)
-                                        <span class="absolute top-4 left-4 bg-vintage-gold text-white text-xs px-3 py-2 uppercase tracking-[0.14em] font-semibold shadow-sm">
+                                        <span class="absolute top-4 left-4 bg-[#70511f] text-white text-xs px-3 py-2 uppercase tracking-[0.14em] font-semibold shadow-sm">
                                             Unicat / Comandă
                                         </span>
                                     @endif
