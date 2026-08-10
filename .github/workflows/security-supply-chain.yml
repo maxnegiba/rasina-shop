@@ -25,10 +25,17 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Select PHP 8.4 runtime
+      - name: Set up PHP 8.4 and Composer
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+        env:
+          fail-fast: true
+
+      - name: Show PHP and Composer versions
         run: |
-          test -x /usr/bin/php8.4
-          sudo update-alternatives --set php /usr/bin/php8.4
           php --version
           composer --version
 
