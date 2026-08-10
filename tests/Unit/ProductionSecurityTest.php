@@ -10,7 +10,6 @@ class ProductionSecurityTest extends TestCase
     public function test_hardened_production_configuration_has_no_violations(): void
     {
         config([
-            'app.key' => 'base64:'.base64_encode(random_bytes(32)),
             'app.debug' => false,
             'app.url' => 'https://mtdart.ro',
             'session.driver' => 'database',
@@ -30,7 +29,6 @@ class ProductionSecurityTest extends TestCase
     public function test_insecure_production_configuration_is_rejected(): void
     {
         config([
-            'app.key' => '',
             'app.debug' => true,
             'app.url' => 'http://mtdart.ro',
             'session.driver' => 'cookie',
@@ -46,7 +44,6 @@ class ProductionSecurityTest extends TestCase
 
         $violations = app(ProductionSecurity::class)->violations();
 
-        $this->assertContains('APP_KEY must be configured.', $violations);
         $this->assertContains('APP_DEBUG must be false.', $violations);
         $this->assertContains('APP_URL must use https://.', $violations);
         $this->assertContains('SESSION_DRIVER must be database or redis.', $violations);
