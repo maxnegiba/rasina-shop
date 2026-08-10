@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminMfaController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\BlogController;
@@ -26,32 +27,26 @@ Route::post('/contact', [PageController::class, 'submitContact'])
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 
-// Responsive image derivatives are generated once, cached on disk and served with immutable cache headers.
 Route::get('/media/optimized/{encoded}', OptimizedImageController::class)
     ->where('encoded', '[A-Za-z0-9_-]+')
     ->name('media.optimized');
 
-// --- Magazin (Shop) ---
 Route::group(['prefix' => 'magazin', 'as' => 'shop.'], function () {
     Route::get('/', [ShopController::class, 'index'])->name('index');
     Route::get('/categorie/{slug}', [ShopController::class, 'category'])->name('category');
     Route::get('/produs/{slug}', [ShopController::class, 'show'])->name('show');
 });
 
-// --- Cereri Personalizate (Custom Requests) ---
-// Aici trimitem datele din formularul pentru produse unicat
 Route::post('/cerere-personalizata', [CustomRequestController::class, 'store'])
     ->middleware('throttle:5,1')
     ->name('custom-request.store');
 Route::view('/custom-orders', 'custom-orders')->name('custom-orders');
 
-// --- Jurnal de Atelier (Blog) ---
 Route::group(['prefix' => 'jurnal', 'as' => 'blog.'], function () {
     Route::get('/', [BlogController::class, 'index'])->name('index');
     Route::get('/{slug}', [BlogController::class, 'show'])->name('show');
 });
 
-// --- Cos de Cumparaturi (Cart) ---
 Route::group(['prefix' => 'cos', 'as' => 'cart.'], function () {
     Route::get('/', [CartController::class, 'index'])->name('index');
     Route::post('/adauga', [CartController::class, 'add'])->middleware('throttle:30,1')->name('add');
@@ -59,7 +54,6 @@ Route::group(['prefix' => 'cos', 'as' => 'cart.'], function () {
     Route::post('/sterge', [CartController::class, 'remove'])->middleware('throttle:30,1')->name('remove');
 });
 
-// --- Checkout & Plăți (Stripe) ---
 Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
     Route::get('/', [CheckoutController::class, 'index'])->name('index');
     Route::post('/acceptare', [CheckoutController::class, 'acceptTerms'])->middleware('throttle:30,1')->name('accept-terms');
@@ -69,13 +63,17 @@ Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
 
 Route::post('/webhook/stripe', [\App\Http\Controllers\WebhookController::class, 'handleStripeWebhook'])->name('webhook.stripe');
 
-// --- Descarcare Proforma ---
 Route::get('/proforma/{order:public_token}', [\App\Http\Controllers\ProformaController::class, 'download'])
     ->middleware('signed')
     ->name('order.proforma.download');
 
+Route::middleware(['auth', 'throttle:20,1'])
+    ->prefix('admin-security')
+    ->name('admin.mfa.')
+    ->group(function () {
+        Route::get('/challenge', [AdminMfaController::class, 'show'])->name('challenge');
+        Route::post('/verify', [AdminMfaController::class, 'verify'])->name('verify');
+        Route::post('/resend', [AdminMfaController::class, 'resend'])->name('resend');
+    });
 
-// Notă: Rutele pentru Filament (Admin) sunt gestionate automat de pachet, 
-// deci nu trebuie să adăugăm nimic aici pentru panoul de control.
-// Paginile Legale
 Route::get('/info/{slug}', [PageController::class, 'show'])->name('page.show');
