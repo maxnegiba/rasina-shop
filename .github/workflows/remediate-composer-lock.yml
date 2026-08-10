@@ -19,6 +19,13 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Select PHP 8.4 runtime
+        run: |
+          test -x /usr/bin/php8.4
+          sudo update-alternatives --set php /usr/bin/php8.4
+          php --version
+          composer --version
+
       - name: Update only advisory-affected Composer packages
         run: composer update dompdf/dompdf guzzlehttp/guzzle league/commonmark --with-all-dependencies --no-install --no-scripts --no-interaction
 
