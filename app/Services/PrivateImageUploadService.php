@@ -12,6 +12,10 @@ class PrivateImageUploadService
 
     public function store(UploadedFile $file, string $directory = 'custom_requests'): string
     {
+        if (! function_exists('imagecreatefromstring')) {
+            throw new RuntimeException('Procesarea securizată a imaginilor nu este disponibilă pe server.');
+        }
+
         $info = @getimagesize($file->getRealPath());
 
         if (! $info || empty($info[0]) || empty($info[1])) {
