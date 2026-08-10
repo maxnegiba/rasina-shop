@@ -16,6 +16,16 @@ jobs:
     name: Adversarial security suite
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      APP_ENV: testing
+      APP_DEBUG: false
+      APP_URL: http://localhost
+      CACHE_STORE: array
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+      MAIL_MAILER: array
+      QUEUE_CONNECTION: sync
+      SESSION_DRIVER: array
 
     steps:
       - name: Checkout repository
@@ -34,10 +44,7 @@ jobs:
           fail-fast: true
 
       - name: Install exact PHP dependencies
-        run: composer install --no-interaction --no-progress --prefer-dist --no-scripts
-
-      - name: Prepare Laravel package discovery
-        run: composer dump-autoload --optimize
+        run: composer install --no-interaction --no-progress --prefer-dist
 
       - name: Run focused adversarial attacks
         run: php artisan test tests/Feature/AdversarialSecurityTest.php
