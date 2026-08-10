@@ -85,21 +85,10 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "secure-http": true,
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
-        },
-        "policy": {
-            "advisories": {
-                "block": true,
-                "audit": "fail"
-            },
-            "abandoned": {
-                "block": false,
-                "audit": "fail"
-            }
         }
     },
     "minimum-stability": "stable",
