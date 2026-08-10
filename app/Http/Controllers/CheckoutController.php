@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Services\CheckoutPaymentIntentService;
 use App\Services\OrderPaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -85,7 +86,7 @@ class CheckoutController extends Controller
         }
     }
 
-    public function acceptTerms(Request $request): JsonResponse
+    public function acceptTerms(Request $request, CheckoutPaymentIntentService $paymentIntents): JsonResponse
     {
         $validated = $request->validate([
             'order_token' => ['required', 'uuid'],
@@ -131,32 +132,7 @@ class CheckoutController extends Controller
         }
 
         try {
-            $stripe = new StripeClient((string) config('services.stripe.secret'));
-
-            if ($order->stripe_transaction_id) {
-                $paymentIntent = $stripe->paymentIntents->retrieve($order->stripe_transaction_id);
-            } else {
-                $paymentIntent = $stripe->paymentIntents->create([
-                    'amount' => (int) round((float) $order->total_amount * 100),
-                    'currency' => 'ron',
-                    'automatic_payment_methods' => [
-                        'enabled' => true,
-                        'allow_redirects' => 'never',
-                    ],
-                    'description' => 'Comanda '.$order->order_number.' - '.config('shop.brand_name'),
-                    'metadata' => [
-                        'order_id' => (string) $order->id,
-                        'order_number' => $order->order_number,
-                    ],
-                ], [
-                    'idempotency_key' => 'mtd-payment-intent-'.$order->id,
-                ]);
-
-                Order::query()
-                    ->whereKey($order->id)
-                    ->whereNull('stripe_transaction_id')
-                    ->update(['stripe_transaction_id' => $paymentIntent->id]);
-            }
+            $paymentIntent = $paymentIntents->prepare($order);
 
             return response()->json([
                 'accepted' => true,
