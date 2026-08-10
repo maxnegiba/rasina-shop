@@ -160,7 +160,9 @@
 (() => {
     const stripe = Stripe({{ Illuminate\Support\Js::from($stripeKey) }}, {locale: 'ro'});
     const elements = stripe.elements({
-        clientSecret: {{ Illuminate\Support\Js::from($clientSecret) }},
+        mode: 'payment',
+        amount: {{ Illuminate\Support\Js::from($totalAmountCents) }},
+        currency: 'ron',
         locale: 'ro',
         appearance: {
             theme: 'stripe',
@@ -275,6 +277,7 @@
 
         return messages[error?.code]
             || (error?.type === 'validation_error' ? error.message : null)
+            || error?.message
             || 'Plata nu a putut fi procesată. Verificați datele și încercați din nou.';
     }
 
@@ -298,7 +301,7 @@
         return valid;
     }
 
-    async function saveAcceptances() {
+    async function createPaymentIntentAfterAcceptance() {
         const response = await fetch({{ Illuminate\Support\Js::from(route('checkout.accept-terms')) }}, {
             method: 'POST',
             headers: {
@@ -325,6 +328,12 @@
             }
             throw new Error(payload.message || 'Confirmările obligatorii nu au putut fi salvate.');
         }
+
+        if (!payload.client_secret) {
+            throw new Error('Sesiunea securizată de plată nu a putut fi creată.');
+        }
+
+        return payload.client_secret;
     }
 
     form.addEventListener('submit', async (event) => {
@@ -350,11 +359,11 @@
                 throw submitResult.error;
             }
 
-            await saveAcceptances();
-
+            const clientSecret = await createPaymentIntentAfterAcceptance();
             const email = emailInput.value.trim();
             const {error} = await stripe.confirmPayment({
                 elements,
+                clientSecret,
                 confirmParams: {
                     return_url: {{ Illuminate\Support\Js::from(route('checkout.success', ['order' => $orderToken])) }},
                     receipt_email: email,

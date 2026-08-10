@@ -3,42 +3,50 @@
 namespace App\Http\Controllers;
 
 use App\Models\CustomRequest;
+use App\Services\PrivateImageUploadService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use RuntimeException;
 
 class CustomRequestController extends Controller
 {
     /**
-     * Procesează trimiterea formularului de cerere personalizată
+     * Procesează trimiterea formularului de cerere personalizată.
      */
-    public function store(Request $request)
+    public function store(Request $request, PrivateImageUploadService $images): RedirectResponse
     {
-        // 1. Validarea datelor (Siguranță înainte de toate)
         $validatedData = $request->validate([
-            'product_id' => 'nullable|exists:products,id',
-            'customer_name' => 'required|string|max:255',
-            'customer_email' => 'required|email|max:255',
-            'customer_phone' => 'nullable|string|max:20',
-            'dimensions_requested' => 'nullable|string|max:255',
-            'color_preferences' => 'nullable|string|max:255',
-            'special_message' => 'nullable|string|max:5000',
-            'reference_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120', // Max 5MB
+            'product_id' => ['nullable', 'exists:products,id'],
+            'customer_name' => ['required', 'string', 'max:255'],
+            'customer_email' => ['required', 'email', 'max:255'],
+            'customer_phone' => ['nullable', 'string', 'max:20'],
+            'dimensions_requested' => ['nullable', 'string', 'max:255'],
+            'color_preferences' => ['nullable', 'string', 'max:255'],
+            'special_message' => ['nullable', 'string', 'max:5000'],
+            'reference_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120', 'dimensions:max_width=6000,max_height=6000'],
         ], [
-            // Mesaje de eroare personalizate în română
             'customer_name.required' => 'Te rugăm să ne spui cum te numiești.',
             'customer_email.required' => 'Avem nevoie de adresa ta de email pentru a-ți trimite oferta.',
             'customer_email.email' => 'Adresa de email nu pare a fi validă.',
             'reference_image.image' => 'Fișierul încărcat trebuie să fie o imagine.',
             'reference_image.max' => 'Imaginea este prea mare (maxim 5MB).',
+            'reference_image.dimensions' => 'Imaginea are o rezoluție prea mare (maxim 6000 × 6000 px).',
         ]);
 
-        // 2. Gestionarea imaginii încărcate
         $imagePath = null;
+
         if ($request->hasFile('reference_image')) {
-            // Salvăm imaginea în folderul 'custom_requests' din disk-ul public
-            $imagePath = $request->file('reference_image')->store('custom_requests', 'public');
+            try {
+                // Decodarea + re-encodarea elimină EXIF/metadatele și fișierul este salvat exclusiv pe disk-ul privat.
+                $imagePath = $images->store($request->file('reference_image'));
+            } catch (RuntimeException $exception) {
+                throw ValidationException::withMessages([
+                    'reference_image' => $exception->getMessage(),
+                ]);
+            }
         }
 
-        // 3. Crearea înregistrării în Baza de Date
         CustomRequest::create([
             'product_id' => $validatedData['product_id'] ?? null,
             'customer_name' => $validatedData['customer_name'],
@@ -48,11 +56,9 @@ class CustomRequestController extends Controller
             'color_preferences' => $validatedData['color_preferences'] ?? null,
             'special_message' => $validatedData['special_message'] ?? null,
             'reference_image_path' => $imagePath,
-            'status' => 'new', // Apare automat ca "Nouă" în Filament
+            'status' => 'new',
         ]);
 
-        // 4. Feedback pentru client
-        // Redirecționăm înapoi cu un mesaj de succes care va fi afișat elegant în site
         return redirect()->back()->with('success', 'Cererea ta a fost trimisă cu succes! Te vom contacta în cel mai scurt timp pentru a discuta detaliile și oferta de preț.');
     }
 }
