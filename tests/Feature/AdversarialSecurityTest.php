@@ -43,7 +43,7 @@ HTML;
 
     public function test_stolen_or_expired_admin_mfa_session_cannot_cross_admin_boundary(): void
     {
-        Route::middleware(EnsureAdminMfa::class)
+        Route::middleware(['web', EnsureAdminMfa::class])
             ->get('/_adversarial-admin-boundary', fn () => response('admin-ok'));
 
         $admin = User::factory()->create(['is_admin' => true]);
@@ -68,7 +68,7 @@ HTML;
 
     public function test_non_admin_user_cannot_reach_mfa_protected_admin_boundary(): void
     {
-        Route::middleware(EnsureAdminMfa::class)
+        Route::middleware(['web', EnsureAdminMfa::class])
             ->get('/_adversarial-admin-role', fn () => response('admin-ok'));
 
         $user = User::factory()->create(['is_admin' => false]);
