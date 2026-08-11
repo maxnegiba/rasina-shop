@@ -1,0 +1,54 @@
+name: Security - Adversarial Tests
+
+on:
+  push:
+    branches:
+      - main
+      - 'agent/**'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  adversarial-security:
+    name: Adversarial security suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      APP_ENV: testing
+      APP_DEBUG: false
+      APP_KEY: base64:UjqGhDTPaYbJlEE5T2/ifcTx/AwxHq7D/bc3jjooIak=
+      APP_URL: http://localhost
+      CACHE_STORE: array
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+      MAIL_MAILER: array
+      QUEUE_CONNECTION: sync
+      SESSION_DRIVER: array
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP 8.4 and Composer
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '8.4'
+          extensions: dom, fileinfo, gd, mbstring, pdo_sqlite, sqlite3
+          tools: composer:v2
+          coverage: none
+        env:
+          fail-fast: true
+
+      - name: Install exact PHP dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Run focused adversarial attacks
+        run: php artisan test tests/Feature/AdversarialSecurityTest.php
+
+      - name: Run complete regression suite
+        run: php artisan test
