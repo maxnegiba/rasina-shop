@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
@@ -57,41 +58,62 @@ class AdminMfaController extends Controller
     {
         $this->ensureAdmin($request);
         $request->session()->forget(['admin_mfa_code_hash', 'admin_mfa_code_expires_at', 'admin_mfa_code_user_id']);
-        $this->issueCodeIfNeeded($request, force: true);
+
+        if (! $this->issueCodeIfNeeded($request, force: true)) {
+            return back()->withErrors([
+                'code' => 'Codul nu a putut fi trimis momentan. Verifică serviciul de email și încearcă din nou.',
+            ]);
+        }
 
         return back()->with('status', 'A fost trimis un cod nou.');
     }
 
-    private function issueCodeIfNeeded(Request $request, bool $force = false): void
+    private function issueCodeIfNeeded(Request $request, bool $force = false): bool
     {
         $expiresAt = (int) $request->session()->get('admin_mfa_code_expires_at', 0);
         $sameUser = (int) $request->session()->get('admin_mfa_code_user_id', 0) === (int) $request->user()->getKey();
 
         if (! $force && $sameUser && $expiresAt > time()) {
-            return;
+            return true;
         }
 
         $key = 'admin-mfa-send:'.$request->user()->getKey().'|'.$request->ip();
         $maxAttempts = (int) config('security.admin_mfa.send_attempts', 3);
 
         if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
-            return;
+            $request->session()->flash('error', 'Ai solicitat prea multe coduri. Încearcă din nou în câteva minute.');
+
+            return false;
+        }
+
+        $code = (string) random_int(100000, 999999);
+
+        try {
+            Mail::raw(
+                "Codul tău de securitate pentru panoul MTD ART este: {$code}\n\nCodul expiră în 10 minute. Dacă nu ai încercat să te autentifici, schimbă parola imediat.",
+                fn ($message) => $message
+                    ->to((string) $request->user()->email)
+                    ->subject('Cod securitate MTD ART'),
+            );
+        } catch (\Throwable $exception) {
+            Log::error('Admin MFA email could not be sent.', [
+                'user_id' => $request->user()->getKey(),
+                'exception' => $exception->getMessage(),
+            ]);
+
+            $request->session()->flash('error', 'Codul de securitate nu a putut fi trimis. Încearcă din nou.');
+
+            return false;
         }
 
         RateLimiter::hit($key, 600);
-        $code = (string) random_int(100000, 999999);
         $request->session()->put([
             'admin_mfa_code_hash' => Hash::make($code),
             'admin_mfa_code_expires_at' => time() + (int) config('security.admin_mfa.code_seconds', 600),
             'admin_mfa_code_user_id' => (int) $request->user()->getKey(),
         ]);
 
-        Mail::raw(
-            "Codul tău de securitate pentru panoul MTD ART este: {$code}\n\nCodul expiră în 10 minute. Dacă nu ai încercat să te autentifici, schimbă parola imediat.",
-            fn ($message) => $message
-                ->to((string) $request->user()->email)
-                ->subject('Cod securitate MTD ART'),
-        );
+        return true;
     }
 
     private function ensureAdmin(Request $request): void
