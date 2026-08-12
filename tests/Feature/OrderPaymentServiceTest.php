@@ -2,22 +2,23 @@
 
 namespace Tests\Feature;
 
-use App\Mail\OrderConfirmationMail;
+use App\Jobs\SendAdminOrderNotificationEmail;
+use App\Jobs\SendOrderConfirmationEmail;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\OrderPaymentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class OrderPaymentServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_succeeded_payment_intent_is_fulfilled_only_once(): void
+    public function test_succeeded_payment_intent_is_fulfilled_and_mail_jobs_are_claimed_only_once(): void
     {
-        Mail::fake();
+        Queue::fake();
         [$order, $product] = $this->reservedOrder();
         $paymentIntent = $this->succeededPaymentIntent($order);
         $service = app(OrderPaymentService::class);
@@ -32,7 +33,9 @@ class OrderPaymentServiceTest extends TestCase
         $this->assertSame('pi_test_123', $order->stripe_transaction_id);
         $this->assertSame('PROFORMA-'.now()->format('Y').'-'.str_pad((string) $order->id, 6, '0', STR_PAD_LEFT), $order->proforma_number);
         $this->assertSame(0, $product->stock);
-        Mail::assertQueued(OrderConfirmationMail::class, 1);
+        $this->assertNotNull($order->confirmation_queued_at);
+        Queue::assertPushed(SendOrderConfirmationEmail::class, 1);
+        Queue::assertPushed(SendAdminOrderNotificationEmail::class, 1);
     }
 
     public function test_canceled_payment_intent_releases_reserved_stock_only_once(): void
@@ -69,7 +72,7 @@ class OrderPaymentServiceTest extends TestCase
 
     public function test_already_created_hosted_checkout_remains_fulfillable(): void
     {
-        Mail::fake();
+        Queue::fake();
         [$order] = $this->reservedOrder();
         $order->update(['stripe_checkout_session_id' => 'cs_test_legacy']);
         $address = (object) [
@@ -104,7 +107,8 @@ class OrderPaymentServiceTest extends TestCase
 
         $this->assertSame('paid', $order->fresh()->payment_status);
         $this->assertSame('pi_test_legacy', $order->fresh()->stripe_transaction_id);
-        Mail::assertQueued(OrderConfirmationMail::class, 1);
+        Queue::assertPushed(SendOrderConfirmationEmail::class, 1);
+        Queue::assertPushed(SendAdminOrderNotificationEmail::class, 1);
     }
 
     private function reservedOrder(): array
