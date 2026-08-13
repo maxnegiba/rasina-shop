@@ -29,10 +29,17 @@
             <button type="submit" class="w-full bg-dark-brown text-white px-5 py-4 uppercase tracking-[0.15em] text-[10px] font-semibold hover:bg-vintage-gold transition-colors">Verifică și continuă</button>
         </form>
 
-        <form method="POST" action="{{ route('admin.mfa.resend') }}" class="mt-5 text-center">
-            @csrf
-            <button type="submit" class="text-xs underline text-dark-brown/60 hover:text-vintage-gold">Trimite un cod nou</button>
-        </form>
+        <div class="mt-5 flex flex-col items-center gap-3">
+            <form method="POST" action="{{ route('admin.mfa.resend') }}" class="text-center">
+                @csrf
+                <button type="submit" class="text-xs underline text-dark-brown/60 hover:text-vintage-gold">Trimite un cod nou</button>
+            </form>
+
+            <form method="POST" action="{{ route('admin.mfa.logout') }}" class="text-center">
+                @csrf
+                <button type="submit" class="text-xs underline text-dark-brown/60 hover:text-vintage-gold">Conectează-te cu alt cont</button>
+            </form>
+        </div>
     </main>
 </body>
 </html>
