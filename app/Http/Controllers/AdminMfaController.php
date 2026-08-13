@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -66,6 +67,18 @@ class AdminMfaController extends Controller
         }
 
         return back()->with('status', 'A fost trimis un cod nou.');
+    }
+
+    public function logout(Request $request): RedirectResponse
+    {
+        $this->ensureAdmin($request);
+
+        Auth::guard('web')->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/admin/login');
     }
 
     private function issueCodeIfNeeded(Request $request, bool $force = false): bool
