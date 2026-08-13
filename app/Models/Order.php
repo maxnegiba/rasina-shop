@@ -19,10 +19,13 @@ class Order extends Model
         'stripe_checkout_session_id', 'proforma_number', 'public_token',
         'stock_reserved_at', 'stock_released_at', 'terms_accepted_at',
         'privacy_acknowledged_at', 'terms_version', 'confirmation_sent_at',
+        'confirmation_queued_at', 'confirmation_failed_at',
+        'admin_notification_queued_at', 'admin_notification_sent_at',
+        'admin_notification_failed_at',
     ];
 
     protected $casts = [
-        'customer_details' => 'array', // Transformă automat JSON-ul din DB în array PHP
+        'customer_details' => 'array',
         'subtotal_amount' => 'decimal:2',
         'shipping_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
@@ -32,6 +35,11 @@ class Order extends Model
         'terms_accepted_at' => 'datetime',
         'privacy_acknowledged_at' => 'datetime',
         'confirmation_sent_at' => 'datetime',
+        'confirmation_queued_at' => 'datetime',
+        'confirmation_failed_at' => 'datetime',
+        'admin_notification_queued_at' => 'datetime',
+        'admin_notification_sent_at' => 'datetime',
+        'admin_notification_failed_at' => 'datetime',
     ];
 
     protected static function booted(): void

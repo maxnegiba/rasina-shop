@@ -2,11 +2,12 @@
 
 namespace App\Services;
 
-use App\Mail\OrderConfirmationMail;
+use App\Jobs\SendAdminOrderNotificationEmail;
+use App\Jobs\SendOrderConfirmationEmail;
 use App\Models\Order;
+use App\Settings\GeneralSettings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use RuntimeException;
 
 class OrderPaymentService
@@ -36,10 +37,6 @@ class OrderPaymentService
         );
     }
 
-    /**
-     * Keeps already-created hosted Checkout Sessions fulfillable while new orders
-     * use the embedded Payment Element again.
-     */
     public function completeLegacyCheckout(object $checkoutSession): ?Order
     {
         if (($checkoutSession->payment_status ?? null) !== 'paid') {
@@ -134,8 +131,10 @@ class OrderPaymentService
             throw new RuntimeException('Stripe payment amount mismatch.');
         }
 
-        $email = filter_var($customerDetails['email'] ?? null, FILTER_VALIDATE_EMAIL) ?: null;
-        $mailClaimedAt = null;
+        $customerEmail = filter_var($customerDetails['email'] ?? null, FILTER_VALIDATE_EMAIL) ?: null;
+        $adminEmail = $this->adminNotificationEmail();
+        $customerMailClaimedAt = null;
+        $adminMailClaimedAt = null;
 
         if (! $order->terms_accepted_at || ! $order->privacy_acknowledged_at) {
             Log::critical('A succeeded Stripe payment has no recorded legal acceptance.', [
@@ -149,8 +148,10 @@ class OrderPaymentService
             $transactionId,
             $checkoutSessionId,
             $customerDetails,
-            $email,
-            &$mailClaimedAt,
+            $customerEmail,
+            $adminEmail,
+            &$customerMailClaimedAt,
+            &$adminMailClaimedAt,
         ): void {
             /** @var Order $lockedOrder */
             $lockedOrder = Order::query()->lockForUpdate()->findOrFail($order->id);
@@ -175,9 +176,16 @@ class OrderPaymentService
                 $updates['proforma_number'] = $lockedOrder->proformaNumber();
             }
 
-            if ($email && ! $lockedOrder->confirmation_sent_at) {
-                $mailClaimedAt = now();
-                $updates['confirmation_sent_at'] = $mailClaimedAt;
+            if ($customerEmail && ! $lockedOrder->confirmation_sent_at && ! $lockedOrder->confirmation_queued_at) {
+                $customerMailClaimedAt = now();
+                $updates['confirmation_queued_at'] = $customerMailClaimedAt;
+                $updates['confirmation_failed_at'] = null;
+            }
+
+            if ($adminEmail && ! $lockedOrder->admin_notification_sent_at && ! $lockedOrder->admin_notification_queued_at) {
+                $adminMailClaimedAt = now();
+                $updates['admin_notification_queued_at'] = $adminMailClaimedAt;
+                $updates['admin_notification_failed_at'] = null;
             }
 
             $lockedOrder->update($updates);
@@ -185,16 +193,38 @@ class OrderPaymentService
 
         $order->refresh()->load('items.product');
 
-        if ($mailClaimedAt && $email) {
+        if ($customerMailClaimedAt && $customerEmail) {
             try {
-                Mail::to($email)->queue(new OrderConfirmationMail($order));
+                SendOrderConfirmationEmail::dispatch($order->id, $customerEmail);
             } catch (\Throwable $exception) {
                 Order::query()
                     ->whereKey($order->id)
-                    ->where('confirmation_sent_at', $mailClaimedAt)
-                    ->update(['confirmation_sent_at' => null]);
+                    ->where('confirmation_queued_at', $customerMailClaimedAt)
+                    ->update([
+                        'confirmation_queued_at' => null,
+                        'confirmation_failed_at' => now(),
+                    ]);
 
-                Log::error('Order confirmation email could not be sent.', [
+                Log::error('Order confirmation job could not be queued.', [
+                    'order_id' => $order->id,
+                    'exception' => $exception->getMessage(),
+                ]);
+            }
+        }
+
+        if ($adminMailClaimedAt && $adminEmail) {
+            try {
+                SendAdminOrderNotificationEmail::dispatch($order->id, $adminEmail);
+            } catch (\Throwable $exception) {
+                Order::query()
+                    ->whereKey($order->id)
+                    ->where('admin_notification_queued_at', $adminMailClaimedAt)
+                    ->update([
+                        'admin_notification_queued_at' => null,
+                        'admin_notification_failed_at' => now(),
+                    ]);
+
+                Log::error('Admin order notification job could not be queued.', [
                     'order_id' => $order->id,
                     'exception' => $exception->getMessage(),
                 ]);
@@ -202,6 +232,13 @@ class OrderPaymentService
         }
 
         return $order;
+    }
+
+    private function adminNotificationEmail(): ?string
+    {
+        $email = app(GeneralSettings::class)->contact_email ?: config('shop.legal.email');
+
+        return filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : null;
     }
 
     private function findOrderForPaymentIntent(object $paymentIntent): ?Order

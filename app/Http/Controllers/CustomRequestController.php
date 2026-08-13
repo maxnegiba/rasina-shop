@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CustomRequest;
+use App\Services\CustomRequestMailService;
 use App\Services\PrivateImageUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,8 +15,11 @@ class CustomRequestController extends Controller
     /**
      * Procesează trimiterea formularului de cerere personalizată.
      */
-    public function store(Request $request, PrivateImageUploadService $images): RedirectResponse
-    {
+    public function store(
+        Request $request,
+        PrivateImageUploadService $images,
+        CustomRequestMailService $mail,
+    ): RedirectResponse {
         $validatedData = $request->validate([
             'product_id' => ['nullable', 'exists:products,id'],
             'customer_name' => ['required', 'string', 'max:255'],
@@ -38,7 +42,6 @@ class CustomRequestController extends Controller
 
         if ($request->hasFile('reference_image')) {
             try {
-                // Decodarea + re-encodarea elimină EXIF/metadatele și fișierul este salvat exclusiv pe disk-ul privat.
                 $imagePath = $images->store($request->file('reference_image'));
             } catch (RuntimeException $exception) {
                 throw ValidationException::withMessages([
@@ -47,7 +50,7 @@ class CustomRequestController extends Controller
             }
         }
 
-        CustomRequest::create([
+        $customRequest = CustomRequest::create([
             'product_id' => $validatedData['product_id'] ?? null,
             'customer_name' => $validatedData['customer_name'],
             'customer_email' => $validatedData['customer_email'],
@@ -58,6 +61,8 @@ class CustomRequestController extends Controller
             'reference_image_path' => $imagePath,
             'status' => 'new',
         ]);
+
+        $mail->queueNotifications($customRequest);
 
         return redirect()->back()->with('success', 'Cererea ta a fost trimisă cu succes! Te vom contacta în cel mai scurt timp pentru a discuta detaliile și oferta de preț.');
     }

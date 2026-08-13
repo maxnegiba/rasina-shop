@@ -10,7 +10,7 @@
     <p>Comanda dumneavoastră cu numărul <strong>{{ $order->order_number }}</strong> a fost plasată cu succes și a fost achitată.</p>
     <p>Total achitat: <strong>{{ number_format($order->total_amount, 2, ',', '.') }} RON</strong>.</p>
     <p>Atașat acestui email veți găsi documentul proforma corespunzător. Proforma este un document comercial nefiscal și nu înlocuiește documentele fiscale prevăzute de lege.</p>
-    <p>Echipa noastră pregătește piesele cu mare grijă. Veți primi o nouă notificare atunci când comanda va fi expediată.</p>
+    <p>Echipa noastră va procesa comanda cu grijă și vă va contacta dacă sunt necesare informații suplimentare.</p>
     <br>
     <p>Cu respect,</p>
     <p>Echipa {{ config('shop.brand_name') }}</p>

@@ -2,10 +2,11 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\CustomRequest;
 use App\Models\Product;
+use App\Services\CustomRequestMailService;
 use Illuminate\Support\Facades\RateLimiter;
+use Livewire\Component;
 
 class CustomOrderModal extends Component
 {
@@ -32,7 +33,7 @@ class CustomOrderModal extends Component
             $this->product_name = $product ? $product->name : null;
 
             if ($product?->isSold()) {
-                $this->message = 'Doresc să comand o piesă asemănătoare cu „' . $product->name . '”.';
+                $this->message = 'Doresc să comand o piesă asemănătoare cu „'.$product->name.'”.';
             }
         } else {
             $this->product_name = null;
@@ -60,7 +61,7 @@ class CustomOrderModal extends Component
             return;
         }
 
-        CustomRequest::create([
+        $customRequest = CustomRequest::create([
             'customer_name' => $this->name,
             'customer_email' => $this->email,
             'customer_phone' => $this->phone,
@@ -68,6 +69,8 @@ class CustomOrderModal extends Component
             'product_id' => $this->product_id,
             'status' => 'new',
         ]);
+
+        app(CustomRequestMailService::class)->queueNotifications($customRequest);
 
         $this->successMessage = 'Cererea a fost trimisă cu succes! Te vom contacta în curând.';
         $this->reset(['name', 'email', 'phone', 'message']);
