@@ -73,6 +73,7 @@ Route::middleware('throttle:20,1')
         Route::get('/challenge', [AdminMfaController::class, 'show'])->name('challenge');
         Route::post('/verify', [AdminMfaController::class, 'verify'])->name('verify');
         Route::post('/resend', [AdminMfaController::class, 'resend'])->name('resend');
+        Route::post('/logout', [AdminMfaController::class, 'logout'])->name('logout');
     });
 
 Route::get('/info/{slug}', [PageController::class, 'show'])->name('page.show');
