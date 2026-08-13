@@ -57,4 +57,15 @@ class AdminMfaTest extends TestCase
             ->get('/_admin-mfa-bound-test')
             ->assertRedirect(route('admin.mfa.challenge'));
     }
+
+    public function test_admin_can_switch_accounts_from_mfa_challenge(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.mfa.logout'))
+            ->assertRedirect('/admin/login');
+
+        $this->assertGuest();
+    }
 }
