@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\BrevoTransactionalMailService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 
@@ -89,14 +89,14 @@ class AdminMfaController extends Controller
         $code = (string) random_int(100000, 999999);
 
         try {
-            Mail::raw(
-                "Codul tău de securitate pentru panoul MTD ART este: {$code}\n\nCodul expiră în 10 minute. Dacă nu ai încercat să te autentifici, schimbă parola imediat.",
-                fn ($message) => $message
-                    ->to((string) $request->user()->email)
-                    ->subject('Cod securitate MTD ART'),
+            app(BrevoTransactionalMailService::class)->send(
+                to: [(string) $request->user()->email],
+                subject: 'Cod securitate MTD ART',
+                textContent: "Codul tău de securitate pentru panoul MTD ART este: {$code}\n\nCodul expiră în 10 minute. Dacă nu ai încercat să te autentifici, schimbă parola imediat.",
+                tags: ['admin-mfa'],
             );
         } catch (\Throwable $exception) {
-            Log::error('Admin MFA email could not be sent.', [
+            Log::error('Admin MFA email could not be sent through Brevo.', [
                 'user_id' => $request->user()->getKey(),
                 'exception' => $exception->getMessage(),
             ]);

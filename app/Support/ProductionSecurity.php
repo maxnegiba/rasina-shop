@@ -37,8 +37,16 @@ class ProductionSecurity
             $violations[] = 'SESSION_SAME_SITE must be lax or strict.';
         }
 
-        if ((string) config('mail.default') === 'log') {
-            $violations[] = 'MAIL_MAILER must deliver email in production; the log mailer would break admin MFA.';
+        if (trim((string) config('services.brevo.api_key')) === '') {
+            $violations[] = 'BREVO_API_KEY must be configured for transactional email and admin MFA.';
+        }
+
+        if (! filter_var(config('services.brevo.sender_email'), FILTER_VALIDATE_EMAIL)) {
+            $violations[] = 'BREVO_SENDER_EMAIL must be a valid verified Brevo sender.';
+        }
+
+        if (! filter_var(config('services.brevo.reply_to_email'), FILTER_VALIDATE_EMAIL)) {
+            $violations[] = 'BREVO_REPLY_TO_EMAIL must be a valid real inbox so customer replies are deliverable.';
         }
 
         if (trim((string) config('services.stripe.key')) === '') {

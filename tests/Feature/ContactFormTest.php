@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Mail\ContactMessageMail;
+use App\Jobs\SendContactMessageEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class ContactFormTest extends TestCase
@@ -13,7 +13,7 @@ class ContactFormTest extends TestCase
 
     public function test_valid_contact_message_is_queued_for_the_shop(): void
     {
-        Mail::fake();
+        Queue::fake();
         config()->set('shop.legal.email', 'atelier@example.com');
 
         $this->post(route('contact.submit'), [
@@ -23,9 +23,9 @@ class ContactFormTest extends TestCase
             'message' => 'Aș dori mai multe detalii.',
         ])->assertRedirect()->assertSessionHas('success');
 
-        Mail::assertQueued(ContactMessageMail::class, function (ContactMessageMail $mail): bool {
-            return $mail->hasTo('atelier@example.com')
-                && $mail->messageData['email'] === 'client@example.com';
+        Queue::assertPushed(SendContactMessageEmail::class, function (SendContactMessageEmail $job): bool {
+            return $job->recipient === 'atelier@example.com'
+                && $job->messageData['email'] === 'client@example.com';
         });
     }
 }

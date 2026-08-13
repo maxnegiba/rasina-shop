@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\ContactMessageMail;
+use App\Jobs\SendContactMessageEmail;
 use App\Models\Product;
 use App\Models\Post;
 use App\Models\Category;
 use App\Models\Page;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class PageController extends Controller
 {
@@ -74,8 +73,16 @@ class PageController extends Controller
         $recipient = app(\App\Settings\GeneralSettings::class)->contact_email
             ?: config('shop.legal.email');
 
+        if (! filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
+            Log::error('Contact message has no valid shop recipient.');
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Mesajul nu a putut fi trimis momentan. Încercați din nou sau folosiți datele de contact afișate.');
+        }
+
         try {
-            Mail::to($recipient)->queue(new ContactMessageMail($validated));
+            SendContactMessageEmail::dispatch($validated, $recipient);
         } catch (\Throwable $exception) {
             Log::error('Contact message could not be queued.', [
                 'exception' => $exception->getMessage(),

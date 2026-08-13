@@ -2,14 +2,13 @@
 
 namespace App\Jobs;
 
-use App\Mail\AdminOrderPaidMail;
 use App\Models\Order;
+use App\Services\BrevoTransactionalMailService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Mail;
 
 class SendAdminOrderNotificationEmail implements ShouldQueue
 {
@@ -21,7 +20,7 @@ class SendAdminOrderNotificationEmail implements ShouldQueue
     {
     }
 
-    public function handle(): void
+    public function handle(BrevoTransactionalMailService $brevo): void
     {
         $order = Order::query()->with('items.product')->findOrFail($this->orderId);
 
@@ -29,7 +28,19 @@ class SendAdminOrderNotificationEmail implements ShouldQueue
             return;
         }
 
-        Mail::to($this->email)->send(new AdminOrderPaidMail($order));
+        $customerEmail = filter_var(data_get($order->customer_details, 'email'), FILTER_VALIDATE_EMAIL) ?: null;
+        $customerName = data_get($order->customer_details, 'name');
+
+        $brevo->send(
+            to: [$this->email],
+            subject: 'Comandă plătită '.$order->order_number.' - '.config('shop.brand_name'),
+            htmlContent: view('emails.admin_order_paid', ['order' => $order])->render(),
+            replyTo: $customerEmail ? [
+                'email' => $customerEmail,
+                'name' => is_string($customerName) ? $customerName : null,
+            ] : null,
+            tags: ['paid-order-admin'],
+        );
 
         $order->update([
             'admin_notification_sent_at' => now(),

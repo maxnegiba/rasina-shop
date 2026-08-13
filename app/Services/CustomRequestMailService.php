@@ -2,12 +2,11 @@
 
 namespace App\Services;
 
-use App\Mail\CustomRequestReceivedMail;
-use App\Mail\NewCustomRequestMail;
+use App\Jobs\SendCustomRequestAcknowledgementEmail;
+use App\Jobs\SendNewCustomRequestNotificationEmail;
 use App\Models\CustomRequest;
 use App\Settings\GeneralSettings;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class CustomRequestMailService
 {
@@ -16,8 +15,7 @@ class CustomRequestMailService
         $customRequest->loadMissing('product');
 
         try {
-            Mail::to($customRequest->customer_email)
-                ->queue(new CustomRequestReceivedMail($customRequest));
+            SendCustomRequestAcknowledgementEmail::dispatch($customRequest->id);
         } catch (\Throwable $exception) {
             Log::error('Custom request acknowledgement could not be queued.', [
                 'custom_request_id' => $customRequest->id,
@@ -36,7 +34,7 @@ class CustomRequestMailService
         }
 
         try {
-            Mail::to($recipient)->queue(new NewCustomRequestMail($customRequest));
+            SendNewCustomRequestNotificationEmail::dispatch($customRequest->id, $recipient);
         } catch (\Throwable $exception) {
             Log::error('Custom request admin notification could not be queued.', [
                 'custom_request_id' => $customRequest->id,

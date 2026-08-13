@@ -41,4 +41,13 @@ return [
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
+    'brevo' => [
+        'api_key' => env('BREVO_API_KEY'),
+        'endpoint' => env('BREVO_API_ENDPOINT', 'https://api.brevo.com/v3/smtp/email'),
+        'sender_email' => env('BREVO_SENDER_EMAIL', 'contact@mtdart.ro'),
+        'sender_name' => env('BREVO_SENDER_NAME', env('SHOP_BRAND_NAME', 'MTD Art')),
+        'reply_to_email' => env('BREVO_REPLY_TO_EMAIL'),
+        'reply_to_name' => env('BREVO_REPLY_TO_NAME', env('SHOP_BRAND_NAME', 'MTD Art')),
+    ],
+
 ];

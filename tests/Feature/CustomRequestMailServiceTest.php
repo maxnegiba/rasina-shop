@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use App\Mail\CustomRequestReceivedMail;
-use App\Mail\NewCustomRequestMail;
+use App\Jobs\SendCustomRequestAcknowledgementEmail;
+use App\Jobs\SendNewCustomRequestNotificationEmail;
 use App\Models\CustomRequest;
 use App\Services\CustomRequestMailService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class CustomRequestMailServiceTest extends TestCase
@@ -16,7 +16,7 @@ class CustomRequestMailServiceTest extends TestCase
 
     public function test_customer_and_shop_are_notified_for_a_custom_request(): void
     {
-        Mail::fake();
+        Queue::fake();
         config()->set('shop.legal.email', 'atelier@example.com');
 
         $customRequest = CustomRequest::create([
@@ -28,12 +28,12 @@ class CustomRequestMailServiceTest extends TestCase
 
         app(CustomRequestMailService::class)->queueNotifications($customRequest);
 
-        Mail::assertQueued(CustomRequestReceivedMail::class, fn (CustomRequestReceivedMail $mail): bool =>
-            $mail->hasTo('client@example.com')
+        Queue::assertPushed(SendCustomRequestAcknowledgementEmail::class, fn (SendCustomRequestAcknowledgementEmail $job): bool =>
+            $job->customRequestId === $customRequest->id
         );
 
-        Mail::assertQueued(NewCustomRequestMail::class, fn (NewCustomRequestMail $mail): bool =>
-            $mail->hasTo('atelier@example.com')
+        Queue::assertPushed(SendNewCustomRequestNotificationEmail::class, fn (SendNewCustomRequestNotificationEmail $job): bool =>
+            $job->customRequestId === $customRequest->id && $job->recipient === 'atelier@example.com'
         );
     }
 }
