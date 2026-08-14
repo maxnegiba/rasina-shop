@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendAdminOrderNotificationEmail;
+use App\Jobs\SendOrderConfirmationEmail;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\CheckoutPaymentIntentService;
 use App\Services\OrderPaymentService;
+use App\Settings\GeneralSettings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -111,6 +114,9 @@ class CheckoutController extends Controller
                 ->where('public_token', $validated['order_token'])
                 ->where('payment_status', 'pending')
                 ->whereNull('stock_released_at')
+                ->where(function ($query): void {
+                    $query->whereNull('payment_method')->orWhere('payment_method', 'card');
+                })
                 ->lockForUpdate()
                 ->first();
 
@@ -119,6 +125,7 @@ class CheckoutController extends Controller
             }
 
             $order->update([
+                'payment_method' => 'card',
                 'terms_accepted_at' => now(),
                 'privacy_acknowledged_at' => now(),
                 'terms_version' => config('shop.terms_version'),
@@ -150,15 +157,168 @@ class CheckoutController extends Controller
         }
     }
 
+    public function cashOnDelivery(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'order_token' => ['required', 'uuid'],
+            'email' => ['required', 'email:rfc', 'max:254'],
+            'name' => ['required', 'string', 'max:150'],
+            'phone' => ['required', 'string', 'max:40'],
+            'address' => ['required', 'array'],
+            'address.line1' => ['required', 'string', 'max:255'],
+            'address.line2' => ['nullable', 'string', 'max:255'],
+            'address.city' => ['required', 'string', 'max:120'],
+            'address.state' => ['nullable', 'string', 'max:120'],
+            'address.postal_code' => ['required', 'string', 'max:20'],
+            'address.country' => ['required', 'in:RO'],
+            'accept_terms' => ['accepted'],
+            'acknowledge_privacy' => ['accepted'],
+        ]);
+
+        $sessionToken = (string) $request->session()->get('checkout_order_token');
+
+        if ($sessionToken === '' || ! hash_equals($sessionToken, (string) $validated['order_token'])) {
+            return response()->json(['message' => 'Sesiunea comenzii nu mai este validă. Reîncărcați pagina.'], 403);
+        }
+
+        $customerEmail = strtolower(trim($validated['email']));
+        $adminEmail = $this->adminNotificationEmail();
+        $customerQueuedAt = null;
+        $adminQueuedAt = null;
+
+        $order = DB::transaction(function () use (
+            $validated,
+            $customerEmail,
+            $adminEmail,
+            &$customerQueuedAt,
+            &$adminQueuedAt,
+        ): ?Order {
+            $order = Order::query()
+                ->where('public_token', $validated['order_token'])
+                ->where('payment_status', 'pending')
+                ->whereNull('stock_released_at')
+                ->whereNull('cancelled_at')
+                ->lockForUpdate()
+                ->first();
+
+            if (! $order || $order->payment_method === 'cash_on_delivery') {
+                return $order;
+            }
+
+            $customerDetails = [
+                'name' => trim($validated['name']),
+                'email' => $customerEmail,
+                'phone' => trim($validated['phone']),
+                'address' => [
+                    'line1' => trim($validated['address']['line1']),
+                    'line2' => filled($validated['address']['line2'] ?? null) ? trim($validated['address']['line2']) : null,
+                    'city' => trim($validated['address']['city']),
+                    'state' => filled($validated['address']['state'] ?? null) ? trim($validated['address']['state']) : null,
+                    'postal_code' => trim($validated['address']['postal_code']),
+                    'country' => 'RO',
+                ],
+            ];
+
+            $updates = [
+                'payment_method' => 'cash_on_delivery',
+                'customer_details' => $customerDetails,
+                'terms_accepted_at' => now(),
+                'privacy_acknowledged_at' => now(),
+                'terms_version' => config('shop.terms_version'),
+            ];
+
+            if (! $order->proforma_number) {
+                $updates['proforma_number'] = $order->proformaNumber();
+            }
+
+            if (! $order->confirmation_sent_at && ! $order->confirmation_queued_at) {
+                $customerQueuedAt = now();
+                $updates['confirmation_queued_at'] = $customerQueuedAt;
+                $updates['confirmation_failed_at'] = null;
+            }
+
+            if ($adminEmail && ! $order->admin_notification_sent_at && ! $order->admin_notification_queued_at) {
+                $adminQueuedAt = now();
+                $updates['admin_notification_queued_at'] = $adminQueuedAt;
+                $updates['admin_notification_failed_at'] = null;
+            }
+
+            $order->update($updates);
+
+            return $order->fresh()->load('items.product');
+        });
+
+        if (! $order || ! $order->isCashOnDelivery()) {
+            return response()->json(['message' => 'Comanda nu mai poate fi plasată cu plata ramburs. Reîncărcați pagina.'], 409);
+        }
+
+        if ($customerQueuedAt) {
+            try {
+                SendOrderConfirmationEmail::dispatch($order->id, $customerEmail);
+            } catch (\Throwable $exception) {
+                Order::query()->whereKey($order->id)->where('confirmation_queued_at', $customerQueuedAt)->update([
+                    'confirmation_queued_at' => null,
+                    'confirmation_failed_at' => now(),
+                ]);
+                Log::error('Cash-on-delivery customer confirmation could not be queued.', [
+                    'order_id' => $order->id,
+                    'exception' => $exception->getMessage(),
+                ]);
+            }
+        }
+
+        if ($adminQueuedAt && $adminEmail) {
+            try {
+                SendAdminOrderNotificationEmail::dispatch($order->id, $adminEmail);
+            } catch (\Throwable $exception) {
+                Order::query()->whereKey($order->id)->where('admin_notification_queued_at', $adminQueuedAt)->update([
+                    'admin_notification_queued_at' => null,
+                    'admin_notification_failed_at' => now(),
+                ]);
+                Log::error('Cash-on-delivery admin notification could not be queued.', [
+                    'order_id' => $order->id,
+                    'exception' => $exception->getMessage(),
+                ]);
+            }
+        }
+
+        $request->session()->forget(['cart', 'checkout_order_token']);
+
+        return response()->json([
+            'placed' => true,
+            'redirect_url' => route('checkout.success', [
+                'order' => $order->public_token,
+                'method' => 'cash_on_delivery',
+            ]),
+        ]);
+    }
+
     public function success(Request $request, OrderPaymentService $payments): View
     {
-        $paymentIntentId = $request->string('payment_intent')->toString();
         $orderToken = $request->string('order')->toString();
+
+        if ($request->string('method')->toString() === 'cash_on_delivery' && $orderToken !== '') {
+            $order = Order::query()
+                ->where('public_token', $orderToken)
+                ->where('payment_method', 'cash_on_delivery')
+                ->whereNull('cancelled_at')
+                ->first();
+
+            return view('checkout.success', [
+                'order' => $order,
+                'paymentState' => $order ? 'cash_on_delivery' : 'invalid',
+            ]);
+        }
+
+        $paymentIntentId = $request->string('payment_intent')->toString();
         $stripeStatus = null;
         $order = $paymentIntentId && $orderToken
             ? Order::query()
                 ->where('public_token', $orderToken)
                 ->where('stripe_transaction_id', $paymentIntentId)
+                ->where(function ($query): void {
+                    $query->whereNull('payment_method')->orWhere('payment_method', 'card');
+                })
                 ->first()
             : null;
 
@@ -202,7 +362,12 @@ class CheckoutController extends Controller
     {
         $token = (string) $request->session()->get('checkout_order_token');
         $order = $token
-            ? Order::where('public_token', $token)->where('payment_status', 'pending')->first()
+            ? Order::where('public_token', $token)
+                ->where('payment_status', 'pending')
+                ->where(function ($query): void {
+                    $query->whereNull('payment_method')->orWhere('payment_method', 'card');
+                })
+                ->first()
             : null;
 
         if ($order) {
@@ -271,6 +436,7 @@ class CheckoutController extends Controller
                 'discount_amount' => $discountCents / 100,
                 'total_amount' => $totalCents / 100,
                 'payment_status' => 'pending',
+                'payment_method' => null,
                 'shipping_status' => 'processing',
                 'customer_details' => [],
                 'stock_reserved_at' => now(),
@@ -304,6 +470,9 @@ class CheckoutController extends Controller
             ->with('items.product')
             ->where('public_token', $token)
             ->where('payment_status', 'pending')
+            ->where(function ($query): void {
+                $query->whereNull('payment_method')->orWhere('payment_method', 'card');
+            })
             ->whereNotNull('stock_reserved_at')
             ->whereNull('stock_released_at')
             ->first();
@@ -350,6 +519,12 @@ class CheckoutController extends Controller
             return null;
         }
 
+        if ($order->isCashOnDelivery()) {
+            $request->session()->forget(['cart', 'checkout_order_token']);
+
+            return null;
+        }
+
         if ($order->payment_status === 'paid') {
             return $order;
         }
@@ -381,5 +556,12 @@ class CheckoutController extends Controller
         $request->session()->forget('checkout_order_token');
 
         return null;
+    }
+
+    private function adminNotificationEmail(): ?string
+    {
+        $email = app(GeneralSettings::class)->contact_email ?: config('shop.legal.email');
+
+        return filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : null;
     }
 }

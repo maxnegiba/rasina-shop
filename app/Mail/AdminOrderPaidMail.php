@@ -19,7 +19,8 @@ class AdminOrderPaidMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Comandă plătită '.$this->order->order_number.' - '.config('shop.brand_name'),
+            subject: ($this->order->isCashOnDelivery() ? 'Comandă ramburs ' : 'Comandă plătită ')
+                .$this->order->order_number.' - '.config('shop.brand_name'),
         );
     }
 
