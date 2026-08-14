@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\URL;
 
 class OrderResource extends Resource
@@ -24,9 +25,13 @@ class OrderResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::whereNull('cancelled_at')
-            ->where('payment_status', 'paid')
+        return static::getModel()::query()
+            ->whereNull('cancelled_at')
             ->where('shipping_status', 'processing')
+            ->where(function (Builder $query): void {
+                $query->where('payment_status', 'paid')
+                    ->orWhere('payment_method', 'cash_on_delivery');
+            })
             ->count() ?: null;
     }
 
@@ -53,16 +58,22 @@ class OrderResource extends Resource
                             ->columnSpanFull(),
                     ])->columns(3),
 
-                    Forms\Components\Section::make('Informații Plată & Stripe')->schema([
+                    Forms\Components\Section::make('Informații Plată')->schema([
+                        Forms\Components\Placeholder::make('payment_method_info')
+                            ->label('Metodă de plată')
+                            ->content(fn (?Order $record): string => $record?->isCashOnDelivery()
+                                ? 'Ramburs la curier'
+                                : 'Online (Stripe)'),
                         Forms\Components\TextInput::make('total_amount')
-                            ->label('Total Încasat (RON)')
+                            ->label('Total produse (RON)')
                             ->numeric()
                             ->prefix('RON')
                             ->disabled(),
                         Forms\Components\TextInput::make('stripe_transaction_id')
                             ->label('ID Tranzacție Stripe')
-                            ->disabled(),
-                    ])->columns(2),
+                            ->disabled()
+                            ->visible(fn (?Order $record): bool => ! $record?->isCashOnDelivery()),
+                    ])->columns(3),
 
                     Forms\Components\Section::make('Anulare')
                         ->schema([
@@ -108,7 +119,9 @@ class OrderResource extends Resource
                         Forms\Components\TextInput::make('proforma_number')->label('Număr Proforma')->disabled(),
                         Forms\Components\Placeholder::make('proforma_info')
                             ->label('Status')
-                            ->content('Documentul proforma nefiscal este generat automat după confirmarea plății Stripe.'),
+                            ->content(fn (?Order $record): string => $record?->isCashOnDelivery()
+                                ? 'Proforma nefiscală este generată la plasarea comenzii ramburs.'
+                                : 'Proforma nefiscală este generată automat după confirmarea plății online.'),
                     ]),
                 ])->columnSpan(['lg' => 1]),
             ])
@@ -134,9 +147,15 @@ class OrderResource extends Resource
                     ->searchable(),
 
                 TextColumn::make('total_amount')
-                    ->label('Total')
+                    ->label('Total produse')
                     ->money('RON')
                     ->sortable(),
+
+                TextColumn::make('payment_method')
+                    ->label('Metodă')
+                    ->badge()
+                    ->color(fn (string $state): string => $state === 'cash_on_delivery' ? 'warning' : 'info')
+                    ->formatStateUsing(fn (string $state): string => $state === 'cash_on_delivery' ? 'Ramburs' : 'Stripe'),
 
                 TextColumn::make('payment_status')
                     ->label('Plată')
@@ -179,6 +198,12 @@ class OrderResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
+                Tables\Filters\SelectFilter::make('payment_method')
+                    ->label('Metodă de plată')
+                    ->options([
+                        'stripe' => 'Online (Stripe)',
+                        'cash_on_delivery' => 'Ramburs',
+                    ]),
                 Tables\Filters\SelectFilter::make('payment_status')
                     ->options(['pending' => 'Neplătită', 'paid' => 'Plătită']),
                 Tables\Filters\TernaryFilter::make('cancelled_at')
@@ -187,17 +212,37 @@ class OrderResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('Detalii'),
+
                 Tables\Actions\Action::make('download_proforma')
                     ->label('Descarcă Proforma')
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('gray')
-                    ->visible(fn (Order $record): bool => $record->payment_status === 'paid')
+                    ->visible(fn (Order $record): bool => $record->payment_status === 'paid' || $record->isCashOnDelivery())
                     ->url(fn (Order $record): string => URL::temporarySignedRoute(
                         'order.proforma.download',
                         now()->addMinutes(15),
                         ['order' => $record->public_token],
                     ))
                     ->openUrlInNewTab(),
+
+                Tables\Actions\Action::make('mark_cod_paid')
+                    ->label('Marchează încasată')
+                    ->icon('heroicon-o-banknotes')
+                    ->color('success')
+                    ->visible(fn (Order $record): bool => $record->isCashOnDelivery()
+                        && $record->payment_status === 'pending'
+                        && ! $record->isCancelled())
+                    ->requiresConfirmation()
+                    ->modalHeading('Confirmă încasarea ramburs')
+                    ->modalDescription('Folosește această acțiune numai după ce plata ramburs a fost confirmată ca încasată.')
+                    ->action(function (Order $record): void {
+                        $record->update(['payment_status' => 'paid']);
+
+                        Notification::make()
+                            ->title('Plata ramburs a fost marcată ca încasată')
+                            ->success()
+                            ->send();
+                    }),
 
                 Tables\Actions\Action::make('cancel_order')
                     ->label('Anulează')
