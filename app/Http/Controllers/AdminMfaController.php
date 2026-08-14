@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AdminMfaCodeMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -100,14 +101,12 @@ class AdminMfaController extends Controller
         }
 
         $code = (string) random_int(100000, 999999);
+        $codeSeconds = (int) config('security.admin_mfa.code_seconds', 600);
+        $expiresInMinutes = max(1, (int) ceil($codeSeconds / 60));
 
         try {
-            Mail::raw(
-                "Codul tău de securitate pentru panoul MTD ART este: {$code}\n\nCodul expiră în 10 minute. Dacă nu ai încercat să te autentifici, schimbă parola imediat.",
-                fn ($message) => $message
-                    ->to((string) $request->user()->email)
-                    ->subject('Cod securitate MTD ART'),
-            );
+            Mail::to((string) $request->user()->email)
+                ->send(new AdminMfaCodeMail($code, $expiresInMinutes));
         } catch (\Throwable $exception) {
             Log::error('Admin MFA email could not be sent.', [
                 'user_id' => $request->user()->getKey(),
@@ -119,10 +118,10 @@ class AdminMfaController extends Controller
             return false;
         }
 
-        RateLimiter::hit($key, 600);
+        RateLimiter::hit($key, $codeSeconds);
         $request->session()->put([
             'admin_mfa_code_hash' => Hash::make($code),
-            'admin_mfa_code_expires_at' => time() + (int) config('security.admin_mfa.code_seconds', 600),
+            'admin_mfa_code_expires_at' => time() + $codeSeconds,
             'admin_mfa_code_user_id' => (int) $request->user()->getKey(),
         ]);
 

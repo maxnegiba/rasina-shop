@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Http\Middleware\EnsureAdminMfa;
+use App\Mail\AdminMfaCodeMail;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
@@ -67,5 +69,19 @@ class AdminMfaTest extends TestCase
             ->assertRedirect('/admin/login');
 
         $this->assertGuest();
+    }
+
+    public function test_mfa_challenge_sends_the_branded_security_mail(): void
+    {
+        Mail::fake();
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.mfa.challenge'))
+            ->assertOk();
+
+        Mail::assertSent(AdminMfaCodeMail::class, fn (AdminMfaCodeMail $mail): bool =>
+            strlen($mail->code) === 6 && $mail->expiresInMinutes === 10
+        );
     }
 }
