@@ -14,6 +14,51 @@ class ManageGeneralSettings extends SettingsPage
     protected static ?string $title = 'Setări Generale';
     protected static string $settings = GeneralSettings::class;
 
+    /**
+     * Filament dehydrates empty optional text/file fields as null, while the
+     * persisted settings object intentionally exposes those values as strings.
+     * Normalize only submitted fields before Spatie assigns them to the typed
+     * settings properties so a blank optional field cannot raise a TypeError.
+     *
+     * @var array<int, string>
+     */
+    private const STRING_SETTINGS = [
+        'contact_whatsapp_number',
+        'contact_phone',
+        'contact_email',
+        'company_address',
+        'facebook_url',
+        'instagram_url',
+        'default_whatsapp_greeting_text',
+        'contact_eyebrow',
+        'contact_title',
+        'contact_intro',
+        'contact_address_label',
+        'contact_address_note',
+        'contact_communication_label',
+        'contact_hours_label',
+        'contact_custom_card_title',
+        'contact_custom_card_text',
+        'contact_custom_card_cta',
+        'contact_form_title',
+        'contact_form_response_note',
+        'contact_custom_eyebrow',
+        'contact_custom_title',
+        'contact_custom_intro',
+        'about_eyebrow',
+        'about_title',
+        'about_image',
+        'about_image_alt',
+        'about_quote',
+        'about_paragraph_one',
+        'about_paragraph_two',
+        'about_value_one_title',
+        'about_value_one_text',
+        'about_value_two_title',
+        'about_value_two_text',
+        'about_cta_label',
+    ];
+
     public function form(Form $form): Form
     {
         return $form
@@ -104,5 +149,20 @@ class ManageGeneralSettings extends SettingsPage
                             ]),
                     ])->columnSpanFull(),
             ]);
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        foreach (self::STRING_SETTINGS as $key) {
+            if (array_key_exists($key, $data) && $data[$key] === null) {
+                $data[$key] = '';
+            }
+        }
+
+        if (array_key_exists('working_hours', $data) && $data['working_hours'] === null) {
+            $data['working_hours'] = [];
+        }
+
+        return $data;
     }
 }
