@@ -2,12 +2,56 @@
 
 namespace App\Http\Middleware;
 
+use Closure;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Throwable;
 
 class TraceCsrfToken extends ValidateCsrfToken
 {
+    public function handle($request, Closure $next)
+    {
+        if (! ($request instanceof Request) || ! $request->is('livewire/*')) {
+            return parent::handle($request, $next);
+        }
+
+        try {
+            $response = parent::handle($request, $next);
+
+            if (method_exists($response, 'getStatusCode') && $response->getStatusCode() === 419) {
+                Log::warning('livewire_419_origin', [
+                    'kind' => 'response',
+                    'status' => 419,
+                    'path' => '/'.$request->path(),
+                    'user_id' => $request->user()?->getAuthIdentifier(),
+                    'component_names' => $this->componentNames($request),
+                ]);
+            }
+
+            return $response;
+        } catch (Throwable $exception) {
+            $status = $exception instanceof HttpExceptionInterface
+                ? $exception->getStatusCode()
+                : null;
+
+            if ($status === 419) {
+                Log::warning('livewire_419_origin', [
+                    'kind' => 'exception',
+                    'status' => 419,
+                    'exception' => $exception::class,
+                    'message' => $exception->getMessage(),
+                    'path' => '/'.$request->path(),
+                    'user_id' => $request->user()?->getAuthIdentifier(),
+                    'component_names' => $this->componentNames($request),
+                ]);
+            }
+
+            throw $exception;
+        }
+    }
+
     protected function tokensMatch($request): bool
     {
         $matches = parent::tokensMatch($request);
@@ -35,6 +79,38 @@ class TraceCsrfToken extends ValidateCsrfToken
         }
 
         return $matches;
+    }
+
+    private function componentNames(Request $request): array
+    {
+        $components = $request->input('components', []);
+
+        if (! is_array($components)) {
+            return [];
+        }
+
+        $names = [];
+
+        foreach ($components as $component) {
+            if (! is_array($component)) {
+                continue;
+            }
+
+            $snapshot = $component['snapshot'] ?? null;
+
+            if (! is_string($snapshot)) {
+                continue;
+            }
+
+            $decoded = json_decode($snapshot, true);
+            $name = is_array($decoded) ? ($decoded['memo']['name'] ?? null) : null;
+
+            if (is_string($name) && $name !== '') {
+                $names[] = $name;
+            }
+        }
+
+        return array_values(array_unique($names));
     }
 
     private function fingerprint(mixed $value): ?string
