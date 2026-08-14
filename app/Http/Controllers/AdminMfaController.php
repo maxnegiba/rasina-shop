@@ -48,12 +48,22 @@ class AdminMfaController extends Controller
 
         RateLimiter::clear($key);
         $request->session()->forget(['admin_mfa_code_hash', 'admin_mfa_code_expires_at', 'admin_mfa_code_user_id']);
+
+        $intendedUrl = $this->safeIntendedAdminUrl(
+            (string) $request->session()->pull('admin_mfa_intended_url', ''),
+            $request,
+        );
+
+        $request->session()->regenerate();
+
+        $now = time();
         $request->session()->put([
-            'admin_mfa_verified_at' => time(),
+            'admin_mfa_verified_at' => $now,
+            'admin_mfa_last_activity_at' => $now,
             'admin_mfa_user_id' => (int) $request->user()->getKey(),
         ]);
 
-        return redirect('/admin');
+        return redirect()->to($intendedUrl ?: '/admin');
     }
 
     public function resend(Request $request): RedirectResponse
@@ -131,6 +141,28 @@ class AdminMfaController extends Controller
     private function ensureAdmin(Request $request): void
     {
         abort_unless($request->user()?->is_admin === true, 403);
+    }
+
+    private function safeIntendedAdminUrl(string $candidate, Request $request): string
+    {
+        if ($candidate === '') {
+            return '';
+        }
+
+        $parts = parse_url($candidate);
+
+        if (! is_array($parts)) {
+            return '';
+        }
+
+        $host = $parts['host'] ?? null;
+        $path = $parts['path'] ?? '/';
+
+        if ($host !== $request->getHost() || ! str_starts_with($path, '/admin')) {
+            return '';
+        }
+
+        return $candidate;
     }
 
     private function maskedEmail(string $email): string
