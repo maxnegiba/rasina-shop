@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RalphJSmit\Laravel\SEO\Support\HasSEO;
 use RalphJSmit\Laravel\SEO\Support\SEOData;
@@ -78,6 +79,37 @@ class Product extends Model
     public function isSold(): bool
     {
         return (int) $this->stock <= 0;
+    }
+
+    public function relistForSale(int $stock = 1): void
+    {
+        if ($stock < 1) {
+            throw new \InvalidArgumentException('Stocul pentru repunerea la vânzare trebuie să fie cel puțin 1.');
+        }
+
+        DB::transaction(function () use ($stock): void {
+            /** @var self $product */
+            $product = self::query()->lockForUpdate()->findOrFail($this->getKey());
+
+            if ($product->price === null || (float) $product->price <= 0) {
+                throw new \LogicException('Produsul nu poate fi repus la vânzare fără un preț valid.');
+            }
+
+            if (! $product->category_id) {
+                throw new \LogicException('Produsul nu poate fi repus la vânzare fără categorie.');
+            }
+
+            if (! $product->images()->exists() && blank($product->image)) {
+                throw new \LogicException('Produsul nu poate fi repus la vânzare fără cel puțin o imagine.');
+            }
+
+            $product->update([
+                'stock' => $stock,
+                'status' => 'published',
+            ]);
+        });
+
+        $this->refresh();
     }
 
     public function getDynamicSEOData(): SEOData
