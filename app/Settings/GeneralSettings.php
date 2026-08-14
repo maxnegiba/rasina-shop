@@ -15,8 +15,6 @@ class GeneralSettings extends Settings
     public string $default_whatsapp_greeting_text;
     public array $working_hours;
 
-    public string $footer_description;
-
     public string $contact_eyebrow;
     public string $contact_title;
     public string $contact_intro;
