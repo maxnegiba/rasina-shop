@@ -18,8 +18,10 @@ class AdminOrderPaidMail extends Mailable
 
     public function envelope(): Envelope
     {
+        $label = $this->order->isCashOnDelivery() ? 'Comandă ramburs ' : 'Comandă plătită ';
+
         return new Envelope(
-            subject: 'Comandă plătită '.$this->order->order_number.' - '.config('shop.brand_name'),
+            subject: $label.$this->order->order_number.' - '.config('shop.brand_name'),
         );
     }
 

@@ -72,6 +72,108 @@ class OrderPaymentService
         );
     }
 
+    public function placeCashOnDelivery(Order $order, array $customerDetails): Order
+    {
+        if (! $order->terms_accepted_at || ! $order->privacy_acknowledged_at) {
+            throw new RuntimeException('Legal acceptance is required before placing a cash on delivery order.');
+        }
+
+        $customerEmail = filter_var($customerDetails['email'] ?? null, FILTER_VALIDATE_EMAIL) ?: null;
+
+        if (! $customerEmail) {
+            throw new RuntimeException('A valid customer email is required for cash on delivery.');
+        }
+
+        $adminEmail = $this->adminNotificationEmail();
+        $customerMailClaimedAt = null;
+        $adminMailClaimedAt = null;
+
+        DB::transaction(function () use (
+            $order,
+            $customerDetails,
+            $customerEmail,
+            $adminEmail,
+            &$customerMailClaimedAt,
+            &$adminMailClaimedAt,
+        ): void {
+            /** @var Order $lockedOrder */
+            $lockedOrder = Order::query()->lockForUpdate()->findOrFail($order->id);
+
+            if ($lockedOrder->payment_status !== 'pending'
+                || $lockedOrder->stock_released_at
+                || $lockedOrder->cancelled_at) {
+                throw new RuntimeException('Order is no longer available for cash on delivery.');
+            }
+
+            $updates = [
+                'payment_method' => 'cash_on_delivery',
+                'customer_details' => $customerDetails,
+                'stripe_transaction_id' => null,
+                'stripe_checkout_session_id' => null,
+            ];
+
+            if (! $lockedOrder->proforma_number) {
+                $updates['proforma_number'] = $lockedOrder->proformaNumber();
+            }
+
+            if (! $lockedOrder->confirmation_sent_at && ! $lockedOrder->confirmation_queued_at) {
+                $customerMailClaimedAt = now();
+                $updates['confirmation_queued_at'] = $customerMailClaimedAt;
+                $updates['confirmation_failed_at'] = null;
+            }
+
+            if ($adminEmail && ! $lockedOrder->admin_notification_sent_at && ! $lockedOrder->admin_notification_queued_at) {
+                $adminMailClaimedAt = now();
+                $updates['admin_notification_queued_at'] = $adminMailClaimedAt;
+                $updates['admin_notification_failed_at'] = null;
+            }
+
+            $lockedOrder->update($updates);
+        });
+
+        $order->refresh()->load('items.product');
+
+        if ($customerMailClaimedAt) {
+            try {
+                SendOrderConfirmationEmail::dispatch($order->id, $customerEmail);
+            } catch (\Throwable $exception) {
+                Order::query()
+                    ->whereKey($order->id)
+                    ->where('confirmation_queued_at', $customerMailClaimedAt)
+                    ->update([
+                        'confirmation_queued_at' => null,
+                        'confirmation_failed_at' => now(),
+                    ]);
+
+                Log::error('Cash on delivery confirmation job could not be queued.', [
+                    'order_id' => $order->id,
+                    'exception' => $exception->getMessage(),
+                ]);
+            }
+        }
+
+        if ($adminMailClaimedAt && $adminEmail) {
+            try {
+                SendAdminOrderNotificationEmail::dispatch($order->id, $adminEmail);
+            } catch (\Throwable $exception) {
+                Order::query()
+                    ->whereKey($order->id)
+                    ->where('admin_notification_queued_at', $adminMailClaimedAt)
+                    ->update([
+                        'admin_notification_queued_at' => null,
+                        'admin_notification_failed_at' => now(),
+                    ]);
+
+                Log::error('Cash on delivery admin notification job could not be queued.', [
+                    'order_id' => $order->id,
+                    'exception' => $exception->getMessage(),
+                ]);
+            }
+        }
+
+        return $order;
+    }
+
     public function recordFailedAttempt(object $paymentIntent): void
     {
         $order = $this->findOrderForPaymentIntent($paymentIntent);
@@ -164,6 +266,7 @@ class OrderPaymentService
 
             $updates = [
                 'payment_status' => 'paid',
+                'payment_method' => 'stripe',
                 'customer_details' => $customerDetails,
                 'stripe_transaction_id' => $transactionId,
             ];
@@ -262,7 +365,7 @@ class OrderPaymentService
                 ->first();
         }
 
-        if (! $order) {
+        if (! $order || $order->payment_method !== 'stripe') {
             return null;
         }
 
@@ -299,7 +402,11 @@ class OrderPaymentService
                 ->first();
         }
 
-        if ($order && $orderId && (int) $orderId !== (int) $order->id) {
+        if (! $order || $order->payment_method !== 'stripe') {
+            return null;
+        }
+
+        if ($orderId && (int) $orderId !== (int) $order->id) {
             return null;
         }
 

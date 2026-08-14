@@ -27,6 +27,13 @@ class CheckoutController extends Controller
 
         $order = $this->reusableOrder($request, $cart);
 
+        if ($order?->isCashOnDelivery() && $order->terms_accepted_at && ! empty($order->customer_details)) {
+            return redirect()->route('checkout.success', [
+                'order' => $order->public_token,
+                'method' => 'cod',
+            ]);
+        }
+
         try {
             if ($order?->stripe_transaction_id) {
                 $stripe = new StripeClient((string) config('services.stripe.secret'));
@@ -53,6 +60,13 @@ class CheckoutController extends Controller
                 $completedOrder = $this->cancelStaleSessionOrder($request, $stripe, $payments);
 
                 if ($completedOrder) {
+                    if ($completedOrder->isCashOnDelivery()) {
+                        return redirect()->route('checkout.success', [
+                            'order' => $completedOrder->public_token,
+                            'method' => 'cod',
+                        ]);
+                    }
+
                     return redirect()->route('checkout.success', [
                         'payment_intent' => $completedOrder->stripe_transaction_id,
                         'order' => $completedOrder->public_token,
@@ -71,7 +85,7 @@ class CheckoutController extends Controller
                 'order' => $order->loadMissing('items.product'),
             ]);
         } catch (\Throwable $exception) {
-            if ($order && ! $order->stripe_transaction_id) {
+            if ($order && ! $order->stripe_transaction_id && ! $order->isCashOnDelivery()) {
                 $order->update(['payment_status' => 'failed']);
                 $order->releaseReservedStock();
             }
@@ -110,6 +124,7 @@ class CheckoutController extends Controller
             $order = Order::query()
                 ->where('public_token', $validated['order_token'])
                 ->where('payment_status', 'pending')
+                ->where('payment_method', 'stripe')
                 ->whereNull('stock_released_at')
                 ->lockForUpdate()
                 ->first();
@@ -150,19 +165,163 @@ class CheckoutController extends Controller
         }
     }
 
+    public function cashOnDelivery(Request $request, OrderPaymentService $payments): JsonResponse
+    {
+        $validated = $request->validate([
+            'order_token' => ['required', 'uuid'],
+            'accept_terms' => ['accepted'],
+            'acknowledge_privacy' => ['accepted'],
+            'customer.email' => ['required', 'email:rfc', 'max:254'],
+            'customer.name' => ['required', 'string', 'min:2', 'max:120'],
+            'customer.phone' => ['required', 'string', 'min:7', 'max:40'],
+            'customer.address.line1' => ['required', 'string', 'max:180'],
+            'customer.address.line2' => ['nullable', 'string', 'max:180'],
+            'customer.address.city' => ['required', 'string', 'max:120'],
+            'customer.address.state' => ['nullable', 'string', 'max:120'],
+            'customer.address.postal_code' => ['required', 'string', 'max:20'],
+            'customer.address.country' => ['required', 'in:RO'],
+        ], [
+            'customer.email.required' => 'Introduceți adresa de email.',
+            'customer.email.email' => 'Introduceți o adresă de email validă.',
+            'customer.name.required' => 'Completați numele destinatarului.',
+            'customer.phone.required' => 'Completați numărul de telefon pentru curier.',
+            'customer.address.line1.required' => 'Completați adresa de livrare.',
+            'customer.address.city.required' => 'Completați localitatea.',
+            'customer.address.postal_code.required' => 'Completați codul poștal.',
+            'customer.address.country.in' => 'Livrarea este disponibilă în România.',
+            'accept_terms.accepted' => 'Trebuie să acceptați Termenii și Condițiile.',
+            'acknowledge_privacy.accepted' => 'Trebuie să confirmați că ați citit Politica de Confidențialitate.',
+        ]);
+
+        if (! hash_equals(
+            (string) $request->session()->get('checkout_order_token'),
+            (string) $validated['order_token'],
+        )) {
+            return response()->json(['message' => 'Sesiunea comenzii nu mai este validă. Reîncărcați pagina.'], 403);
+        }
+
+        $order = Order::query()
+            ->where('public_token', $validated['order_token'])
+            ->where('payment_status', 'pending')
+            ->whereNull('stock_released_at')
+            ->whereNull('cancelled_at')
+            ->first();
+
+        if (! $order) {
+            return response()->json(['message' => 'Comanda nu mai poate fi plasată. Reîncărcați pagina.'], 409);
+        }
+
+        try {
+            if ($order->stripe_transaction_id && ! $order->isCashOnDelivery()) {
+                $stripe = new StripeClient((string) config('services.stripe.secret'));
+                $paymentIntent = $stripe->paymentIntents->retrieve($order->stripe_transaction_id);
+
+                if ($paymentIntent->status === 'succeeded') {
+                    $paidOrder = $payments->completePaymentIntent($paymentIntent);
+
+                    return response()->json([
+                        'placed' => true,
+                        'redirect_url' => route('checkout.success', [
+                            'payment_intent' => $paymentIntent->id,
+                            'order' => $paidOrder?->public_token ?? $order->public_token,
+                        ]),
+                    ]);
+                }
+
+                if ($paymentIntent->status === 'processing') {
+                    return response()->json([
+                        'message' => 'Plata online este deja în curs de procesare. Așteptați confirmarea înainte de a schimba metoda de plată.',
+                    ], 409);
+                }
+
+                if ($paymentIntent->status !== 'canceled') {
+                    $stripe->paymentIntents->cancel($paymentIntent->id);
+                }
+            }
+
+            $order = DB::transaction(function () use ($order): Order {
+                /** @var Order $lockedOrder */
+                $lockedOrder = Order::query()->lockForUpdate()->findOrFail($order->id);
+
+                if ($lockedOrder->payment_status !== 'pending'
+                    || $lockedOrder->stock_released_at
+                    || $lockedOrder->cancelled_at) {
+                    throw new \RuntimeException('Comanda nu mai este disponibilă.');
+                }
+
+                $lockedOrder->update([
+                    'payment_method' => 'cash_on_delivery',
+                    'terms_accepted_at' => $lockedOrder->terms_accepted_at ?: now(),
+                    'privacy_acknowledged_at' => $lockedOrder->privacy_acknowledged_at ?: now(),
+                    'terms_version' => $lockedOrder->terms_version ?: config('shop.terms_version'),
+                ]);
+
+                return $lockedOrder->fresh();
+            });
+
+            $customerDetails = [
+                'name' => trim((string) data_get($validated, 'customer.name')),
+                'email' => strtolower(trim((string) data_get($validated, 'customer.email'))),
+                'phone' => trim((string) data_get($validated, 'customer.phone')),
+                'address' => [
+                    'line1' => trim((string) data_get($validated, 'customer.address.line1')),
+                    'line2' => filled(data_get($validated, 'customer.address.line2'))
+                        ? trim((string) data_get($validated, 'customer.address.line2'))
+                        : null,
+                    'city' => trim((string) data_get($validated, 'customer.address.city')),
+                    'state' => filled(data_get($validated, 'customer.address.state'))
+                        ? trim((string) data_get($validated, 'customer.address.state'))
+                        : null,
+                    'postal_code' => trim((string) data_get($validated, 'customer.address.postal_code')),
+                    'country' => 'RO',
+                ],
+            ];
+
+            $order = $payments->placeCashOnDelivery($order, $customerDetails);
+
+            return response()->json([
+                'placed' => true,
+                'redirect_url' => route('checkout.success', [
+                    'order' => $order->public_token,
+                    'method' => 'cod',
+                ]),
+            ]);
+        } catch (\Throwable $exception) {
+            Log::error('Cash on delivery order could not be placed.', [
+                'order_id' => $order->id,
+                'exception' => $exception->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'Comanda cu plata ramburs nu a putut fi înregistrată. Încercați din nou.',
+            ], 502);
+        }
+    }
+
     public function success(Request $request, OrderPaymentService $payments): View
     {
         $paymentIntentId = $request->string('payment_intent')->toString();
         $orderToken = $request->string('order')->toString();
+        $requestedMethod = $request->string('method')->toString();
         $stripeStatus = null;
-        $order = $paymentIntentId && $orderToken
-            ? Order::query()
+
+        $order = null;
+
+        if ($orderToken !== '' && $requestedMethod === 'cod' && $paymentIntentId === '') {
+            $order = Order::query()
+                ->where('public_token', $orderToken)
+                ->where('payment_method', 'cash_on_delivery')
+                ->whereNull('cancelled_at')
+                ->first();
+        } elseif ($paymentIntentId !== '' && $orderToken !== '') {
+            $order = Order::query()
                 ->where('public_token', $orderToken)
                 ->where('stripe_transaction_id', $paymentIntentId)
-                ->first()
-            : null;
+                ->where('payment_method', 'stripe')
+                ->first();
+        }
 
-        if ($order) {
+        if ($order && ! $order->isCashOnDelivery()) {
             try {
                 $stripe = new StripeClient((string) config('services.stripe.secret'));
                 $paymentIntent = $stripe->paymentIntents->retrieve($paymentIntentId);
@@ -181,7 +340,8 @@ class CheckoutController extends Controller
 
         $sessionOrderToken = (string) $request->session()->get('checkout_order_token');
 
-        if ($order?->payment_status === 'paid'
+        if ($order
+            && ($order->payment_status === 'paid' || $order->isCashOnDelivery())
             && $sessionOrderToken !== ''
             && hash_equals($sessionOrderToken, $orderToken)) {
             $request->session()->forget(['cart', 'checkout_order_token']);
@@ -189,6 +349,7 @@ class CheckoutController extends Controller
 
         $paymentState = match (true) {
             ! $order => 'invalid',
+            $order->isCashOnDelivery() => 'cod',
             $order->payment_status === 'paid' => 'paid',
             $order->payment_status === 'failed' => 'failed',
             in_array($stripeStatus, ['requires_payment_method', 'canceled'], true) => 'failed',
@@ -207,7 +368,7 @@ class CheckoutController extends Controller
 
         if ($order) {
             try {
-                if ($order->stripe_transaction_id) {
+                if ($order->stripe_transaction_id && ! $order->isCashOnDelivery()) {
                     $stripe = new StripeClient((string) config('services.stripe.secret'));
                     $stripe->paymentIntents->cancel($order->stripe_transaction_id);
                 }
@@ -216,7 +377,7 @@ class CheckoutController extends Controller
                 $order->releaseReservedStock();
                 $request->session()->forget('checkout_order_token');
             } catch (\Throwable $exception) {
-                Log::warning('Pending PaymentIntent could not be canceled.', [
+                Log::warning('Pending checkout could not be canceled.', [
                     'order_id' => $order->id,
                     'exception' => $exception->getMessage(),
                 ]);
@@ -226,7 +387,7 @@ class CheckoutController extends Controller
         }
 
         return redirect()->route('cart.index')
-            ->with('error', 'Plata a fost anulată. Produsele au rămas în coș.');
+            ->with('error', 'Comanda a fost anulată. Produsele au rămas în coș.');
     }
 
     private function reserveCart(array $cart): Order
@@ -271,6 +432,7 @@ class CheckoutController extends Controller
                 'discount_amount' => $discountCents / 100,
                 'total_amount' => $totalCents / 100,
                 'payment_status' => 'pending',
+                'payment_method' => 'stripe',
                 'shipping_status' => 'processing',
                 'customer_details' => [],
                 'stock_reserved_at' => now(),
@@ -348,6 +510,10 @@ class CheckoutController extends Controller
             $request->session()->forget('checkout_order_token');
 
             return null;
+        }
+
+        if ($order->isCashOnDelivery()) {
+            return $order;
         }
 
         if ($order->payment_status === 'paid') {
