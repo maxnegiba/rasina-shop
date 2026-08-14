@@ -28,6 +28,11 @@
     --font-sans: Manrope, ui-sans-serif, system-ui, sans-serif;
 }
 
+footer {
+    background-color: #2c1e16;
+    background-image: radial-gradient(ellipse at top, #3b2818 0%, #2c1e16 55%, #1a120d 100%);
+}
+
 /*
  * Keep the same accessibility/brand balance as the full storefront bundle.
  * This block intentionally mirrors resources/css/app.css.
