@@ -6,10 +6,11 @@ use App\Filament\Resources\OrderResource\Pages;
 use App\Models\Order;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\URL;
 
 class OrderResource extends Resource
@@ -23,7 +24,8 @@ class OrderResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::where('payment_status', 'paid')
+        return static::getModel()::whereNull('cancelled_at')
+            ->where('payment_status', 'paid')
             ->where('shipping_status', 'processing')
             ->count() ?: null;
     }
@@ -61,6 +63,18 @@ class OrderResource extends Resource
                             ->label('ID Tranzacție Stripe')
                             ->disabled(),
                     ])->columns(2),
+
+                    Forms\Components\Section::make('Anulare')
+                        ->schema([
+                            Forms\Components\Placeholder::make('cancelled_at_info')
+                                ->label('Anulată la')
+                                ->content(fn (?Order $record): string => $record?->cancelled_at?->format('d.m.Y H:i') ?? '—'),
+                            Forms\Components\Placeholder::make('cancellation_reason_info')
+                                ->label('Motiv')
+                                ->content(fn (?Order $record): string => $record?->cancellation_reason ?: '—'),
+                        ])
+                        ->columns(2)
+                        ->visible(fn (?Order $record): bool => (bool) $record?->cancelled_at),
                 ])->columnSpan(['lg' => 2]),
 
                 Forms\Components\Group::make()->schema([
@@ -86,7 +100,8 @@ class OrderResource extends Resource
                                 'delivered' => 'Livrat',
                             ])
                             ->required()
-                            ->native(false),
+                            ->native(false)
+                            ->disabled(fn (?Order $record): bool => (bool) $record?->cancelled_at),
                     ]),
 
                     Forms\Components\Section::make('Document Proforma')->schema([
@@ -154,11 +169,21 @@ class OrderResource extends Resource
                         'delivered' => 'Livrată',
                         default => $state,
                     }),
+
+                TextColumn::make('cancelled_at')
+                    ->label('Status')
+                    ->badge()
+                    ->placeholder('Activă')
+                    ->formatStateUsing(fn ($state): string => $state ? 'Anulată' : 'Activă')
+                    ->color(fn ($state): string => $state ? 'danger' : 'success'),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('payment_status')
                     ->options(['pending' => 'Neplătită', 'paid' => 'Plătită']),
+                Tables\Filters\TernaryFilter::make('cancelled_at')
+                    ->label('Comenzi anulate')
+                    ->nullable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('Detalii'),
@@ -173,6 +198,64 @@ class OrderResource extends Resource
                         ['order' => $record->public_token],
                     ))
                     ->openUrlInNewTab(),
+
+                Tables\Actions\Action::make('cancel_order')
+                    ->label('Anulează')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('warning')
+                    ->visible(fn (Order $record): bool => ! $record->isCancelled() && $record->shipping_status !== 'delivered')
+                    ->form([
+                        Forms\Components\Textarea::make('reason')
+                            ->label('Motiv anulare')
+                            ->placeholder('Opțional: motivul anulării')
+                            ->maxLength(1000),
+                    ])
+                    ->requiresConfirmation()
+                    ->modalHeading('Anulează comanda')
+                    ->modalDescription(fn (Order $record): string => $record->payment_status === 'paid'
+                        ? 'Comanda este plătită. Anularea NU efectuează automat o rambursare Stripe și nu readaugă automat produsele în stoc.'
+                        : 'Comanda va fi marcată ca anulată. Dacă are stoc rezervat, acesta va fi eliberat automat.')
+                    ->action(function (Order $record, array $data): void {
+                        try {
+                            $record->cancel($data['reason'] ?? null);
+
+                            Notification::make()
+                                ->title('Comanda a fost anulată')
+                                ->success()
+                                ->send();
+                        } catch (\LogicException $exception) {
+                            Notification::make()
+                                ->title('Comanda nu poate fi anulată')
+                                ->body($exception->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
+
+                Tables\Actions\Action::make('delete_order')
+                    ->label('Șterge')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->visible(fn (Order $record): bool => $record->payment_status !== 'paid')
+                    ->requiresConfirmation()
+                    ->modalHeading('Șterge definitiv comanda')
+                    ->modalDescription('Această acțiune șterge definitiv comanda. Dacă există stoc rezervat, acesta va fi eliberat înainte de ștergere.')
+                    ->action(function (Order $record): void {
+                        try {
+                            $record->deleteSafelyFromAdmin();
+
+                            Notification::make()
+                                ->title('Comanda a fost ștearsă')
+                                ->success()
+                                ->send();
+                        } catch (\LogicException $exception) {
+                            Notification::make()
+                                ->title('Comanda nu poate fi ștearsă')
+                                ->body($exception->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
             ]);
     }
 
