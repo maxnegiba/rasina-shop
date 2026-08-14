@@ -98,21 +98,90 @@ class ManageGeneralSettings extends SettingsPage
                             ]),
                         Forms\Components\Tabs\Tab::make('Pagina Contact')
                             ->schema([
-                                Forms\Components\TextInput::make('contact_eyebrow')->label('Etichetă antet'),
-                                Forms\Components\TextInput::make('contact_title')->label('Titlu principal'),
-                                Forms\Components\Textarea::make('contact_intro')->label('Text introductiv')->rows(4),
-                                Forms\Components\TextInput::make('contact_address_label')->label('Titlu adresă'),
-                                Forms\Components\TextInput::make('contact_address_note')->label('Notă adresă'),
-                                Forms\Components\TextInput::make('contact_communication_label')->label('Titlu comunicare'),
-                                Forms\Components\TextInput::make('contact_hours_label')->label('Titlu program'),
-                                Forms\Components\TextInput::make('contact_custom_card_title')->label('Titlu card comenzi unicat'),
-                                Forms\Components\Textarea::make('contact_custom_card_text')->label('Text card comenzi unicat')->rows(3),
-                                Forms\Components\TextInput::make('contact_custom_card_cta')->label('Text buton card'),
-                                Forms\Components\TextInput::make('contact_form_title')->label('Titlu formular contact'),
-                                Forms\Components\TextInput::make('contact_form_response_note')->label('Notă sub formular'),
-                                Forms\Components\TextInput::make('contact_custom_eyebrow')->label('Etichetă secțiune proiecte speciale'),
-                                Forms\Components\TextInput::make('contact_custom_title')->label('Titlu secțiune proiecte speciale'),
-                                Forms\Components\Textarea::make('contact_custom_intro')->label('Introducere proiecte speciale')->rows(4),
+                                Forms\Components\Section::make('Structura paginii')
+                                    ->description('Bifează elementele care trebuie să apară pe pagina Contact. Le poți elimina și adăuga din nou fără să pierzi textele configurate.')
+                                    ->schema([
+                                        Forms\Components\CheckboxList::make('contact_enabled_sections')
+                                            ->label('Elemente vizibile')
+                                            ->options([
+                                                'header' => 'Antet pagină',
+                                                'intro' => 'Text introductiv',
+                                                'address' => 'Adresă atelier',
+                                                'communication' => 'Email și telefon',
+                                                'hours' => 'Program atelier',
+                                                'custom_card' => 'Card „Comenzi Unicat”',
+                                                'contact_form' => 'Formular de contact',
+                                                'custom_request' => 'Secțiune „Proiecte Speciale / Comandă personalizată”',
+                                            ])
+                                            ->columns(2)
+                                            ->helperText('Debifează o secțiune pentru a o ascunde din site. O poți bifa din nou oricând.'),
+                                    ])
+                                    ->columnSpanFull(),
+
+                                Forms\Components\Section::make('Conținut existent')
+                                    ->description('Aceste texte sunt păstrate chiar dacă ascunzi temporar o secțiune.')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('contact_eyebrow')->label('Etichetă antet'),
+                                        Forms\Components\TextInput::make('contact_title')->label('Titlu principal'),
+                                        Forms\Components\Textarea::make('contact_intro')->label('Text introductiv')->rows(4),
+                                        Forms\Components\TextInput::make('contact_address_label')->label('Titlu adresă'),
+                                        Forms\Components\TextInput::make('contact_address_note')->label('Notă adresă'),
+                                        Forms\Components\TextInput::make('contact_communication_label')->label('Titlu comunicare'),
+                                        Forms\Components\TextInput::make('contact_hours_label')->label('Titlu program'),
+                                        Forms\Components\TextInput::make('contact_custom_card_title')->label('Titlu card comenzi unicat'),
+                                        Forms\Components\Textarea::make('contact_custom_card_text')->label('Text card comenzi unicat')->rows(3),
+                                        Forms\Components\TextInput::make('contact_custom_card_cta')->label('Text buton card'),
+                                        Forms\Components\TextInput::make('contact_form_title')->label('Titlu formular contact'),
+                                        Forms\Components\TextInput::make('contact_form_response_note')->label('Notă sub formular'),
+                                        Forms\Components\TextInput::make('contact_custom_eyebrow')->label('Etichetă secțiune proiecte speciale'),
+                                        Forms\Components\TextInput::make('contact_custom_title')->label('Titlu secțiune proiecte speciale'),
+                                        Forms\Components\Textarea::make('contact_custom_intro')->label('Introducere proiecte speciale')->rows(4),
+                                    ])
+                                    ->columns(2)
+                                    ->collapsible()
+                                    ->columnSpanFull(),
+
+                                Forms\Components\Section::make('Secțiuni suplimentare')
+                                    ->description('Adaugă blocuri editoriale noi pe pagina Contact. Pot fi șterse și reordonate din această listă.')
+                                    ->schema([
+                                        Forms\Components\Repeater::make('contact_custom_sections')
+                                            ->label('Blocuri personalizate')
+                                            ->schema([
+                                                Forms\Components\TextInput::make('eyebrow')
+                                                    ->label('Etichetă mică'),
+                                                Forms\Components\TextInput::make('title')
+                                                    ->label('Titlu')
+                                                    ->required(),
+                                                Forms\Components\Textarea::make('body')
+                                                    ->label('Text')
+                                                    ->rows(4)
+                                                    ->columnSpanFull(),
+                                                Forms\Components\Select::make('placement')
+                                                    ->label('Poziție în pagină')
+                                                    ->options([
+                                                        'after_header' => 'După antet',
+                                                        'after_main' => 'După zona principală de contact',
+                                                        'before_custom_request' => 'Înainte de proiectele speciale',
+                                                        'after_custom_request' => 'După proiectele speciale',
+                                                    ])
+                                                    ->default('before_custom_request')
+                                                    ->required(),
+                                                Forms\Components\Toggle::make('highlighted')
+                                                    ->label('Aspect evidențiat')
+                                                    ->default(false),
+                                                Forms\Components\TextInput::make('button_label')
+                                                    ->label('Text buton opțional'),
+                                                Forms\Components\TextInput::make('button_url')
+                                                    ->label('URL buton opțional')
+                                                    ->url(),
+                                            ])
+                                            ->columns(2)
+                                            ->defaultItems(0)
+                                            ->collapsible()
+                                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Secțiune nouă')
+                                            ->columnSpanFull(),
+                                    ])
+                                    ->columnSpanFull(),
                             ])
                             ->columns(2),
                         Forms\Components\Tabs\Tab::make('Pagina Despre')
@@ -159,8 +228,27 @@ class ManageGeneralSettings extends SettingsPage
             }
         }
 
-        if (array_key_exists('working_hours', $data) && $data['working_hours'] === null) {
-            $data['working_hours'] = [];
+        foreach (['working_hours', 'contact_enabled_sections', 'contact_custom_sections'] as $arrayKey) {
+            if (array_key_exists($arrayKey, $data) && $data[$arrayKey] === null) {
+                $data[$arrayKey] = [];
+            }
+        }
+
+        if (isset($data['contact_custom_sections']) && is_array($data['contact_custom_sections'])) {
+            $data['contact_custom_sections'] = array_values(array_map(
+                static function (array $section): array {
+                    foreach (['eyebrow', 'title', 'body', 'placement', 'button_label', 'button_url'] as $key) {
+                        if (($section[$key] ?? null) === null) {
+                            $section[$key] = '';
+                        }
+                    }
+
+                    $section['highlighted'] = (bool) ($section['highlighted'] ?? false);
+
+                    return $section;
+                },
+                $data['contact_custom_sections'],
+            ));
         }
 
         return $data;
