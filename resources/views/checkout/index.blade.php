@@ -19,9 +19,9 @@
 
         <div class="mb-9 text-center">
             <span class="block text-vintage-gold tracking-[0.26em] text-[10px] font-semibold uppercase mb-3">Finalizare comandă</span>
-            <h1 class="font-serif text-3xl md:text-5xl text-dark-brown mb-4">Plată sigură, direct pe site</h1>
+            <h1 class="font-serif text-3xl md:text-5xl text-dark-brown mb-4">Finalizați comanda în siguranță</h1>
             <p class="text-sm font-light text-dark-brown/60 max-w-2xl mx-auto leading-relaxed">
-                Completați datele de livrare, alegeți metoda de plată disponibilă și verificați totalul înainte de confirmare.
+                Completați datele de livrare, alegeți metoda de plată preferată și verificați totalul comenzii înainte de confirmare.
             </p>
         </div>
 
@@ -41,7 +41,7 @@
                             class="w-full border border-black/20 px-4 py-3.5 text-dark-brown focus:border-vintage-gold focus:ring-vintage-gold"
                             placeholder="nume@exemplu.ro"
                         >
-                        <p id="email-help" class="mt-2 text-xs text-dark-brown/50">Aici veți primi confirmarea comenzii și documentul proforma.</p>
+                        <p id="email-help" class="mt-2 text-xs text-dark-brown/50">Veți primi pe această adresă confirmarea comenzii și documentul proforma.</p>
                         <p id="email-error" role="alert" class="mt-2 text-xs text-red-700 hidden"></p>
                     </div>
 
@@ -55,7 +55,7 @@
                         <div class="flex items-start justify-between gap-4 border-b border-black/10 pb-3 mb-5">
                             <div>
                                 <h2 class="font-serif text-2xl text-dark-brown">Metoda de plată</h2>
-                                <p class="mt-1 text-xs text-dark-brown/50">Cardul rămâne metoda disponibilă de rezervă.</p>
+                                <p class="mt-1 text-xs text-dark-brown/50">Alegeți metoda de plată preferată dintre opțiunile disponibile.</p>
                             </div>
                             <span class="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.1em] text-emerald-700 whitespace-nowrap">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
@@ -68,7 +68,6 @@
                             <p class="text-xs text-dark-brown/50">Se încarcă metodele de plată disponibile…</p>
                         </div>
                         <div id="payment-element" class="hidden"></div>
-                        <p class="mt-3 text-xs text-dark-brown/50">Apple Pay și Google Pay apar automat numai pe dispozitivele și browserele compatibile, dacă sunt active în Stripe.</p>
                     </div>
 
                     <fieldset class="border-t border-black/10 pt-6 space-y-4">
@@ -105,7 +104,7 @@
                             </svg>
                         </span>
                     </button>
-                    <p class="text-center text-[10px] text-dark-brown/45 leading-relaxed">Nu închideți pagina cât timp plata se procesează. Apăsați butonul o singură dată.</p>
+                    <p class="text-center text-[10px] text-dark-brown/45 leading-relaxed">După confirmarea plății, veți vedea imediat starea comenzii.</p>
                 </form>
 
                 <form method="POST" action="{{ route('checkout.cancel') }}" class="mt-5 text-center">
@@ -145,9 +144,9 @@
                 </dl>
 
                 <div class="mt-7 pt-5 border-t border-black/5 space-y-3 text-[10px] text-dark-brown/55 leading-relaxed">
-                    <p>✓ Plata este procesată securizat de Stripe; datele complete ale cardului nu ajung la MTD Art.</p>
-                    <p>✓ Produsele sunt rezervate pentru aproximativ {{ config('shop.checkout_reservation_minutes') }} de minute cât finalizați plata.</p>
-                    <p>✓ Primiți confirmarea și proforma pe email după validarea plății.</p>
+                    <p>✓ Plata este procesată securizat de Stripe; datele complete ale cardului nu sunt stocate de MTD Art.</p>
+                    <p>✓ Produsele sunt rezervate pentru aproximativ {{ config('shop.checkout_reservation_minutes') }} de minute cât finalizați comanda.</p>
+                    <p>✓ Confirmarea comenzii și documentul proforma sunt trimise pe email după validarea plății.</p>
                     <p>✓ Pentru ajutor: <a href="mailto:{{ config('shop.legal.email') }}" class="underline hover:text-vintage-gold">{{ config('shop.legal.email') }}</a></p>
                 </div>
             </aside>
@@ -229,7 +228,7 @@
     });
 
     paymentElement.on('loaderror', () => {
-        showGlobalError('Metodele de plată nu s-au încărcat. Verifică conexiunea și reîncarcă pagina.');
+        showGlobalError('Metodele de plată nu s-au încărcat. Verificați conexiunea și reîncărcați pagina.');
     });
 
     function clearErrors() {
