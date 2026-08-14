@@ -14,7 +14,7 @@ class AdminMfaTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_without_recent_mfa_is_redirected_to_challenge(): void
+    public function test_admin_without_mfa_is_redirected_to_challenge(): void
     {
         Route::middleware(EnsureAdminMfa::class)
             ->get('/_admin-mfa-test', fn () => response('ok'));
@@ -26,7 +26,7 @@ class AdminMfaTest extends TestCase
             ->assertRedirect(route('admin.mfa.challenge'));
     }
 
-    public function test_admin_with_recent_mfa_can_continue(): void
+    public function test_admin_with_mfa_for_current_session_can_continue(): void
     {
         Route::middleware(EnsureAdminMfa::class)
             ->get('/_admin-mfa-verified-test', fn () => response('ok'));
@@ -36,7 +36,6 @@ class AdminMfaTest extends TestCase
         $this->actingAs($admin)
             ->withSession([
                 'admin_mfa_verified_at' => time(),
-                'admin_mfa_last_activity_at' => time(),
                 'admin_mfa_user_id' => $admin->id,
             ])
             ->get('/_admin-mfa-verified-test')
@@ -44,93 +43,39 @@ class AdminMfaTest extends TestCase
             ->assertSee('ok');
     }
 
-    public function test_active_admin_can_continue_past_the_old_four_hour_cutoff(): void
+    public function test_mfa_does_not_expire_independently_while_laravel_session_is_alive(): void
     {
         Route::middleware(EnsureAdminMfa::class)
-            ->get('/_admin-mfa-active-test', fn () => response('ok'));
-
-        config([
-            'security.admin_mfa.idle_seconds' => 7200,
-            'security.admin_mfa.absolute_seconds' => 43200,
-        ]);
+            ->get('/_admin-mfa-long-session-test', fn () => response('ok'));
 
         $admin = User::factory()->create(['is_admin' => true]);
 
         $this->actingAs($admin)
             ->withSession([
-                'admin_mfa_verified_at' => time() - 18000,
-                'admin_mfa_last_activity_at' => time() - 30,
+                'admin_mfa_verified_at' => time() - 604800,
+                'admin_mfa_last_activity_at' => time() - 604800,
                 'admin_mfa_user_id' => $admin->id,
             ])
-            ->get('/_admin-mfa-active-test')
+            ->get('/_admin-mfa-long-session-test')
             ->assertOk()
             ->assertSee('ok');
     }
 
-    public function test_idle_admin_mfa_session_requires_reverification_on_full_page_navigation(): void
+    public function test_verified_admin_livewire_bulk_action_is_not_interrupted(): void
     {
         Route::middleware(EnsureAdminMfa::class)
-            ->get('/_admin-mfa-idle-test', fn () => response('ok'));
-
-        config([
-            'security.admin_mfa.idle_seconds' => 7200,
-            'security.admin_mfa.absolute_seconds' => 43200,
-        ]);
+            ->post('/livewire/_admin-mfa-bulk-test', fn () => response('bulk-action-ok'));
 
         $admin = User::factory()->create(['is_admin' => true]);
 
         $this->actingAs($admin)
             ->withSession([
-                'admin_mfa_verified_at' => time() - 8000,
-                'admin_mfa_last_activity_at' => time() - 7201,
-                'admin_mfa_user_id' => $admin->id,
-            ])
-            ->get('/_admin-mfa-idle-test')
-            ->assertRedirect(route('admin.mfa.challenge'));
-    }
-
-    public function test_absolute_mfa_lifetime_still_forces_reverification_on_full_page_navigation(): void
-    {
-        Route::middleware(EnsureAdminMfa::class)
-            ->get('/_admin-mfa-absolute-test', fn () => response('ok'));
-
-        config([
-            'security.admin_mfa.idle_seconds' => 7200,
-            'security.admin_mfa.absolute_seconds' => 43200,
-        ]);
-
-        $admin = User::factory()->create(['is_admin' => true]);
-
-        $this->actingAs($admin)
-            ->withSession([
-                'admin_mfa_verified_at' => time() - 43201,
-                'admin_mfa_last_activity_at' => time() - 10,
-                'admin_mfa_user_id' => $admin->id,
-            ])
-            ->get('/_admin-mfa-absolute-test')
-            ->assertRedirect(route('admin.mfa.challenge'));
-    }
-
-    public function test_verified_admin_livewire_action_is_not_interrupted_by_mfa_timer_expiry(): void
-    {
-        Route::middleware(EnsureAdminMfa::class)
-            ->post('/livewire/_admin-mfa-relaxed-test', fn () => response('bulk-action-ok'));
-
-        config([
-            'security.admin_mfa.idle_seconds' => 7200,
-            'security.admin_mfa.absolute_seconds' => 43200,
-        ]);
-
-        $admin = User::factory()->create(['is_admin' => true]);
-
-        $this->actingAs($admin)
-            ->withSession([
-                'admin_mfa_verified_at' => time() - 50000,
-                'admin_mfa_last_activity_at' => time() - 8000,
+                'admin_mfa_verified_at' => time() - 604800,
+                'admin_mfa_last_activity_at' => time() - 604800,
                 'admin_mfa_user_id' => $admin->id,
             ])
             ->withHeader('X-Livewire', 'true')
-            ->post('/livewire/_admin-mfa-relaxed-test')
+            ->post('/livewire/_admin-mfa-bulk-test')
             ->assertOk()
             ->assertSee('bulk-action-ok');
     }
@@ -163,7 +108,6 @@ class AdminMfaTest extends TestCase
         $this->actingAs($admin)
             ->withSession([
                 'admin_mfa_verified_at' => time(),
-                'admin_mfa_last_activity_at' => time(),
                 'admin_mfa_user_id' => $otherAdmin->id,
             ])
             ->get('/_admin-mfa-bound-test')
