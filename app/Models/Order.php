@@ -14,7 +14,7 @@ class Order extends Model
 
     protected $fillable = [
         'user_id', 'order_number', 'subtotal_amount', 'shipping_amount',
-        'discount_amount', 'total_amount', 'payment_status',
+        'discount_amount', 'total_amount', 'payment_status', 'payment_method',
         'shipping_status', 'customer_details', 'stripe_transaction_id',
         'stripe_checkout_session_id', 'proforma_number', 'public_token',
         'stock_reserved_at', 'stock_released_at', 'terms_accepted_at',
@@ -60,6 +60,11 @@ class Order extends Model
         $year = ($this->created_at ?? now())->format('Y');
 
         return sprintf('PROFORMA-%s-%06d', $year, $this->getKey());
+    }
+
+    public function isCashOnDelivery(): bool
+    {
+        return $this->payment_method === 'cash_on_delivery';
     }
 
     public function isCancelled(): bool
