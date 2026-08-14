@@ -45,12 +45,9 @@
             });
 
             fail(({ status, content, preventDefault }) => {
-                if (status === 419) {
-                    preventDefault();
-                    redirectOnce('/admin/login');
-                    return;
-                }
-
+                // Do not convert Livewire's native 419/session-expired handling into a
+                // forced admin-login redirect. Doing so masked CSRF/session failures as
+                // MFA failures and made debugging/recovery substantially worse.
                 if (status !== 401) {
                     return;
                 }
