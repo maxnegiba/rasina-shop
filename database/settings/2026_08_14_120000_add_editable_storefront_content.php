@@ -6,8 +6,6 @@ return new class extends SettingsMigration
 {
     public function up(): void
     {
-        $this->migrator->add('general.footer_description', 'O fuziune atemporală între esența naturală a lemnului și eleganța translucidă a rășinii. Piese de artă unicat, lucrate manual cu pasiune și măiestrie în România.');
-
         $this->migrator->add('general.contact_eyebrow', 'Contact');
         $this->migrator->add('general.contact_title', 'Ne Găsiți Aici');
         $this->migrator->add('general.contact_intro', 'Suntem deschiși la discuții, idei noi și, bineînțeles, cereri personalizate. Deoarece piesele noastre necesită un proces meticulos, fiecare proiect începe cu o conversație.');
