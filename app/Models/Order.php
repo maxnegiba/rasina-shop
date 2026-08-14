@@ -21,7 +21,7 @@ class Order extends Model
         'privacy_acknowledged_at', 'terms_version', 'confirmation_sent_at',
         'confirmation_queued_at', 'confirmation_failed_at',
         'admin_notification_queued_at', 'admin_notification_sent_at',
-        'admin_notification_failed_at',
+        'admin_notification_failed_at', 'cancelled_at', 'cancellation_reason',
     ];
 
     protected $casts = [
@@ -40,6 +40,7 @@ class Order extends Model
         'admin_notification_queued_at' => 'datetime',
         'admin_notification_sent_at' => 'datetime',
         'admin_notification_failed_at' => 'datetime',
+        'cancelled_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -59,6 +60,49 @@ class Order extends Model
         $year = ($this->created_at ?? now())->format('Y');
 
         return sprintf('PROFORMA-%s-%06d', $year, $this->getKey());
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->cancelled_at !== null;
+    }
+
+    public function cancel(?string $reason = null): void
+    {
+        DB::transaction(function () use ($reason): void {
+            /** @var self $order */
+            $order = self::query()->lockForUpdate()->findOrFail($this->getKey());
+
+            if ($order->cancelled_at) {
+                return;
+            }
+
+            if ($order->shipping_status === 'delivered') {
+                throw new \LogicException('O comandă deja livrată nu poate fi anulată.');
+            }
+
+            if ($order->payment_status !== 'paid') {
+                $order->releaseReservedStock();
+                $order->refresh();
+            }
+
+            $order->update([
+                'cancelled_at' => now(),
+                'cancellation_reason' => filled($reason) ? trim($reason) : null,
+            ]);
+        });
+
+        $this->refresh();
+    }
+
+    public function deleteSafelyFromAdmin(): void
+    {
+        if ($this->payment_status === 'paid') {
+            throw new \LogicException('Comenzile plătite nu pot fi șterse. Anulează comanda și gestionează rambursarea separat.');
+        }
+
+        $this->releaseReservedStock();
+        $this->delete();
     }
 
     public function releaseReservedStock(): void
