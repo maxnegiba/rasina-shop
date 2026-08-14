@@ -13,7 +13,7 @@ class ProformaController extends Controller
      */
     public function download(Order $order): Response
     {
-        abort_unless($order->payment_status === 'paid', 404);
+        abort_unless($order->payment_status === 'paid' || $order->isCashOnDelivery(), 404);
 
         if (! $order->proforma_number) {
             $order->update(['proforma_number' => $order->proformaNumber()]);
@@ -21,7 +21,7 @@ class ProformaController extends Controller
 
         $order->load('items.product');
         $pdf = Pdf::loadView('pdf.proforma', compact('order'));
-        $filename = 'Proforma_' . $order->proforma_number . '_' . $order->order_number . '.pdf';
+        $filename = 'Proforma_'.$order->proforma_number.'_'.$order->order_number.'.pdf';
 
         return $pdf->download($filename);
     }
