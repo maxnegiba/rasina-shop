@@ -6,7 +6,7 @@ use Tests\TestCase;
 
 class FilamentLivewireSessionConfigurationTest extends TestCase
 {
-    public function test_stateful_panel_middleware_is_not_forced_to_persist_on_livewire_requests(): void
+    public function test_panel_and_auth_middleware_are_not_forced_to_persist_on_livewire_requests(): void
     {
         $source = file_get_contents(app_path('Providers/Filament/AdminPanelProvider.php'));
 
@@ -18,10 +18,16 @@ class FilamentLivewireSessionConfigurationTest extends TestCase
             'The full cookie/session/CSRF panel middleware stack must not be registered as persistent Livewire middleware.',
         );
 
-        $this->assertStringContainsString(
+        $this->assertStringNotContainsString(
             "EnsureAdminMfa::class,\n            ], isPersistent: true)",
             $source,
-            'Admin authentication/MFA should remain persistent on Livewire requests.',
+            'Authenticated panel middleware must not be forced to persist across Livewire requests because persistent auth/session mutation can break the temporary file upload lifecycle.',
+        );
+
+        $this->assertStringContainsString(
+            "->authMiddleware([\n                Authenticate::class,\n                EnsureAdminMfa::class,\n            ])",
+            $source,
+            'Admin authentication and MFA must still protect full authenticated panel requests.',
         );
     }
 
