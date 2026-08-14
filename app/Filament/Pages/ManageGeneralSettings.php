@@ -93,12 +93,6 @@ class ManageGeneralSettings extends SettingsPage
                                 Forms\Components\TextInput::make('about_cta_label')->label('Text buton galerie'),
                             ])
                             ->columns(2),
-                        Forms\Components\Tabs\Tab::make('Footer')
-                            ->schema([
-                                Forms\Components\Textarea::make('footer_description')
-                                    ->label('Descriere footer')
-                                    ->rows(4),
-                            ]),
                         Forms\Components\Tabs\Tab::make('Social Media')
                             ->schema([
                                 Forms\Components\TextInput::make('facebook_url')
