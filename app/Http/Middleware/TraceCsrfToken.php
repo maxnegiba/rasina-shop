@@ -29,7 +29,7 @@ class TraceCsrfToken extends ValidateCsrfToken
                 'x_csrf_token_fp' => $this->fingerprint($request->header('X-CSRF-TOKEN')),
                 'x_xsrf_token_fp' => $this->fingerprint($request->header('X-XSRF-TOKEN')),
                 'has_session_cookie' => $request->cookies->has((string) config('session.cookie')),
-                'content_length' => $request->headers->getInt('Content-Length'),
+                'content_length' => (int) ($request->header('Content-Length') ?? 0),
                 'content_type' => $request->header('Content-Type'),
             ]);
         }
