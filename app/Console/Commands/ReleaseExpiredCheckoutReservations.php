@@ -22,6 +22,9 @@ class ReleaseExpiredCheckoutReservations extends Command
 
         Order::query()
             ->where('payment_status', 'pending')
+            ->where(function ($query): void {
+                $query->whereNull('payment_method')->orWhere('payment_method', '!=', 'cash_on_delivery');
+            })
             ->whereNotNull('stock_reserved_at')
             ->whereNull('stock_released_at')
             ->where('stock_reserved_at', '<=', $cutoff)
