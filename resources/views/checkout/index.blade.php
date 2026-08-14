@@ -21,7 +21,7 @@
             <span class="block text-vintage-gold tracking-[0.26em] text-[10px] font-semibold uppercase mb-3">Finalizare comandă</span>
             <h1 class="font-serif text-3xl md:text-5xl text-dark-brown mb-4">Finalizați comanda în siguranță</h1>
             <p class="text-sm font-light text-dark-brown/60 max-w-2xl mx-auto leading-relaxed">
-                Completați datele de livrare, alegeți metoda de plată preferată și verificați totalul produselor înainte de confirmare.
+                Completați datele de livrare, alegeți metoda de plată preferată și verificați totalul comenzii înainte de confirmare.
             </p>
         </div>
 
@@ -135,14 +135,13 @@
                 </div>
 
                 <dl class="mt-6 pt-5 border-t border-black/10 space-y-3 text-xs text-dark-brown/65">
-                    <div class="flex justify-between gap-4"><dt>Subtotal produse</dt><dd>{{ number_format($order->subtotal_amount, 2, ',', '.') }} RON</dd></div>
+                    <div class="flex justify-between gap-4"><dt>Subtotal</dt><dd>{{ number_format($order->subtotal_amount, 2, ',', '.') }} RON</dd></div>
                     @if((float) $order->discount_amount > 0)
                         <div class="flex justify-between gap-4 text-emerald-700"><dt>Reducere</dt><dd>−{{ number_format($order->discount_amount, 2, ',', '.') }} RON</dd></div>
                     @endif
-                    <div class="flex justify-between gap-4 pt-4 border-t border-black/10 text-sm text-dark-brown font-semibold"><dt>Total produse</dt><dd>{{ number_format($order->total_amount, 2, ',', '.') }} RON</dd></div>
+                    <div class="flex justify-between gap-4 pt-4 border-t border-black/10 text-sm text-dark-brown font-semibold"><dt>Total de plată</dt><dd>{{ number_format($order->total_amount, 2, ',', '.') }} RON</dd></div>
                 </dl>
-
-                <p class="mt-4 text-xs font-medium text-dark-brown/70">Livrarea nu este inclusă în preț.</p>
+                <p class="mt-3 text-[10px] text-dark-brown/55 leading-relaxed">Livrarea nu este inclusă în preț.</p>
 
                 <div class="mt-7 pt-5 border-t border-black/5 space-y-3 text-[10px] text-dark-brown/55 leading-relaxed">
                     <p>✓ Plata este procesată securizat de Stripe; datele complete ale cardului nu sunt stocate de MTD Art.</p>
