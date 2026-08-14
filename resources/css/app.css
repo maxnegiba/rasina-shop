@@ -2,8 +2,9 @@
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+@source '../views/layouts/app.blade.php';
+@source '../views/**/*.blade.php';
+@source '../js/**/*.js';
 
 @theme {
     --color-ivory: #fffff0;
@@ -16,6 +17,16 @@
     --font-serif: 'Cormorant Garamond', Georgia, serif;
     --font-editorial: 'Libre Baskerville', Georgia, serif;
     --font-sans: Manrope, ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+ * The storefront shell is shared by every public page. Keep the footer's
+ * background explicit so it renders identically in the full app bundle and
+ * in the separately-compiled homepage bundle.
+ */
+footer {
+    background-color: #2c1e16;
+    background-image: radial-gradient(ellipse at top, #3b2818 0%, #2c1e16 55%, #1a120d 100%);
 }
 
 /*
@@ -39,12 +50,10 @@
     line-height: 1.05rem !important;
 }
 
-/* Original gold stays intact for bg-vintage-gold / border-vintage-gold. */
 .text-vintage-gold {
     color: #8a641f !important;
 }
 
-/* Muted brown copy gets sufficient contrast while remaining visibly soft. */
 [class~="text-dark-brown/40"],
 [class~="text-dark-brown/50"] {
     color: #70513e !important;
@@ -57,7 +66,6 @@
     color: #5d3d2b !important;
 }
 
-/* Hero keeps its pink/gold identity, only nudged darker for readable text. */
 [class~="text-[#bf8179]"] {
     color: #a46159 !important;
 }
@@ -69,7 +77,6 @@
     color: #8a641f !important;
 }
 
-/* On the dark footer the lighter original gold family remains appropriate. */
 footer .text-vintage-gold {
     color: #d9c15a !important;
 }
