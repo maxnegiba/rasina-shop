@@ -67,7 +67,7 @@ class AdminMfaTest extends TestCase
             ->assertSee('ok');
     }
 
-    public function test_idle_admin_mfa_session_requires_reverification(): void
+    public function test_idle_admin_mfa_session_requires_reverification_on_full_page_navigation(): void
     {
         Route::middleware(EnsureAdminMfa::class)
             ->get('/_admin-mfa-idle-test', fn () => response('ok'));
@@ -89,7 +89,7 @@ class AdminMfaTest extends TestCase
             ->assertRedirect(route('admin.mfa.challenge'));
     }
 
-    public function test_absolute_mfa_lifetime_still_forces_reverification(): void
+    public function test_absolute_mfa_lifetime_still_forces_reverification_on_full_page_navigation(): void
     {
         Route::middleware(EnsureAdminMfa::class)
             ->get('/_admin-mfa-absolute-test', fn () => response('ok'));
@@ -111,10 +111,10 @@ class AdminMfaTest extends TestCase
             ->assertRedirect(route('admin.mfa.challenge'));
     }
 
-    public function test_expired_mfa_during_livewire_action_returns_machine_readable_reauth_response(): void
+    public function test_verified_admin_livewire_action_is_not_interrupted_by_mfa_timer_expiry(): void
     {
         Route::middleware(EnsureAdminMfa::class)
-            ->post('/livewire/_admin-mfa-expired-test', fn () => response('must-not-run'));
+            ->post('/livewire/_admin-mfa-relaxed-test', fn () => response('bulk-action-ok'));
 
         config([
             'security.admin_mfa.idle_seconds' => 7200,
@@ -125,12 +125,26 @@ class AdminMfaTest extends TestCase
 
         $this->actingAs($admin)
             ->withSession([
-                'admin_mfa_verified_at' => time() - 8000,
-                'admin_mfa_last_activity_at' => time() - 7201,
+                'admin_mfa_verified_at' => time() - 50000,
+                'admin_mfa_last_activity_at' => time() - 8000,
                 'admin_mfa_user_id' => $admin->id,
             ])
             ->withHeader('X-Livewire', 'true')
-            ->post('/livewire/_admin-mfa-expired-test', [], ['HTTP_REFERER' => url('/admin/orders')])
+            ->post('/livewire/_admin-mfa-relaxed-test')
+            ->assertOk()
+            ->assertSee('bulk-action-ok');
+    }
+
+    public function test_livewire_request_without_mfa_for_current_admin_is_still_rejected(): void
+    {
+        Route::middleware(EnsureAdminMfa::class)
+            ->post('/livewire/_admin-mfa-unverified-test', fn () => response('must-not-run'));
+
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin)
+            ->withHeader('X-Livewire', 'true')
+            ->post('/livewire/_admin-mfa-unverified-test')
             ->assertStatus(401)
             ->assertJson([
                 'code' => 'ADMIN_MFA_REQUIRED',
