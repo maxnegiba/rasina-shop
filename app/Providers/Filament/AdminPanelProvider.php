@@ -61,11 +61,11 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-            ], isPersistent: true)
+            ])
             ->authMiddleware([
                 Authenticate::class,
                 EnsureAdminMfa::class,
-            ], isPersistent: true)
+            ])
             ->plugin(
                 SpatieLaravelTranslatablePlugin::make()
                     ->defaultLocales(['ro'])
