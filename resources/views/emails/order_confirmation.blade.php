@@ -1,7 +1,13 @@
 @extends('emails.layout')
 
+@php
+    $isCod = $order->isCashOnDelivery();
+@endphp
+
 @section('title', 'Confirmare comandă')
-@section('preheader', 'Comanda '.$order->order_number.' a fost achitată cu succes.')
+@section('preheader', $isCod
+    ? 'Comanda '.$order->order_number.' a fost înregistrată cu plata ramburs.'
+    : 'Comanda '.$order->order_number.' a fost achitată cu succes.')
 @section('eyebrow', 'Comandă confirmată')
 
 @section('content')
@@ -16,7 +22,11 @@
     </h1>
 
     <p style="margin:0 0 24px; color:#5d3d2b; font-size:15px; line-height:25px;">
-        Plata a fost confirmată, iar piesele dumneavoastră intră acum în grija atelierului MTD Art. Mai jos găsiți rezumatul comenzii.
+        @if($isCod)
+            Comanda a fost înregistrată cu plata ramburs. Produsele se achită curierului la livrare, iar livrarea nu este inclusă în preț. Mai jos găsiți rezumatul comenzii.
+        @else
+            Plata a fost confirmată, iar piesele dumneavoastră intră acum în grija atelierului MTD Art. Mai jos găsiți rezumatul comenzii.
+        @endif
     </p>
 
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 28px; background:#fffdf4; border:1px solid #e6d9b6;">
@@ -26,13 +36,18 @@
                 <div style="margin-top:6px; color:#2c1e16; font-family:Georgia, 'Times New Roman', serif; font-size:17px; line-height:22px;">{{ $order->order_number }}</div>
             </td>
             <td class="mobile-stack" width="50%" style="padding:18px 20px; border-bottom:1px solid #eee4ca; vertical-align:top;">
-                <div style="color:#8a641f; font-size:9px; line-height:13px; letter-spacing:1.8px; text-transform:uppercase; font-weight:700;">Total achitat</div>
+                <div style="color:#8a641f; font-size:9px; line-height:13px; letter-spacing:1.8px; text-transform:uppercase; font-weight:700;">{{ $isCod ? 'Total produse' : 'Total achitat' }}</div>
                 <div style="margin-top:6px; color:#2c1e16; font-family:Georgia, 'Times New Roman', serif; font-size:17px; line-height:22px;">{{ number_format((float) $order->total_amount, 2, ',', '.') }} RON</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="padding:15px 20px; color:#70513e; font-size:12px; line-height:19px;">
+                <strong style="color:#2c1e16;">Metodă de plată:</strong> {{ $isCod ? 'Ramburs la curier' : 'Online, prin Stripe' }}
             </td>
         </tr>
         @if($order->proforma_number)
             <tr>
-                <td colspan="2" style="padding:15px 20px; color:#70513e; font-size:12px; line-height:19px;">
+                <td colspan="2" style="padding:15px 20px; color:#70513e; font-size:12px; line-height:19px; border-top:1px solid #eee4ca;">
                     <strong style="color:#2c1e16;">Proformă:</strong> {{ $order->proforma_number }} &mdash; documentul PDF este atașat acestui email.
                 </td>
             </tr>
@@ -60,7 +75,7 @@
         <tr>
             <td style="padding:20px 22px; background:#f7f0dc; border-left:3px solid #cfb53b; color:#5d3d2b; font-size:13px; line-height:22px;">
                 <strong style="color:#2c1e16;">Ce urmează?</strong><br>
-                Pregătim comanda cu atenție și vă vom contacta dacă avem nevoie de informații suplimentare. Proforma atașată este un document comercial nefiscal și nu înlocuiește documentele fiscale prevăzute de lege.
+                Pregătim comanda cu atenție și vă vom contacta dacă avem nevoie de informații suplimentare. {{ $isCod ? 'Valoarea produselor se achită curierului la livrare. ' : '' }}Proforma atașată este un document comercial nefiscal și nu înlocuiește documentele fiscale prevăzute de lege.
             </td>
         </tr>
     </table>
