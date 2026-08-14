@@ -65,7 +65,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 EnsureAdminMfa::class,
-            ])
+            ], isPersistent: true)
             ->plugin(
                 SpatieLaravelTranslatablePlugin::make()
                     ->defaultLocales(['ro'])
