@@ -1,7 +1,13 @@
 @extends('emails.layout')
 
-@section('title', 'Comandă nouă plătită')
-@section('preheader', 'Comanda '.$order->order_number.' a fost plătită și necesită procesare.')
+@php
+    $isCod = $order->isCashOnDelivery();
+@endphp
+
+@section('title', $isCod ? 'Comandă nouă ramburs' : 'Comandă nouă plătită')
+@section('preheader', $isCod
+    ? 'Comanda '.$order->order_number.' a fost plasată cu plata ramburs.'
+    : 'Comanda '.$order->order_number.' a fost plătită și necesită procesare.')
 @section('eyebrow', 'Notificare atelier')
 
 @section('content')
@@ -12,10 +18,14 @@
     @endphp
 
     <h1 class="email-title" style="margin:0 0 16px; color:#2c1e16; font-family:Georgia, 'Times New Roman', serif; font-size:36px; line-height:42px; font-weight:400;">
-        O comandă nouă este achitată.
+        {{ $isCod ? 'O comandă nouă a fost plasată cu ramburs.' : 'O comandă nouă este achitată.' }}
     </h1>
     <p style="margin:0 0 26px; color:#5d3d2b; font-size:14px; line-height:23px;">
-        Plata a fost confirmată. Comanda poate fi preluată pentru pregătire și procesare în panoul de administrare.
+        @if($isCod)
+            Clientul a ales plata ramburs la curier. Comanda poate fi preluată pentru pregătire; plata produselor este încă neîncasată.
+        @else
+            Plata a fost confirmată. Comanda poate fi preluată pentru pregătire și procesare în panoul de administrare.
+        @endif
     </p>
 
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom:28px; background:#fffdf4; border:1px solid #e6d9b6;">
@@ -24,7 +34,11 @@
             <td align="right" style="padding:18px 20px; border-bottom:1px solid #eee4ca; color:#2c1e16; font-weight:700; font-size:13px; line-height:19px;">{{ $order->order_number }}</td>
         </tr>
         <tr>
-            <td style="padding:18px 20px; border-bottom:1px solid #eee4ca; color:#70513e; font-size:12px; line-height:19px;">Total achitat</td>
+            <td style="padding:18px 20px; border-bottom:1px solid #eee4ca; color:#70513e; font-size:12px; line-height:19px;">Metodă de plată</td>
+            <td align="right" style="padding:18px 20px; border-bottom:1px solid #eee4ca; color:#2c1e16; font-weight:700; font-size:13px; line-height:19px;">{{ $isCod ? 'Ramburs la curier' : 'Online (Stripe)' }}</td>
+        </tr>
+        <tr>
+            <td style="padding:18px 20px; border-bottom:1px solid #eee4ca; color:#70513e; font-size:12px; line-height:19px;">{{ $isCod ? 'Total produse' : 'Total achitat' }}</td>
             <td align="right" style="padding:18px 20px; border-bottom:1px solid #eee4ca; color:#2c1e16; font-family:Georgia, 'Times New Roman', serif; font-size:18px; line-height:22px;">{{ number_format((float) $order->total_amount, 2, ',', '.') }} RON</td>
         </tr>
         <tr>
@@ -49,6 +63,16 @@
                     </td>
                 </tr>
             @endforeach
+        </table>
+    @endif
+
+    @if($isCod)
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 26px;">
+            <tr>
+                <td style="padding:16px 18px; background:#fff7e6; border-left:3px solid #cfb53b; color:#5d3d2b; font-size:12px; line-height:20px;">
+                    <strong style="color:#2c1e16;">Ramburs:</strong> după confirmarea încasării de la curier, marcați comanda ca plătită în panoul de administrare. Livrarea nu este inclusă în totalul produselor.
+                </td>
+            </tr>
         </table>
     @endif
 
