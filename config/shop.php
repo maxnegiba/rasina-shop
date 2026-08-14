@@ -7,6 +7,7 @@ return [
         'business_name' => env('SHOP_LEGAL_BUSINESS_NAME', '[DENUMIREA LEGALĂ A OPERATORULUI]'),
         'tax_id' => env('SHOP_LEGAL_TAX_ID', '[CUI/CIF]'),
         'trade_register' => env('SHOP_LEGAL_TRADE_REGISTER', '[NR. REGISTRUL COMERȚULUI]'),
+        'euid' => env('SHOP_LEGAL_EUID'),
         'address' => env('SHOP_LEGAL_ADDRESS', '[ADRESA SEDIULUI SOCIAL]'),
         'email' => env('SHOP_LEGAL_EMAIL', 'contact@mtdart.ro'),
         'phone' => env('SHOP_LEGAL_PHONE', '[TELEFON]'),
@@ -18,7 +19,7 @@ return [
 
     'checkout_reservation_minutes' => (int) env('SHOP_CHECKOUT_RESERVATION_MINUTES', 31),
 
-    // The amount charged once per order, in RON. Keep this aligned with the
-    // delivery promise shown in the cart, checkout and legal pages.
+    // Delivery is billed separately and is not included in the online order total.
+    // Keep this at zero unless the checkout is intentionally changed to charge delivery online.
     'shipping_cost' => max(0, (float) env('SHOP_SHIPPING_COST', 0)),
 ];

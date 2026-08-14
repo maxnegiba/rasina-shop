@@ -19,7 +19,7 @@
         .logo {
             font-size: 24px;
             font-weight: bold;
-            color: #2C1E16; /* Dark Brown */
+            color: #2C1E16;
         }
         .title {
             text-align: right;
@@ -46,7 +46,8 @@
             border-collapse: collapse;
             margin-bottom: 30px;
         }
-        table.items th, table.items td {
+        table.items th,
+        table.items td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
@@ -55,7 +56,8 @@
             background-color: #f9f9f9;
             font-weight: bold;
         }
-        table.items td.right, table.items th.right {
+        table.items td.right,
+        table.items th.right {
             text-align: right;
         }
         .total-section {
@@ -67,6 +69,21 @@
         .total-row {
             font-weight: bold;
             font-size: 14px;
+        }
+        .delivery-note {
+            margin-top: 18px;
+            padding: 10px;
+            background-color: #faf8f0;
+            border: 1px solid #e7dfbd;
+            text-align: center;
+            color: #5b4a32;
+        }
+        .payment-status {
+            margin-top: 18px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            text-align: center;
         }
         .footer {
             margin-top: 50px;
@@ -84,13 +101,19 @@
         <tr>
             <td>
                 <div class="logo">{{ config('shop.brand_name') }}</div>
-                <div>{{ config('shop.legal.business_name') }}</div>
-                <div>CUI/CIF: {{ config('shop.legal.tax_id') }}</div>
-                <div>Registrul Comerțului: {{ config('shop.legal.trade_register') }}</div>
+                <div><strong>{{ config('shop.legal.business_name') }}</strong></div>
+                <div>CUI: {{ config('shop.legal.tax_id') }}</div>
+                <div>Nr. Reg. Com.: {{ config('shop.legal.trade_register') }}</div>
+                @if(config('shop.legal.euid'))
+                    <div>EUID: {{ config('shop.legal.euid') }}</div>
+                @endif
                 <div>{{ config('shop.legal.address') }}</div>
                 <div>{{ config('shop.legal.email') }} · {{ config('shop.legal.phone') }}</div>
                 @if(config('shop.legal.iban'))
-                    <div>IBAN: {{ config('shop.legal.iban') }}{{ config('shop.legal.bank') ? ' · '.config('shop.legal.bank') : '' }}</div>
+                    <div>IBAN: {{ config('shop.legal.iban') }}</div>
+                @endif
+                @if(config('shop.legal.bank'))
+                    <div>Banca: {{ config('shop.legal.bank') }}</div>
                 @endif
             </td>
             <td>
@@ -98,7 +121,7 @@
                 <div style="text-align: right; margin-top: 10px;">
                     <strong>Seria/Nr:</strong> {{ $order->proforma_number }}<br>
                     <strong>Data:</strong> {{ $order->created_at->format('d.m.Y') }}<br>
-                    <strong>Nr. Comandă:</strong> {{ $order->order_number }}
+                    <strong>Nr. comandă:</strong> {{ $order->order_number }}
                 </div>
             </td>
         </tr>
@@ -113,7 +136,7 @@
                 <strong>Telefon:</strong> {{ $order->customer_details['phone'] ?? '-' }}<br>
             </td>
             <td>
-                <div class="section-title">Adresă Livrare</div>
+                <div class="section-title">Adresă de livrare</div>
                 {{ $order->customer_details['address']['line1'] ?? '' }}
                 {{ $order->customer_details['address']['line2'] ?? '' }}<br>
                 {{ $order->customer_details['address']['city'] ?? '' }},
@@ -137,17 +160,17 @@
         <tbody>
             @if(isset($order->items) && $order->items->count() > 0)
                 @foreach($order->items as $index => $item)
-                <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $item->displayName() }}{{ $item->product_code ? ' ('.$item->product_code.')' : '' }}</td>
-                    <td class="right">{{ $item->quantity }}</td>
-                    <td class="right">{{ number_format($item->unit_price, 2, ',', '.') }}</td>
-                    <td class="right">{{ number_format($item->subtotal, 2, ',', '.') }}</td>
-                </tr>
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $item->displayName() }}{{ $item->product_code ? ' ('.$item->product_code.')' : '' }}</td>
+                        <td class="right">{{ $item->quantity }}</td>
+                        <td class="right">{{ number_format($item->unit_price, 2, ',', '.') }}</td>
+                        <td class="right">{{ number_format($item->subtotal, 2, ',', '.') }}</td>
+                    </tr>
                 @endforeach
             @else
                 <tr>
-                    <td colspan="5" style="text-align:center;">Comanda nu are produse detaliate (Custom Request)</td>
+                    <td colspan="5" style="text-align:center;">Comanda nu are produse detaliate.</td>
                 </tr>
             @endif
         </tbody>
@@ -159,12 +182,8 @@
             <td style="width: 30%;">
                 <table style="width: 100%;">
                     <tr>
-                        <td style="text-align: right; padding-right: 10px;">Subtotal:</td>
+                        <td style="text-align: right; padding-right: 10px;">Subtotal produse:</td>
                         <td style="text-align: right;">{{ number_format($order->subtotal_amount, 2, ',', '.') }}</td>
-                    </tr>
-                    <tr>
-                        <td style="text-align: right; padding-right: 10px;">Livrare:</td>
-                        <td style="text-align: right;">{{ (float) $order->shipping_amount > 0 ? number_format($order->shipping_amount, 2, ',', '.') : '0,00' }}</td>
                     </tr>
                     @if((float) $order->discount_amount > 0)
                         <tr>
@@ -173,7 +192,7 @@
                         </tr>
                     @endif
                     <tr class="total-row">
-                        <td style="text-align: right; padding-right: 10px;">TOTAL (RON):</td>
+                        <td style="text-align: right; padding-right: 10px;">TOTAL PRODUSE (RON):</td>
                         <td style="text-align: right;">{{ number_format($order->total_amount, 2, ',', '.') }}</td>
                     </tr>
                 </table>
@@ -181,8 +200,12 @@
         </tr>
     </table>
 
-    <div style="margin-top: 30px; padding: 10px; background-color: #f9f9f9; border: 1px solid #eee; text-align: center;">
-        <p style="margin: 0;"><strong>Status plată:</strong> {{ $order->payment_status === 'paid' ? 'Plătit (Stripe)' : 'Neplătit' }}</p>
+    <div class="delivery-note">
+        Livrarea nu este inclusă în preț.
+    </div>
+
+    <div class="payment-status">
+        <strong>Status plată:</strong> {{ $order->payment_status === 'paid' ? 'Plătit (Stripe)' : 'Neplătit' }}
     </div>
 
     <div class="footer">
