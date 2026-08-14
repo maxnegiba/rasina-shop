@@ -21,6 +21,7 @@ final class ProductBulkActions
             self::publish(),
             self::makeDraft(),
             self::markSold(),
+            self::relistForSale(),
             self::setStock(),
             self::setPrice(),
             self::changeCategory(),
@@ -143,6 +144,63 @@ final class ProductBulkActions
                     ->title($records->count() . ' produse marcate ca vândute')
                     ->success()
                     ->send();
+            })
+            ->deselectRecordsAfterCompletion();
+    }
+
+    private static function relistForSale(): Tables\Actions\BulkAction
+    {
+        return Tables\Actions\BulkAction::make('relist_for_sale')
+            ->label('Pune din nou la vânzare')
+            ->icon('heroicon-o-arrow-path')
+            ->color('success')
+            ->requiresConfirmation()
+            ->modalHeading('Pune produsele din nou la vânzare')
+            ->modalDescription(
+                'Produsele vândute selectate vor primi stoc 1 și vor fi publicate. Comenzile și plățile anterioare rămân neschimbate în istoric.'
+            )
+            ->action(function (Collection $records): void {
+                $relisted = 0;
+                $skipped = [];
+
+                foreach ($records as $record) {
+                    /** @var Product $record */
+                    if (! $record->isSold()) {
+                        $skipped[] = self::productName($record) . ': este deja în stoc';
+                        continue;
+                    }
+
+                    try {
+                        $record->relistForSale();
+                        $relisted++;
+                    } catch (\LogicException|\InvalidArgumentException $exception) {
+                        $skipped[] = self::productName($record) . ': ' . $exception->getMessage();
+                    }
+                }
+
+                if ($relisted > 0) {
+                    Notification::make()
+                        ->title("{$relisted} produse sunt din nou la vânzare")
+                        ->body('Stoc: 1 · Status: Publicat')
+                        ->success()
+                        ->send();
+                }
+
+                if ($skipped !== []) {
+                    $preview = array_slice($skipped, 0, 8);
+                    $body = implode("\n", $preview);
+
+                    if (count($skipped) > 8) {
+                        $body .= "\n... și încă " . (count($skipped) - 8) . ' produse.';
+                    }
+
+                    Notification::make()
+                        ->title(count($skipped) . ' produse nu au fost repuse la vânzare')
+                        ->body($body)
+                        ->warning()
+                        ->persistent()
+                        ->send();
+                }
             })
             ->deselectRecordsAfterCompletion();
     }

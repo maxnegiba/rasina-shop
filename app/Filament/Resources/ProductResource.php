@@ -8,6 +8,7 @@ use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -190,6 +191,12 @@ class ProductResource extends Resource
                 ->badge(),
             TextColumn::make('category.name')->label('Categorie')->sortable(false),
             TextColumn::make('price')->label('Preț')->money('RON')->sortable()->placeholder('La cerere'),
+            TextColumn::make('stock')
+                ->label('Disponibilitate')
+                ->badge()
+                ->formatStateUsing(fn ($state): string => (int) $state > 0 ? 'În stoc: '.(int) $state : 'Vândut')
+                ->color(fn ($state): string => (int) $state > 0 ? 'success' : 'danger')
+                ->sortable(),
             IconColumn::make('is_custom')->label('Unicat')->boolean(),
             TextColumn::make('status')->label('Status')->badge()
                 ->color(fn (string $state): string => match ($state) {
@@ -217,6 +224,33 @@ class ProductResource extends Resource
                 ->trueLabel('Doar piese unicat')
                 ->falseLabel('Doar produse standard'),
         ])->actions([
+            Tables\Actions\Action::make('relist_for_sale')
+                ->label('Pune din nou la vânzare')
+                ->icon('heroicon-o-arrow-path')
+                ->color('success')
+                ->visible(fn (Product $record): bool => $record->isSold())
+                ->requiresConfirmation()
+                ->modalHeading('Pune produsul din nou la vânzare')
+                ->modalDescription(
+                    'Produsul va fi publicat din nou cu stoc 1. Comenzile și plățile anterioare rămân neschimbate în istoric.'
+                )
+                ->action(function (Product $record): void {
+                    try {
+                        $record->relistForSale();
+
+                        Notification::make()
+                            ->title('Produsul este din nou la vânzare')
+                            ->body('Stoc: 1 · Status: Publicat')
+                            ->success()
+                            ->send();
+                    } catch (\LogicException|\InvalidArgumentException $exception) {
+                        Notification::make()
+                            ->title('Produsul nu poate fi repus la vânzare')
+                            ->body($exception->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                }),
             Tables\Actions\EditAction::make(),
         ])->bulkActions([
             Tables\Actions\BulkActionGroup::make(
