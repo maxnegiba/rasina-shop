@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\InjectGoogleTagManager;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             \Statikbe\CookieConsent\CookieConsentMiddleware::class,
+            InjectGoogleTagManager::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [
