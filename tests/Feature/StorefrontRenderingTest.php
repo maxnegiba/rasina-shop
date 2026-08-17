@@ -44,7 +44,8 @@ class StorefrontRenderingTest extends TestCase
         ])->render();
 
         $this->assertStringContainsString('Plătește 123,45 RON', $html);
-        $this->assertStringContainsString('const paymentButtonLabel = ', $html);
+        $this->assertStringContainsString('const onlinePaymentButtonLabel = ', $html);
+        $this->assertStringContainsString('const cashOnDeliveryButtonLabel = ', $html);
         $this->assertStringNotContainsString('@json(', $html);
     }
 }
