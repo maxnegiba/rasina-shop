@@ -29,8 +29,38 @@ class InjectGoogleTagManager
         }
 
         $escapedContainerId = htmlspecialchars($containerId, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $cookieKey = $this->encodeForJavaScript((string) config('cookie-consent.cookie_key', '__cookie_consent'));
+        $analyticsValue = $this->encodeForJavaScript((string) config('cookie-consent.cookie_value_analytics', '2'));
+        $marketingValue = $this->encodeForJavaScript((string) config('cookie-consent.cookie_value_marketing', '3'));
+        $bothValue = $this->encodeForJavaScript((string) config('cookie-consent.cookie_value_both', 'true'));
 
         $headSnippet = <<<HTML
+<!-- Google Consent Mode defaults -->
+<script>
+window.dataLayer = window.dataLayer || [];
+window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
+(function(){
+    var cookieKey = {$cookieKey};
+    var values = {
+        analytics: {$analyticsValue},
+        marketing: {$marketingValue},
+        both: {$bothValue}
+    };
+    var prefix = encodeURIComponent(cookieKey) + '=';
+    var cookieEntry = document.cookie.split(';').map(function(item){ return item.trim(); }).find(function(item){ return item.indexOf(prefix) === 0; });
+    var current = cookieEntry ? decodeURIComponent(cookieEntry.slice(prefix.length)) : null;
+    var analyticsGranted = current === values.analytics || current === values.both;
+    var marketingGranted = current === values.marketing || current === values.both;
+
+    window.gtag('consent', 'default', {
+        analytics_storage: analyticsGranted ? 'granted' : 'denied',
+        ad_storage: marketingGranted ? 'granted' : 'denied',
+        ad_user_data: marketingGranted ? 'granted' : 'denied',
+        ad_personalization: marketingGranted ? 'granted' : 'denied'
+    });
+})();
+</script>
+<!-- End Google Consent Mode defaults -->
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -73,5 +103,13 @@ HTML;
 
         return $response->isSuccessful()
             && ($contentType === '' || str_contains(strtolower($contentType), 'text/html'));
+    }
+
+    private function encodeForJavaScript(string $value): string
+    {
+        return (string) json_encode(
+            $value,
+            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES,
+        );
     }
 }
