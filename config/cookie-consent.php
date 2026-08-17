@@ -17,5 +17,5 @@ return [
     'skip_on_error_responses' => true,
     'cookie_secure' => env('COOKIE_CONSENT_SECURE', env('APP_ENV') === 'production'),
 
-    'policy_url_ro' => env('COOKIE_POLICY_URL_RO', '/pagina/politica-de-confidentialitate'),
+    'policy_url_ro' => env('COOKIE_POLICY_URL_RO', '/info/politica-de-confidentialitate'),
 ];
