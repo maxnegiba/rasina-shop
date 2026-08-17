@@ -15,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(SecurityHeaders::class);
 
+        $middleware->web(append: [
+            \Statikbe\CookieConsent\CookieConsentMiddleware::class,
+        ]);
+
         $middleware->validateCsrfTokens(except: [
             'webhook/stripe',
         ]);
