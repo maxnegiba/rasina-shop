@@ -82,5 +82,4 @@
 </div>
 
 <div class="lcc-backdrop js-lcc-backdrop" style="display: none"></div>
-<link rel="stylesheet" href="{{ asset('vendor/cookie-consent/css/cookie-consent.css') }}">
 <script src="{{ asset('vendor/cookie-consent/js/cookie-consent.js') }}" defer></script>
