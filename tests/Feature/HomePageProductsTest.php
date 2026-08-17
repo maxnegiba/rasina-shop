@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Statikbe\CookieConsent\CookieConsentMiddleware;
 use Tests\TestCase;
 
 class HomePageProductsTest extends TestCase
@@ -13,6 +14,8 @@ class HomePageProductsTest extends TestCase
 
     public function test_homepage_lists_available_products_by_creation_date(): void
     {
+        $this->withoutMiddleware(CookieConsentMiddleware::class);
+
         $category = Category::create([
             'name' => ['ro' => 'Cruci'],
             'slug' => 'cruci-test',
