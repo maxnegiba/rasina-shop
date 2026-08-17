@@ -39,6 +39,7 @@ class StorefrontRenderingTest extends TestCase
             'stripeKey' => 'pk_test_example',
             'orderToken' => '00000000-0000-4000-8000-000000000000',
             'totalAmount' => 123.45,
+            'totalAmountCents' => 12345,
             'order' => $order,
         ])->render();
 
