@@ -22,7 +22,7 @@ class CookieConsentFoundationTest extends TestCase
             ->assertSee('Necesare')
             ->assertSee('Analiză')
             ->assertSee('Marketing')
-            ->assertSee('vendor/cookie-consent/js/cookie-consent.js', escape: false);
+            ->assertSee('js/privacy-preferences.js', escape: false);
     }
 
     public function test_tracking_stays_disabled_in_the_example_environment(): void
