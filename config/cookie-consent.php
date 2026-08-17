@@ -13,7 +13,13 @@ return [
 
     // Reserved for the GTM stage. No tracking tags are installed yet.
     'gtm_event' => 'cookie_refresh',
-    'ignored_paths' => [],
+
+    // Consent belongs to the public storefront, not Filament/Livewire internals.
+    'ignored_paths' => [
+        '/admin*',
+        '/admin-security*',
+        '/livewire*',
+    ],
     'skip_on_error_responses' => true,
     'cookie_secure' => env('COOKIE_CONSENT_SECURE', env('APP_ENV') === 'production'),
 
