@@ -49,9 +49,6 @@ jobs:
       - name: Prepare test application
         run: php artisan key:generate
 
-      - name: Run Laravel tests
-        run: php artisan test
-
       - name: Set up Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
@@ -63,3 +60,6 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+
+      - name: Run Laravel tests
+        run: php artisan test
