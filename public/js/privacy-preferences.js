@@ -44,6 +44,18 @@
             return entry ? decodeURIComponent(entry.slice(prefix.length)) : null;
         };
 
+        const consentStateFromValue = (value) => {
+            const analyticsGranted = value === values.analytics || value === values.both;
+            const marketingGranted = value === values.marketing || value === values.both;
+
+            return {
+                analytics_storage: analyticsGranted ? 'granted' : 'denied',
+                ad_storage: marketingGranted ? 'granted' : 'denied',
+                ad_user_data: marketingGranted ? 'granted' : 'denied',
+                ad_personalization: marketingGranted ? 'granted' : 'denied',
+            };
+        };
+
         const hide = (element) => {
             element.style.display = 'none';
         };
@@ -103,6 +115,10 @@
             }
 
             document.cookie = parts.join('; ');
+
+            if (typeof window.gtag === 'function') {
+                window.gtag('consent', 'update', consentStateFromValue(value));
+            }
 
             if (typeof consentChangeCallback === 'function') {
                 consentChangeCallback(value);
