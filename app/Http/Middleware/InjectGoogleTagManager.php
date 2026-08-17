@@ -4,10 +4,15 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Spatie\GoogleTagManager\GoogleTagManager;
 use Symfony\Component\HttpFoundation\Response;
 
 class InjectGoogleTagManager
 {
+    public function __construct(
+        private readonly GoogleTagManager $googleTagManager,
+    ) {}
+
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
@@ -33,6 +38,7 @@ class InjectGoogleTagManager
         $analyticsValue = $this->encodeForJavaScript((string) config('cookie-consent.cookie_value_analytics', '2'));
         $marketingValue = $this->encodeForJavaScript((string) config('cookie-consent.cookie_value_marketing', '3'));
         $bothValue = $this->encodeForJavaScript((string) config('cookie-consent.cookie_value_both', 'true'));
+        $serverDataLayer = $this->renderServerDataLayer();
 
         $headSnippet = <<<HTML
 <!-- Google Consent Mode defaults -->
@@ -59,6 +65,7 @@ window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
         ad_personalization: marketingGranted ? 'granted' : 'denied'
     });
 })();
+{$serverDataLayer}
 </script>
 <!-- End Google Consent Mode defaults -->
 <!-- Google Tag Manager -->
@@ -103,6 +110,39 @@ HTML;
 
         return $response->isSuccessful()
             && ($contentType === '' || str_contains(strtolower($contentType), 'text/html'));
+    }
+
+    private function renderServerDataLayer(): string
+    {
+        $lines = [];
+        $baseData = $this->googleTagManager->getDataLayer()->toArray();
+
+        if ($baseData !== [] && ($json = $this->encodeDataLayerPayload($baseData)) !== null) {
+            $lines[] = "window.dataLayer.push({$json});";
+        }
+
+        foreach ($this->googleTagManager->getPushData() as $pushData) {
+            $payload = $pushData->toArray();
+
+            if ($payload !== [] && ($json = $this->encodeDataLayerPayload($payload)) !== null) {
+                $lines[] = "window.dataLayer.push({$json});";
+            }
+        }
+
+        return implode("\n", $lines);
+    }
+
+    private function encodeDataLayerPayload(array $payload): ?string
+    {
+        try {
+            return json_encode(
+                $payload,
+                JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR,
+            );
+        } catch (\JsonException) {
+            // Analytics must never be able to break a storefront response.
+            return null;
+        }
     }
 
     private function encodeForJavaScript(string $value): string
