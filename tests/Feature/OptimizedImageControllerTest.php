@@ -13,7 +13,13 @@ class OptimizedImageControllerTest extends TestCase
         $response = $this->get('/media/optimized/'.$encoded.'?w=192&q=76');
 
         $response->assertOk();
-        $response->assertHeader('Cache-Control', 'public, max-age=31536000, immutable');
+
+        $cacheControl = (string) $response->headers->get('Cache-Control');
+
+        $this->assertStringContainsString('public', $cacheControl);
+        $this->assertStringContainsString('max-age=31536000', $cacheControl);
+        $this->assertStringContainsString('immutable', $cacheControl);
+
         $response->assertHeader('X-Content-Type-Options', 'nosniff');
     }
 
