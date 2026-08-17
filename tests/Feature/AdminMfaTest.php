@@ -16,7 +16,7 @@ class AdminMfaTest extends TestCase
 
     public function test_admin_without_recent_mfa_is_redirected_to_challenge(): void
     {
-        Route::middleware(EnsureAdminMfa::class)
+        Route::middleware(['web', EnsureAdminMfa::class])
             ->get('/_admin-mfa-test', fn () => response('ok'));
 
         $admin = User::factory()->create(['is_admin' => true]);
@@ -28,7 +28,7 @@ class AdminMfaTest extends TestCase
 
     public function test_admin_with_recent_mfa_can_continue(): void
     {
-        Route::middleware(EnsureAdminMfa::class)
+        Route::middleware(['web', EnsureAdminMfa::class])
             ->get('/_admin-mfa-verified-test', fn () => response('ok'));
 
         $admin = User::factory()->create(['is_admin' => true]);
@@ -46,7 +46,7 @@ class AdminMfaTest extends TestCase
 
     public function test_active_admin_can_continue_past_the_old_four_hour_cutoff(): void
     {
-        Route::middleware(EnsureAdminMfa::class)
+        Route::middleware(['web', EnsureAdminMfa::class])
             ->get('/_admin-mfa-active-test', fn () => response('ok'));
 
         config([
@@ -69,7 +69,7 @@ class AdminMfaTest extends TestCase
 
     public function test_idle_admin_mfa_session_requires_reverification_on_full_page_navigation(): void
     {
-        Route::middleware(EnsureAdminMfa::class)
+        Route::middleware(['web', EnsureAdminMfa::class])
             ->get('/_admin-mfa-idle-test', fn () => response('ok'));
 
         config([
@@ -91,7 +91,7 @@ class AdminMfaTest extends TestCase
 
     public function test_absolute_mfa_lifetime_still_forces_reverification_on_full_page_navigation(): void
     {
-        Route::middleware(EnsureAdminMfa::class)
+        Route::middleware(['web', EnsureAdminMfa::class])
             ->get('/_admin-mfa-absolute-test', fn () => response('ok'));
 
         config([
@@ -113,7 +113,7 @@ class AdminMfaTest extends TestCase
 
     public function test_verified_admin_livewire_action_is_not_interrupted_by_mfa_timer_expiry(): void
     {
-        Route::middleware(EnsureAdminMfa::class)
+        Route::middleware(['web', EnsureAdminMfa::class])
             ->post('/livewire/_admin-mfa-relaxed-test', fn () => response('bulk-action-ok'));
 
         config([
@@ -137,7 +137,7 @@ class AdminMfaTest extends TestCase
 
     public function test_livewire_request_without_mfa_for_current_admin_is_still_rejected(): void
     {
-        Route::middleware(EnsureAdminMfa::class)
+        Route::middleware(['web', EnsureAdminMfa::class])
             ->post('/livewire/_admin-mfa-unverified-test', fn () => response('must-not-run'));
 
         $admin = User::factory()->create(['is_admin' => true]);
@@ -154,7 +154,7 @@ class AdminMfaTest extends TestCase
 
     public function test_mfa_session_is_bound_to_the_authenticated_admin(): void
     {
-        Route::middleware(EnsureAdminMfa::class)
+        Route::middleware(['web', EnsureAdminMfa::class])
             ->get('/_admin-mfa-bound-test', fn () => response('ok'));
 
         $admin = User::factory()->create(['is_admin' => true]);
