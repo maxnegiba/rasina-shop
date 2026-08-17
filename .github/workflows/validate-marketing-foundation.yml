@@ -15,7 +15,7 @@ on:
       - resources/css/cookie-consent.css
       - resources/js/app.js
       - public/vendor/cookie-consent/**
-      - tests/Feature/CookieConsentFoundationTest.php
+      - tests/Feature/**
       - .env.example
 
 permissions:
