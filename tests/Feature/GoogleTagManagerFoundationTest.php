@@ -38,6 +38,22 @@ class GoogleTagManagerFoundationTest extends TestCase
         $csp = (string) $response->headers->get('Content-Security-Policy');
 
         $this->assertStringContainsString('https://www.googletagmanager.com', $csp);
+        $this->assertStringContainsString('https://tagmanager.google.com', $csp);
+        $this->assertStringContainsString('https://*.google-analytics.com', $csp);
+        $this->assertStringContainsString('https://*.analytics.google.com', $csp);
+    }
+
+    public function test_google_marketing_csp_sources_are_absent_when_tracking_is_disabled(): void
+    {
+        config()->set('marketing.tracking_enabled', false);
+        config()->set('marketing.gtm.container_id', 'GTM-TEST123');
+
+        $response = $this->get('/');
+        $csp = (string) $response->headers->get('Content-Security-Policy');
+
+        $this->assertStringNotContainsString('https://tagmanager.google.com', $csp);
+        $this->assertStringNotContainsString('https://*.google-analytics.com', $csp);
+        $this->assertStringNotContainsString('https://*.analytics.google.com', $csp);
     }
 
     public function test_invalid_gtm_container_id_is_never_injected(): void
