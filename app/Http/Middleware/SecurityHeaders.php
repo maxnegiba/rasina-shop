@@ -25,6 +25,12 @@ class SecurityHeaders
                 'https://m.stripe.network',
             ];
 
+            $styleSources = [
+                "'self'",
+                "'unsafe-inline'",
+                'https://fonts.googleapis.com',
+            ];
+
             $connectSources = [
                 "'self'",
                 'https://api.stripe.com',
@@ -40,8 +46,18 @@ class SecurityHeaders
             ];
 
             if (config('marketing.tracking_enabled', false)) {
+                // Keep the marketing CSP additions scoped behind the emergency
+                // tracking switch. These sources cover GTM/Tag Assistant and
+                // GA4 collection without opening unrelated advertising domains.
                 $scriptSources[] = 'https://www.googletagmanager.com';
+
+                $styleSources[] = 'https://www.googletagmanager.com';
+                $styleSources[] = 'https://tagmanager.google.com';
+
                 $connectSources[] = 'https://www.googletagmanager.com';
+                $connectSources[] = 'https://*.google-analytics.com';
+                $connectSources[] = 'https://*.analytics.google.com';
+
                 $frameSources[] = 'https://www.googletagmanager.com';
             }
 
@@ -56,7 +72,7 @@ class SecurityHeaders
                 "frame-ancestors 'self'",
                 "form-action 'self'",
                 'script-src '.implode(' ', $scriptSources),
-                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+                'style-src '.implode(' ', $styleSources),
                 "font-src 'self' data: https://fonts.gstatic.com",
                 "img-src 'self' data: blob: https: https://*.stripe.com",
                 'connect-src '.implode(' ', $connectSources),
