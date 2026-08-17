@@ -82,4 +82,4 @@
 </div>
 
 <div class="lcc-backdrop js-lcc-backdrop" style="display: none"></div>
-<script src="{{ asset('vendor/cookie-consent/js/cookie-consent.js') }}" defer></script>
+<script src="{{ asset('js/privacy-preferences.js') }}" defer></script>
