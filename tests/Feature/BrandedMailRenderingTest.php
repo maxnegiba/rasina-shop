@@ -25,7 +25,7 @@ class BrandedMailRenderingTest extends TestCase
             'discount_amount' => 0,
             'total_amount' => 125,
             'payment_status' => 'paid',
-            'shipping_status' => 'pending',
+            'shipping_status' => 'processing',
             'customer_details' => [
                 'name' => 'Ana Popescu',
                 'email' => 'ana@example.com',
