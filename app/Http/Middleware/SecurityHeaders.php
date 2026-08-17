@@ -25,6 +25,26 @@ class SecurityHeaders
                 'https://m.stripe.network',
             ];
 
+            $connectSources = [
+                "'self'",
+                'https://api.stripe.com',
+                'https://*.stripe.com',
+                'https://m.stripe.network',
+            ];
+
+            $frameSources = [
+                "'self'",
+                'https://js.stripe.com',
+                'https://hooks.stripe.com',
+                'https://*.stripe.com',
+            ];
+
+            if (config('marketing.tracking_enabled', false)) {
+                $scriptSources[] = 'https://www.googletagmanager.com';
+                $connectSources[] = 'https://www.googletagmanager.com';
+                $frameSources[] = 'https://www.googletagmanager.com';
+            }
+
             if ($request->is('admin*') || $request->is('admin-security*')) {
                 $scriptSources[] = "'unsafe-eval'";
             }
@@ -39,8 +59,8 @@ class SecurityHeaders
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                 "font-src 'self' data: https://fonts.gstatic.com",
                 "img-src 'self' data: blob: https: https://*.stripe.com",
-                "connect-src 'self' https://api.stripe.com https://*.stripe.com https://m.stripe.network",
-                "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://*.stripe.com",
+                'connect-src '.implode(' ', $connectSources),
+                'frame-src '.implode(' ', $frameSources),
                 "worker-src 'self' blob:",
                 "manifest-src 'self'",
                 'upgrade-insecure-requests',
