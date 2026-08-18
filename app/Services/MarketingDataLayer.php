@@ -41,12 +41,42 @@ class MarketingDataLayer
             return;
         }
 
+        $this->push('view_product', $this->productEcommercePayload($product, 1));
+    }
+
+    public function addToCartEvent(Product $product, int $quantity): ?array
+    {
+        if (! $this->isEnabled()) {
+            return null;
+        }
+
+        return array_merge(
+            ['event' => 'add_to_cart'],
+            $this->productEcommercePayload($product, max(1, $quantity)),
+        );
+    }
+
+    public function flashAddToCart(Product $product, int $quantity): void
+    {
+        $event = $this->addToCartEvent($product, $quantity);
+
+        if ($event === null) {
+            return;
+        }
+
+        $this->googleTagManager->flashPush($event);
+    }
+
+    private function productEcommercePayload(Product $product, int $quantity): array
+    {
+        $quantity = max(1, $quantity);
+
         $item = [
             'item_id' => filled($product->product_code)
                 ? (string) $product->product_code
                 : (string) $product->getKey(),
             'item_name' => (string) $product->name,
-            'quantity' => 1,
+            'quantity' => $quantity,
         ];
 
         if ($product->relationLoaded('category') && $product->category) {
@@ -64,13 +94,11 @@ class MarketingDataLayer
 
         if ($product->price !== null && (float) $product->price > 0) {
             $price = round((float) $product->price, 2);
-            $ecommerce['value'] = $price;
+            $ecommerce['value'] = round($price * $quantity, 2);
             $ecommerce['items'][0]['price'] = $price;
         }
 
-        $this->push('view_product', [
-            'ecommerce' => $ecommerce,
-        ]);
+        return ['ecommerce' => $ecommerce];
     }
 
     private function isEnabled(): bool
