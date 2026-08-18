@@ -25,6 +25,23 @@ const pushCustomOrderStarted = (source = 'general', productId = null) => {
     });
 };
 
+const isWhatsAppUrl = (href) => {
+    if (!href) {
+        return false;
+    }
+
+    if (href.startsWith('whatsapp://')) {
+        return true;
+    }
+
+    try {
+        const url = new URL(href, window.location.href);
+        return ['wa.me', 'www.wa.me', 'api.whatsapp.com', 'web.whatsapp.com'].includes(url.hostname);
+    } catch {
+        return false;
+    }
+};
+
 // Modal-based entry point used by product/custom-order CTAs.
 window.addEventListener('open-custom-modal', (event) => {
     const productId = event?.detail?.productId;
@@ -46,9 +63,7 @@ window.addEventListener('custom-order-sent', (event) => {
     });
 });
 
-// Contact-page entry point currently used by the "Spre formular unicat" CTA.
-// Run in capture phase so other storefront/navigation handlers cannot consume
-// the click before marketing intent is recorded.
+// Capture outbound intent before navigation or another click handler can consume it.
 document.addEventListener('click', (event) => {
     const target = event.target instanceof Element ? event.target.closest('a, button') : null;
 
@@ -68,6 +83,15 @@ document.addEventListener('click', (event) => {
 
         if (hash === '#cerere-personalizata') {
             pushCustomOrderStarted('contact_form');
+        }
+
+        if (isWhatsAppUrl(rawHref || target.href)) {
+            pushMarketingEvent({
+                event: 'whatsapp_click',
+                contact: {
+                    source: window.location.pathname,
+                },
+            });
         }
     }
 }, true);
