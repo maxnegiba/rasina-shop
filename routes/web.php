@@ -70,7 +70,7 @@ Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
 });
 
 // Safe browser validation endpoints for the marketing staging environment only.
-// They never create orders, reserve stock, or contact Stripe.
+// They never create orders, custom requests, contact messages, reserve stock, or contact Stripe.
 if (app()->environment('staging')) {
     Route::get('/_marketing/begin-checkout-preview', function (Request $request) {
         if ($request->boolean('reset')) {
@@ -106,6 +106,42 @@ if (app()->environment('staging')) {
             ['Content-Type' => 'text/html; charset=UTF-8'],
         );
     })->name('marketing.purchase-preview');
+
+    Route::get('/_marketing/custom-order-sent-preview', function (MarketingDataLayer $dataLayer) {
+        $dataLayer->push('custom_order_sent', [
+            'custom_order' => [
+                'source' => 'staging_preview',
+            ],
+        ]);
+
+        return response(
+            '<!doctype html><html><head><meta charset="utf-8"><title>MTD ART custom_order_sent preview</title></head><body><p>Custom-order sent preview. No request was created.</p></body></html>',
+            200,
+            ['Content-Type' => 'text/html; charset=UTF-8'],
+        );
+    })->name('marketing.custom-order-sent-preview');
+
+    Route::get('/_marketing/contact-form-sent-preview', function (MarketingDataLayer $dataLayer) {
+        $dataLayer->push('contact_form_sent', [
+            'contact' => [
+                'source' => 'staging_preview',
+            ],
+        ]);
+
+        return response(
+            '<!doctype html><html><head><meta charset="utf-8"><title>MTD ART contact_form_sent preview</title></head><body><p>Contact-form sent preview. No message was sent.</p></body></html>',
+            200,
+            ['Content-Type' => 'text/html; charset=UTF-8'],
+        );
+    })->name('marketing.contact-form-sent-preview');
+
+    Route::get('/_marketing/whatsapp-preview', function () {
+        return response(
+            '<!doctype html><html><head><meta charset="utf-8"><title>MTD ART WhatsApp preview</title></head><body><a id="marketing-whatsapp-preview" href="https://wa.me/40000000000" target="_blank" rel="noopener noreferrer">Test WhatsApp click</a></body></html>',
+            200,
+            ['Content-Type' => 'text/html; charset=UTF-8'],
+        );
+    })->name('marketing.whatsapp-preview');
 }
 
 Route::post('/webhook/stripe', [\App\Http\Controllers\WebhookController::class, 'handleStripeWebhook'])->name('webhook.stripe');
