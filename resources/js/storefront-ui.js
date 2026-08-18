@@ -18,6 +18,19 @@
 
     const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 
+    function pushMarketingEvent(eventPayload) {
+        if (!eventPayload || typeof eventPayload !== 'object' || Array.isArray(eventPayload)) {
+            return;
+        }
+
+        if (typeof eventPayload.event !== 'string' || eventPayload.event.trim() === '') {
+            return;
+        }
+
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push(eventPayload);
+    }
+
     function setPageLocked(locked) {
         document.documentElement.classList.toggle('overflow-hidden', locked);
         document.body.style.overflow = locked ? 'hidden' : '';
@@ -198,6 +211,7 @@
             }
 
             updateCartUI(data.cart_count, data.html);
+            pushMarketingEvent(data.marketing_event);
             showToast(data.message || 'Produsul a fost adăugat în coș.');
 
             if (data.redirect_url) {
