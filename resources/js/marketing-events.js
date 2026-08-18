@@ -32,7 +32,8 @@ window.addEventListener('open-custom-modal', (event) => {
 });
 
 // Contact-page entry point currently used by the "Spre formular unicat" CTA.
-// The click is the first explicit user action that enters the custom-order flow.
+// Run in capture phase so other storefront/navigation handlers cannot consume
+// the click before marketing intent is recorded.
 document.addEventListener('click', (event) => {
     const target = event.target instanceof Element ? event.target.closest('a, button') : null;
 
@@ -40,9 +41,18 @@ document.addEventListener('click', (event) => {
         return;
     }
 
-    const href = target instanceof HTMLAnchorElement ? target.getAttribute('href') || '' : '';
+    if (target instanceof HTMLAnchorElement) {
+        const rawHref = target.getAttribute('href') || '';
+        let hash = '';
 
-    if (href.includes('#cerere-personalizata')) {
-        pushCustomOrderStarted('contact_form');
+        try {
+            hash = new URL(target.href, window.location.href).hash;
+        } catch {
+            hash = rawHref.includes('#') ? `#${rawHref.split('#').pop()}` : '';
+        }
+
+        if (hash === '#cerere-personalizata') {
+            pushCustomOrderStarted('contact_form');
+        }
     }
-});
+}, true);
