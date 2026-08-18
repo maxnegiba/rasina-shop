@@ -67,6 +67,87 @@ class MarketingDataLayer
         $this->googleTagManager->flashPush($event);
     }
 
+    public function beginCheckoutEvent(array $cart): ?array
+    {
+        if (! $this->isEnabled() || $cart === []) {
+            return null;
+        }
+
+        $productIds = collect($cart)
+            ->pluck('id')
+            ->filter(fn ($id): bool => is_numeric($id))
+            ->map(fn ($id): int => (int) $id)
+            ->unique()
+            ->values();
+
+        $products = Product::query()
+            ->with('category')
+            ->whereIn('id', $productIds)
+            ->get()
+            ->keyBy('id');
+
+        $items = [];
+        $value = 0.0;
+
+        foreach ($cart as $cartItem) {
+            if (! is_array($cartItem)) {
+                continue;
+            }
+
+            $productId = (int) ($cartItem['id'] ?? 0);
+            $quantity = max(1, (int) ($cartItem['quantity'] ?? 1));
+            $price = round((float) ($cartItem['price'] ?? 0), 2);
+            /** @var Product|null $product */
+            $product = $products->get($productId);
+
+            $item = [
+                'item_id' => $product && filled($product->product_code)
+                    ? (string) $product->product_code
+                    : (string) $productId,
+                'item_name' => $product
+                    ? (string) $product->name
+                    : (string) ($cartItem['name'] ?? 'Produs'),
+                'price' => $price,
+                'quantity' => $quantity,
+            ];
+
+            if ($product?->category) {
+                $item['item_category'] = (string) $product->category->name;
+            }
+
+            if ($product && filled($product->product_type)) {
+                $item['item_variant'] = (string) $product->product_type;
+            }
+
+            $items[] = $item;
+            $value += $price * $quantity;
+        }
+
+        if ($items === []) {
+            return null;
+        }
+
+        return [
+            'event' => 'begin_checkout',
+            'ecommerce' => [
+                'currency' => 'RON',
+                'value' => round($value, 2),
+                'items' => $items,
+            ],
+        ];
+    }
+
+    public function pushBeginCheckout(array $cart): void
+    {
+        $event = $this->beginCheckoutEvent($cart);
+
+        if ($event === null) {
+            return;
+        }
+
+        $this->googleTagManager->push($event);
+    }
+
     private function productEcommercePayload(Product $product, int $quantity): array
     {
         $quantity = max(1, $quantity);
