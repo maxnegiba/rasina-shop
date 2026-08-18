@@ -31,6 +31,21 @@ window.addEventListener('open-custom-modal', (event) => {
     pushCustomOrderStarted(productId ? 'product' : 'general', productId);
 });
 
+// Emitted by the Livewire component only after a custom request is persisted
+// and its notification emails have been queued successfully.
+window.addEventListener('custom-order-sent', (event) => {
+    const productId = event?.detail?.productId;
+    const source = event?.detail?.source || (productId ? 'product' : 'general');
+
+    pushMarketingEvent({
+        event: 'custom_order_sent',
+        custom_order: {
+            source,
+            ...(productId ? { product_id: String(productId) } : {}),
+        },
+    });
+});
+
 // Contact-page entry point currently used by the "Spre formular unicat" CTA.
 // Run in capture phase so other storefront/navigation handlers cannot consume
 // the click before marketing intent is recorded.
