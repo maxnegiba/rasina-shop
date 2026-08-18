@@ -10,6 +10,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\OptimizedImageController;
 use App\Http\Middleware\TrackBeginCheckout;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -63,6 +64,23 @@ Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
     Route::get('/succes', [CheckoutController::class, 'success'])->name('success');
     Route::post('/anulare', [CheckoutController::class, 'cancel'])->middleware('throttle:30,1')->name('cancel');
 });
+
+// Safe browser validation endpoint for the marketing staging environment only.
+// It never creates an order, reserves stock, or talks to Stripe; it only renders
+// a 200 HTML response so TrackBeginCheckout can emit the current session cart.
+if (app()->environment('staging')) {
+    Route::get('/_marketing/begin-checkout-preview', function (Request $request) {
+        if ($request->boolean('reset')) {
+            $request->session()->forget('marketing_begin_checkout_fingerprint');
+        }
+
+        return response(
+            '<!doctype html><html><head><meta charset="utf-8"><title>MTD ART begin_checkout preview</title></head><body><p>Marketing staging preview.</p></body></html>',
+            200,
+            ['Content-Type' => 'text/html; charset=UTF-8'],
+        );
+    })->middleware(TrackBeginCheckout::class)->name('marketing.begin-checkout-preview');
+}
 
 Route::post('/webhook/stripe', [\App\Http\Controllers\WebhookController::class, 'handleStripeWebhook'])->name('webhook.stripe');
 
