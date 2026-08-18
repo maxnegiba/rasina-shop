@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Http\Middleware\TrackBeginCheckout;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\MarketingDataLayer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
+use Mockery;
 use Tests\TestCase;
 
 class BeginCheckoutTrackingTest extends TestCase
@@ -68,15 +70,8 @@ class BeginCheckoutTrackingTest extends TestCase
     public function test_begin_checkout_is_not_emitted_twice_for_same_checkout_and_cart(): void
     {
         config()->set('marketing.tracking_enabled', true);
-        config()->set('marketing.gtm.container_id', 'GTM-TEST123');
 
         [$product] = $this->products();
-
-        Route::middleware(['web', TrackBeginCheckout::class])->get('/_begin-checkout-dedup', fn () => response(
-            '<html><head></head><body>checkout</body></html>',
-            200,
-            ['Content-Type' => 'text/html; charset=UTF-8'],
-        ));
 
         $cart = [
             $product->id => [
@@ -90,16 +85,44 @@ class BeginCheckoutTrackingTest extends TestCase
             ],
         ];
 
+        $event = [
+            'event' => 'begin_checkout',
+            'ecommerce' => [
+                'currency' => 'RON',
+                'value' => 125.50,
+                'items' => [[
+                    'item_id' => 'CHECKOUT-001',
+                    'item_name' => 'Produs checkout unu',
+                    'price' => 125.50,
+                    'quantity' => 1,
+                ]],
+            ],
+        ];
+
+        $dataLayer = Mockery::mock(MarketingDataLayer::class);
+        $dataLayer->shouldReceive('beginCheckoutEvent')
+            ->twice()
+            ->with($cart)
+            ->andReturn($event);
+        $dataLayer->shouldReceive('push')
+            ->once()
+            ->with('begin_checkout', ['ecommerce' => $event['ecommerce']]);
+        $this->app->instance(MarketingDataLayer::class, $dataLayer);
+
+        Route::middleware(['web', TrackBeginCheckout::class])->get('/_begin-checkout-dedup', fn () => response(
+            '<html><head></head><body>checkout</body></html>',
+            200,
+            ['Content-Type' => 'text/html; charset=UTF-8'],
+        ));
+
         $this->withSession([
             'cart' => $cart,
             'checkout_order_token' => '00000000-0000-4000-8000-000000000001',
-        ])->get('/_begin-checkout-dedup')
-            ->assertOk()
-            ->assertSee('"event":"begin_checkout"', escape: false);
+        ])->get('/_begin-checkout-dedup')->assertOk();
 
-        $this->get('/_begin-checkout-dedup')
-            ->assertOk()
-            ->assertDontSee('"event":"begin_checkout"', escape: false);
+        $this->get('/_begin-checkout-dedup')->assertOk();
+
+        $this->assertNotEmpty(session('marketing_begin_checkout_fingerprint'));
     }
 
     public function test_begin_checkout_is_not_emitted_for_non_success_response_or_disabled_tracking(): void
