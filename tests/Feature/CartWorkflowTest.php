@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -77,10 +78,16 @@ class CartWorkflowTest extends TestCase
             ->assertJsonPath('marketing_event', null);
     }
 
-    public function test_redirecting_add_flashes_event_for_the_next_page_instead_of_returning_it_twice(): void
+    public function test_redirecting_add_flashes_event_for_the_next_html_page_instead_of_returning_it_twice(): void
     {
         config()->set('marketing.tracking_enabled', true);
         config()->set('marketing.gtm.container_id', 'GTM-TEST123');
+
+        Route::middleware('web')->get('/_cart-marketing-flash-target', fn () => response(
+            '<html><head></head><body>ok</body></html>',
+            200,
+            ['Content-Type' => 'text/html; charset=UTF-8'],
+        ));
 
         $product = $this->product(stock: 1);
 
@@ -92,10 +99,15 @@ class CartWorkflowTest extends TestCase
             ->assertJsonPath('marketing_event', null)
             ->assertJsonPath('redirect_url', route('checkout.index'));
 
-        $content = $this->get(route('checkout.index'))->getContent();
+        $content = $this->get('/_cart-marketing-flash-target')
+            ->assertOk()
+            ->getContent();
 
         $this->assertIsString($content);
         $this->assertStringContainsString('window.dataLayer.push({"event":"add_to_cart"', $content);
+        $this->assertStringContainsString('"currency":"RON"', $content);
+        $this->assertStringContainsString('"value":100', $content);
+        $this->assertStringContainsString('"quantity":1', $content);
     }
 
     public function test_cart_quantity_can_be_updated_and_survives_navigation(): void
