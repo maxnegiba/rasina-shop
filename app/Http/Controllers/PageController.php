@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Post;
 use App\Models\Category;
 use App\Models\Page;
+use App\Services\MarketingDataLayer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -62,7 +63,7 @@ class PageController extends Controller
     /**
      * Trimite mesajul din formularul generic de contact
      */
-    public function submitContact(Request $request)
+    public function submitContact(Request $request, MarketingDataLayer $dataLayer)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -85,6 +86,12 @@ class PageController extends Controller
                 ->withInput()
                 ->with('error', 'Mesajul nu a putut fi trimis momentan. Încercați din nou sau folosiți datele de contact afișate.');
         }
+
+        $dataLayer->flashPush('contact_form_sent', [
+            'contact' => [
+                'source' => 'contact_page',
+            ],
+        ]);
 
         return redirect()->back()->with('success', 'Vă mulțumim pentru mesaj! Vă vom contacta în curând.');
     }
