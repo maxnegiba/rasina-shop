@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Order;
 use App\Models\Product;
 use Spatie\GoogleTagManager\GoogleTagManager;
 
@@ -146,6 +147,61 @@ class MarketingDataLayer
         }
 
         $this->googleTagManager->push($event);
+    }
+
+    public function purchaseEvent(Order $order): ?array
+    {
+        if (! $this->isEnabled()) {
+            return null;
+        }
+
+        $order->loadMissing('items.product.category');
+
+        if ($order->items->isEmpty()) {
+            return null;
+        }
+
+        $items = [];
+
+        foreach ($order->items as $orderItem) {
+            $product = $orderItem->product;
+            $quantity = max(1, (int) $orderItem->quantity);
+            $price = round((float) $orderItem->unit_price, 2);
+
+            $item = [
+                'item_id' => filled($orderItem->product_code)
+                    ? (string) $orderItem->product_code
+                    : ($product ? (string) $product->getKey() : (string) $orderItem->getKey()),
+                'item_name' => (string) ($orderItem->product_name ?: $product?->name ?: 'Produs'),
+                'price' => $price,
+                'quantity' => $quantity,
+            ];
+
+            if ($product?->category) {
+                $item['item_category'] = (string) $product->category->name;
+            }
+
+            if ($product && filled($product->product_type)) {
+                $item['item_variant'] = (string) $product->product_type;
+            }
+
+            $items[] = $item;
+        }
+
+        $shipping = round((float) ($order->shipping_amount ?? 0), 2);
+        $total = round((float) $order->total_amount, 2);
+        $value = round(max(0, $total - $shipping), 2);
+
+        return [
+            'event' => 'purchase',
+            'ecommerce' => [
+                'transaction_id' => (string) $order->order_number,
+                'currency' => 'RON',
+                'value' => $value,
+                'shipping' => $shipping,
+                'items' => $items,
+            ],
+        ];
     }
 
     private function productEcommercePayload(Product $product, int $quantity): array
