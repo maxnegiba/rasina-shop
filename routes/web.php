@@ -10,6 +10,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\OptimizedImageController;
 use App\Http\Middleware\TrackBeginCheckout;
+use App\Http\Middleware\TrackPurchase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -61,7 +62,9 @@ Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
         ->name('index');
     Route::post('/acceptare', [CheckoutController::class, 'acceptTerms'])->middleware('throttle:30,1')->name('accept-terms');
     Route::post('/ramburs', [CheckoutController::class, 'cashOnDelivery'])->middleware('throttle:20,1')->name('cash-on-delivery');
-    Route::get('/succes', [CheckoutController::class, 'success'])->name('success');
+    Route::get('/succes', [CheckoutController::class, 'success'])
+        ->middleware(TrackPurchase::class)
+        ->name('success');
     Route::post('/anulare', [CheckoutController::class, 'cancel'])->middleware('throttle:30,1')->name('cancel');
 });
 
