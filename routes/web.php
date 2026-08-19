@@ -135,13 +135,8 @@ if (app()->environment('staging')) {
         );
     })->name('marketing.contact-form-sent-preview');
 
-    Route::get('/_marketing/whatsapp-preview', function () {
-        return response(
-            '<!doctype html><html><head><meta charset="utf-8"><title>MTD ART WhatsApp preview</title></head><body><a id="marketing-whatsapp-preview" href="https://wa.me/40000000000" target="_blank" rel="noopener noreferrer">Test WhatsApp click</a></body></html>',
-            200,
-            ['Content-Type' => 'text/html; charset=UTF-8'],
-        );
-    })->name('marketing.whatsapp-preview');
+    Route::view('/_marketing/whatsapp-preview', 'marketing.whatsapp-preview')
+        ->name('marketing.whatsapp-preview');
 }
 
 Route::post('/webhook/stripe', [\App\Http\Controllers\WebhookController::class, 'handleStripeWebhook'])->name('webhook.stripe');
