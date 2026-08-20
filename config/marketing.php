@@ -11,5 +11,6 @@ return [
         'pixel_id' => env('META_PIXEL_ID'),
         'capi_access_token' => env('META_CAPI_ACCESS_TOKEN'),
         'graph_api_version' => env('META_GRAPH_API_VERSION', 'v23.0'),
+        'test_event_code' => env('META_CAPI_TEST_EVENT_CODE'),
     ],
 ];
