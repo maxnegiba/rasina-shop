@@ -72,6 +72,9 @@ Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
 // Safe browser validation endpoints for the marketing staging environment only.
 // They never create orders, custom requests, contact messages, reserve stock, or contact Stripe.
 if (app()->environment('staging')) {
+    Route::view('/_marketing/all-events-preview', 'marketing.all-events-preview')
+        ->name('marketing.all-events-preview');
+
     Route::get('/_marketing/begin-checkout-preview', function (Request $request) {
         if ($request->boolean('reset')) {
             $request->session()->forget('marketing_begin_checkout_fingerprint');
