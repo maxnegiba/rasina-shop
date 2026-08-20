@@ -3,11 +3,13 @@
 namespace Tests\Feature;
 
 use App\Http\Middleware\TrackPurchase;
+use App\Jobs\SendMetaPurchase;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\MarketingDataLayer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Mockery;
@@ -41,6 +43,7 @@ class PurchaseTrackingTest extends TestCase
 
         $this->assertIsString($content);
         $this->assertStringContainsString('window.dataLayer.push({"event":"purchase"', $content);
+        $this->assertStringContainsString('"event_id":"mtd-purchase-'.$order->order_number.'"', $content);
         $this->assertStringContainsString('"transaction_id":"'.$order->order_number.'"', $content);
         $this->assertStringContainsString('"currency":"RON"', $content);
         $this->assertStringContainsString('"value":90', $content);
@@ -60,6 +63,7 @@ class PurchaseTrackingTest extends TestCase
         [$order] = $this->cashOnDeliveryOrder();
         $event = [
             'event' => 'purchase',
+            'event_id' => 'mtd-purchase-'.$order->order_number,
             'ecommerce' => [
                 'transaction_id' => $order->order_number,
                 'currency' => 'RON',
@@ -75,7 +79,10 @@ class PurchaseTrackingTest extends TestCase
             ->andReturn($event);
         $dataLayer->shouldReceive('push')
             ->once()
-            ->with('purchase', ['ecommerce' => $event['ecommerce']]);
+            ->with('purchase', [
+                'event_id' => $event['event_id'],
+                'ecommerce' => $event['ecommerce'],
+            ]);
         $this->app->instance(MarketingDataLayer::class, $dataLayer);
 
         Route::middleware(['web', TrackPurchase::class])->get('/_purchase-dedup-test', fn () => response(
@@ -93,6 +100,35 @@ class PurchaseTrackingTest extends TestCase
             $order->order_number,
             session('marketing_purchase_transaction_ids', []),
         );
+    }
+
+    public function test_meta_capi_purchase_is_queued_only_with_marketing_consent(): void
+    {
+        config()->set('marketing.tracking_enabled', true);
+        Bus::fake();
+
+        [$order] = $this->cashOnDeliveryOrder();
+
+        Route::middleware(['web', TrackPurchase::class])->get('/_purchase-meta-consent-test', fn () => response(
+            '<html><head></head><body>purchase</body></html>',
+            200,
+            ['Content-Type' => 'text/html; charset=UTF-8'],
+        ));
+
+        $url = '/_purchase-meta-consent-test?order='.$order->public_token.'&method=cod';
+
+        $this->withCookie('__cookie_consent', 'false')->get($url)->assertOk();
+        Bus::assertNotDispatched(SendMetaPurchase::class);
+
+        $this->withSession(['marketing_purchase_transaction_ids' => []])
+            ->withCookie('__cookie_consent', 'true')
+            ->get($url)
+            ->assertOk();
+
+        Bus::assertDispatched(SendMetaPurchase::class, function (SendMetaPurchase $job) use ($order): bool {
+            return $job->orderId === $order->id
+                && $job->eventId === 'mtd-purchase-'.$order->order_number;
+        });
     }
 
     public function test_pending_stripe_or_invalid_success_page_does_not_push_purchase(): void
