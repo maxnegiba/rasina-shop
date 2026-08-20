@@ -12,6 +12,7 @@ use App\Http\Controllers\OptimizedImageController;
 use App\Http\Middleware\TrackBeginCheckout;
 use App\Http\Middleware\TrackPurchase;
 use App\Services\MarketingDataLayer;
+use App\Services\MetaConversionsApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -89,6 +90,7 @@ if (app()->environment('staging')) {
 
     Route::get('/_marketing/purchase-preview', function (MarketingDataLayer $dataLayer) {
         $dataLayer->push('purchase', [
+            'event_id' => 'mtd-preview-purchase-20260820',
             'ecommerce' => [
                 'transaction_id' => 'MTD-PREVIEW-20260818-01',
                 'currency' => 'RON',
@@ -109,6 +111,73 @@ if (app()->environment('staging')) {
             ['Content-Type' => 'text/html; charset=UTF-8'],
         );
     })->name('marketing.purchase-preview');
+
+    Route::get('/_marketing/meta-capi-purchase-preview', function (
+        Request $request,
+        MarketingDataLayer $dataLayer,
+        MetaConversionsApi $meta,
+    ) {
+        $eventId = 'mtd-capi-preview-'.now()->format('YmdHisv');
+        $marketingConsent = in_array((string) $request->cookie('__cookie_consent', 'false'), ['3', 'true'], true);
+        $serverSent = false;
+        $serverError = null;
+
+        $dataLayer->push('purchase', [
+            'event_id' => $eventId,
+            'ecommerce' => [
+                'transaction_id' => 'MTD-CAPI-PREVIEW-'.now()->format('YmdHis'),
+                'currency' => 'RON',
+                'value' => 90,
+                'shipping' => 0,
+                'items' => [[
+                    'item_id' => 'PREVIEW-001',
+                    'item_name' => 'MTD ART CAPI Preview',
+                    'price' => 90,
+                    'quantity' => 1,
+                ]],
+            ],
+        ]);
+
+        if ($marketingConsent) {
+            try {
+                $meta->sendPurchase([
+                    'event_name' => 'Purchase',
+                    'event_time' => now()->timestamp,
+                    'event_id' => $eventId,
+                    'action_source' => 'website',
+                    'event_source_url' => $request->fullUrl(),
+                    'user_data' => array_filter([
+                        'client_ip_address' => $request->ip(),
+                        'client_user_agent' => $request->userAgent(),
+                        'fbp' => $request->cookie('_fbp'),
+                        'fbc' => $request->cookie('_fbc'),
+                    ], fn ($value) => filled($value)),
+                    'custom_data' => [
+                        'currency' => 'RON',
+                        'value' => 90,
+                        'order_id' => 'MTD-CAPI-PREVIEW',
+                        'contents' => [[
+                            'id' => 'PREVIEW-001',
+                            'quantity' => 1,
+                            'item_price' => 90,
+                        ]],
+                        'content_type' => 'product',
+                    ],
+                ]);
+                $serverSent = true;
+            } catch (\Throwable $exception) {
+                report($exception);
+                $serverError = $exception->getMessage();
+            }
+        }
+
+        return view('marketing.meta-capi-purchase-preview', compact(
+            'eventId',
+            'marketingConsent',
+            'serverSent',
+            'serverError',
+        ));
+    })->name('marketing.meta-capi-purchase-preview');
 
     Route::get('/_marketing/custom-order-sent-preview', function (MarketingDataLayer $dataLayer) {
         $dataLayer->push('custom_order_sent', [
