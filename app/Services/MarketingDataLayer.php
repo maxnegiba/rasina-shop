@@ -191,9 +191,11 @@ class MarketingDataLayer
         $shipping = round((float) ($order->shipping_amount ?? 0), 2);
         $total = round((float) $order->total_amount, 2);
         $value = round(max(0, $total - $shipping), 2);
+        $eventId = $this->purchaseEventId($order);
 
         return [
             'event' => 'purchase',
+            'event_id' => $eventId,
             'ecommerce' => [
                 'transaction_id' => (string) $order->order_number,
                 'currency' => 'RON',
@@ -202,6 +204,11 @@ class MarketingDataLayer
                 'items' => $items,
             ],
         ];
+    }
+
+    public function purchaseEventId(Order $order): string
+    {
+        return 'mtd-purchase-'.(string) $order->order_number;
     }
 
     private function productEcommercePayload(Product $product, int $quantity): array
