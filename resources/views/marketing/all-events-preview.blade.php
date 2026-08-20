@@ -80,15 +80,18 @@
                 }],
             };
 
+            const previewTransactionId = `MTD-PREVIEW-${Date.now()}`;
+
             const events = [
                 { event: 'view_product', ecommerce },
                 { event: 'add_to_cart', ecommerce },
                 { event: 'begin_checkout', ecommerce },
                 {
                     event: 'purchase',
+                    event_id: `mtd-purchase-${previewTransactionId}`,
                     ecommerce: {
                         ...ecommerce,
-                        transaction_id: `MTD-PREVIEW-${Date.now()}`,
+                        transaction_id: previewTransactionId,
                         shipping: 0,
                     },
                 },
