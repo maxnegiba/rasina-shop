@@ -46,10 +46,12 @@ class SecurityHeaders
             ];
 
             if (config('marketing.tracking_enabled', false)) {
-                // Keep the marketing CSP additions scoped behind the emergency
-                // tracking switch. These sources cover GTM/Tag Assistant and
-                // GA4 collection without opening unrelated advertising domains.
+                // Keep marketing CSP additions scoped behind the emergency
+                // tracking switch. Consent still gates individual vendor tags
+                // in GTM; CSP only permits the endpoints when tracking is on.
                 $scriptSources[] = 'https://www.googletagmanager.com';
+                $scriptSources[] = 'https://connect.facebook.net';
+                $scriptSources[] = 'https://analytics.tiktok.com';
 
                 $styleSources[] = 'https://www.googletagmanager.com';
                 $styleSources[] = 'https://tagmanager.google.com';
@@ -57,6 +59,9 @@ class SecurityHeaders
                 $connectSources[] = 'https://www.googletagmanager.com';
                 $connectSources[] = 'https://*.google-analytics.com';
                 $connectSources[] = 'https://*.analytics.google.com';
+                $connectSources[] = 'https://connect.facebook.net';
+                $connectSources[] = 'https://www.facebook.com';
+                $connectSources[] = 'https://analytics.tiktok.com';
 
                 $frameSources[] = 'https://www.googletagmanager.com';
             }
