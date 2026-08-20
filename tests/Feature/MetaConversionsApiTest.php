@@ -22,6 +22,7 @@ class MetaConversionsApiTest extends TestCase
         config()->set('marketing.meta.pixel_id', '1397295259019403');
         config()->set('marketing.meta.capi_access_token', 'test-token');
         config()->set('marketing.meta.graph_api_version', 'v23.0');
+        config()->set('marketing.meta.test_event_code', null);
 
         Http::fake([
             'graph.facebook.com/*' => Http::response(['events_received' => 1], 200),
@@ -86,6 +87,7 @@ class MetaConversionsApiTest extends TestCase
 
             return $request->url() === 'https://graph.facebook.com/v23.0/1397295259019403/events'
                 && $request->hasHeader('Authorization', 'Bearer test-token')
+                && ! array_key_exists('test_event_code', $payload)
                 && data_get($event, 'event_name') === 'Purchase'
                 && data_get($event, 'event_id') === 'mtd-purchase-'.$order->order_number
                 && data_get($event, 'action_source') === 'website'
@@ -99,6 +101,35 @@ class MetaConversionsApiTest extends TestCase
                 && ! str_contains((string) $encoded, 'never-send@example.test')
                 && ! str_contains((string) $encoded, '0712345678');
         });
+    }
+
+    public function test_client_includes_test_event_code_when_configured(): void
+    {
+        config()->set('marketing.tracking_enabled', true);
+        config()->set('marketing.meta.pixel_id', '1397295259019403');
+        config()->set('marketing.meta.capi_access_token', 'test-token');
+        config()->set('marketing.meta.graph_api_version', 'v23.0');
+        config()->set('marketing.meta.test_event_code', 'TEST83946');
+
+        Http::fake([
+            'graph.facebook.com/*' => Http::response(['events_received' => 1], 200),
+        ]);
+
+        app(\App\Services\MetaConversionsApi::class)->sendPurchase([
+            'event_name' => 'Purchase',
+            'event_time' => 1787240000,
+            'event_id' => 'mtd-purchase-test',
+            'action_source' => 'website',
+            'user_data' => [],
+            'custom_data' => [
+                'currency' => 'RON',
+                'value' => 90,
+            ],
+        ]);
+
+        Http::assertSent(fn (Request $request): bool =>
+            data_get($request->data(), 'test_event_code') === 'TEST83946'
+        );
     }
 
     public function test_client_is_noop_when_tracking_or_credentials_are_disabled(): void
