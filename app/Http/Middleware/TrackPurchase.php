@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Jobs\SendMetaPurchase;
 use App\Models\Order;
 use App\Services\MarketingDataLayer;
 use Closure;
@@ -41,8 +42,9 @@ class TrackPurchase
         }
 
         $transactionId = (string) data_get($event, 'ecommerce.transaction_id', '');
+        $eventId = (string) ($event['event_id'] ?? '');
 
-        if ($transactionId === '') {
+        if ($transactionId === '' || $eventId === '') {
             return $response;
         }
 
@@ -55,8 +57,24 @@ class TrackPurchase
         }
 
         $this->dataLayer->push('purchase', [
+            'event_id' => $eventId,
             'ecommerce' => $event['ecommerce'],
         ]);
+
+        if ($this->hasMarketingConsent($request)) {
+            SendMetaPurchase::dispatch(
+                orderId: (int) $order->getKey(),
+                eventId: $eventId,
+                eventTime: now()->timestamp,
+                eventSourceUrl: $request->fullUrl(),
+                userData: [
+                    'client_ip_address' => $request->ip(),
+                    'client_user_agent' => $request->userAgent(),
+                    'fbp' => $request->cookie('_fbp'),
+                    'fbc' => $request->cookie('_fbc'),
+                ],
+            )->afterResponse();
+        }
 
         $request->session()->put(
             'marketing_purchase_transaction_ids',
@@ -91,5 +109,12 @@ class TrackPurchase
         return $order->payment_status === 'paid'
             ? $order
             : null;
+    }
+
+    private function hasMarketingConsent(Request $request): bool
+    {
+        $consent = (string) $request->cookie('__cookie_consent', 'false');
+
+        return in_array($consent, ['3', 'true'], true);
     }
 }
