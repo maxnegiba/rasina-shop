@@ -17,6 +17,13 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(SecurityHeaders::class);
 
+        // The cookie-consent package writes a plain browser-readable cookie so the
+        // frontend can update Consent Mode immediately. Laravel must not try to
+        // decrypt it, otherwise server-side marketing consent checks see it as null.
+        $middleware->encryptCookies(except: [
+            '__cookie_consent',
+        ]);
+
         $middleware->web(append: [
             \Statikbe\CookieConsent\CookieConsentMiddleware::class,
             GoogleTagManagerMiddleware::class,
