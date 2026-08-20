@@ -14,9 +14,17 @@ class MetaConversionsApi
             return;
         }
 
-        $response = $this->http()->post($this->endpoint(), [
+        $payload = [
             'data' => [$event],
-        ]);
+        ];
+
+        $testEventCode = trim((string) config('marketing.meta.test_event_code'));
+
+        if ($testEventCode !== '') {
+            $payload['test_event_code'] = $testEventCode;
+        }
+
+        $response = $this->http()->post($this->endpoint(), $payload);
 
         if ($response->failed()) {
             throw new RuntimeException(sprintf(
