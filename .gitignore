@@ -18,6 +18,7 @@
 /public/storage
 /public/vendor/livewire
 /storage/*.key
+/storage/app/analytics/*.json
 /storage/pail
 /vendor
 Homestead.json
