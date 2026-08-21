@@ -117,11 +117,11 @@ class PurchaseTrackingTest extends TestCase
 
         $url = '/_purchase-meta-consent-test?order='.$order->public_token.'&method=cod';
 
-        $this->withCookie('__cookie_consent', 'false')->get($url)->assertOk();
+        $this->withUnencryptedCookie('__cookie_consent', 'false')->get($url)->assertOk();
         Bus::assertNotDispatched(SendMetaPurchase::class);
 
         $this->withSession(['marketing_purchase_transaction_ids' => []])
-            ->withCookie('__cookie_consent', 'true')
+            ->withUnencryptedCookie('__cookie_consent', 'true')
             ->get($url)
             ->assertOk();
 
