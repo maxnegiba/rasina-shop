@@ -19,7 +19,9 @@ class MarketingAttributionTest extends TestCase
         $url = '/_attribution-capture-test?utm_source=facebook&utm_medium=paid_social&utm_campaign=cruci_august&utm_content=video_02';
 
         $withoutMarketing = $this->withCookie('__cookie_consent', '2')->get($url)->assertOk();
-        $this->assertNull($withoutMarketing->headers->getCookies()[0] ?? null);
+        $withoutMarketingCookie = collect($withoutMarketing->headers->getCookies())
+            ->first(fn ($cookie): bool => $cookie->getName() === MarketingAttribution::COOKIE_NAME);
+        $this->assertNull($withoutMarketingCookie);
 
         $withMarketing = $this->withCookie('__cookie_consent', 'true')->get($url)->assertOk();
         $cookie = collect($withMarketing->headers->getCookies())
