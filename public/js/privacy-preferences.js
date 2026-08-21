@@ -28,14 +28,15 @@
         };
 
         const cookieKey = alertModal.dataset.cookieKey || '__cookie_consent';
+        const attributionCookieKey = 'mtd_marketing_attribution';
         const expirationDays = Number(alertModal.dataset.cookieExpirationDays || 365);
         const gtmEvent = alertModal.dataset.gtmEvent || 'cookie_refresh';
         const cookieSecure = alertModal.dataset.cookieSecure === 'true';
         const sessionDomain = (alertModal.dataset.sessionDomain || '').trim();
         let consentChangeCallback = null;
 
-        const readCookie = () => {
-            const prefix = `${encodeURIComponent(cookieKey)}=`;
+        const readCookie = (key = cookieKey) => {
+            const prefix = `${encodeURIComponent(key)}=`;
             const entry = document.cookie
                 .split(';')
                 .map((item) => item.trim())
@@ -54,6 +55,85 @@
                 ad_user_data: marketingGranted ? 'granted' : 'denied',
                 ad_personalization: marketingGranted ? 'granted' : 'denied',
             };
+        };
+
+        const cookieParts = (key, value, expires) => {
+            const parts = [
+                `${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
+                `expires=${expires}`,
+                'path=/',
+                'SameSite=Lax',
+            ];
+
+            if (sessionDomain && sessionDomain !== 'null') {
+                parts.push(`domain=${sessionDomain}`);
+            }
+
+            if (cookieSecure) {
+                parts.push('Secure');
+            }
+
+            return parts;
+        };
+
+        const writeAttribution = (marketingGranted) => {
+            if (!marketingGranted) {
+                document.cookie = cookieParts(
+                    attributionCookieKey,
+                    '',
+                    'Thu, 01 Jan 1970 00:00:00 GMT',
+                ).join('; ');
+                return;
+            }
+
+            const query = new URLSearchParams(window.location.search);
+            const utm = {};
+
+            ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach((key) => {
+                const value = (query.get(key) || '').trim();
+                if (value) {
+                    utm[key] = value.slice(0, key === 'utm_source' || key === 'utm_medium' ? 120 : 180);
+                }
+            });
+
+            if (Object.keys(utm).length === 0) {
+                return;
+            }
+
+            const touch = {
+                ...utm,
+                landing_path: window.location.pathname.slice(0, 500),
+                referrer_host: (() => {
+                    try {
+                        return document.referrer ? new URL(document.referrer).hostname.slice(0, 255) : undefined;
+                    } catch {
+                        return undefined;
+                    }
+                })(),
+                captured_at: new Date().toISOString(),
+            };
+
+            Object.keys(touch).forEach((key) => touch[key] === undefined && delete touch[key]);
+
+            let existing = null;
+            try {
+                existing = JSON.parse(readCookie(attributionCookieKey) || 'null');
+            } catch {
+                existing = null;
+            }
+
+            const payload = {
+                version: 1,
+                first_touch: existing?.first_touch || touch,
+                last_touch: touch,
+            };
+
+            const expires = new Date(Date.now() + 90 * 86400000).toUTCString();
+            document.cookie = cookieParts(
+                attributionCookieKey,
+                JSON.stringify(payload),
+                expires,
+            ).join('; ');
         };
 
         const hide = (element) => {
@@ -99,25 +179,13 @@
 
         const writeConsent = (value) => {
             const expires = new Date(Date.now() + expirationDays * 86400000).toUTCString();
-            const parts = [
-                `${encodeURIComponent(cookieKey)}=${encodeURIComponent(value)}`,
-                `expires=${expires}`,
-                'path=/',
-                'SameSite=Lax',
-            ];
+            document.cookie = cookieParts(cookieKey, value, expires).join('; ');
 
-            if (sessionDomain && sessionDomain !== 'null') {
-                parts.push(`domain=${sessionDomain}`);
-            }
-
-            if (cookieSecure) {
-                parts.push('Secure');
-            }
-
-            document.cookie = parts.join('; ');
+            const state = consentStateFromValue(value);
+            writeAttribution(state.ad_storage === 'granted');
 
             if (typeof window.gtag === 'function') {
-                window.gtag('consent', 'update', consentStateFromValue(value));
+                window.gtag('consent', 'update', state);
             }
 
             if (typeof consentChangeCallback === 'function') {
