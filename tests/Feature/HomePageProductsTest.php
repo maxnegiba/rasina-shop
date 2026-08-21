@@ -14,6 +14,9 @@ class HomePageProductsTest extends TestCase
 
     public function test_homepage_lists_available_products_by_creation_date(): void
     {
+        // This test asserts the controller/view data only. Keep it deterministic
+        // regardless of whether a staging .env has marketing injection enabled.
+        config()->set('marketing.tracking_enabled', false);
         $this->withoutMiddleware(CookieConsentMiddleware::class);
 
         $category = Category::create([
