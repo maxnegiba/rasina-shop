@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CaptureMarketingAttribution;
 use App\Http\Middleware\InjectGoogleTagManager;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
@@ -17,15 +18,16 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(SecurityHeaders::class);
 
-        // The cookie-consent package writes a plain browser-readable cookie so the
-        // frontend can update Consent Mode immediately. Laravel must not try to
-        // decrypt it, otherwise server-side marketing consent checks see it as null.
+        // Consent + attribution cookies are intentionally browser-readable. Laravel
+        // must not try to decrypt them before the marketing middleware inspects them.
         $middleware->encryptCookies(except: [
             '__cookie_consent',
+            \App\Services\MarketingAttribution::COOKIE_NAME,
         ]);
 
         $middleware->web(append: [
             \Statikbe\CookieConsent\CookieConsentMiddleware::class,
+            CaptureMarketingAttribution::class,
             GoogleTagManagerMiddleware::class,
             InjectGoogleTagManager::class,
         ]);
