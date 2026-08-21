@@ -18,12 +18,20 @@ class MarketingAttributionTest extends TestCase
 
         $url = '/_attribution-capture-test?utm_source=facebook&utm_medium=paid_social&utm_campaign=cruci_august&utm_content=video_02';
 
-        $withoutMarketing = $this->withCookie('__cookie_consent', '2')->get($url)->assertOk();
+        $withoutMarketing = $this
+            ->withUnencryptedCookie('__cookie_consent', '2')
+            ->get($url)
+            ->assertOk();
+
         $withoutMarketingCookie = collect($withoutMarketing->headers->getCookies())
             ->first(fn ($cookie): bool => $cookie->getName() === MarketingAttribution::COOKIE_NAME);
         $this->assertNull($withoutMarketingCookie);
 
-        $withMarketing = $this->withCookie('__cookie_consent', 'true')->get($url)->assertOk();
+        $withMarketing = $this
+            ->withUnencryptedCookie('__cookie_consent', 'true')
+            ->get($url)
+            ->assertOk();
+
         $cookie = collect($withMarketing->headers->getCookies())
             ->first(fn ($cookie): bool => $cookie->getName() === MarketingAttribution::COOKIE_NAME);
 
@@ -73,8 +81,8 @@ class MarketingAttributionTest extends TestCase
         ]);
 
         $response = $this
-            ->withCookie('__cookie_consent', 'true')
-            ->withCookie(MarketingAttribution::COOKIE_NAME, $cookie)
+            ->withUnencryptedCookie('__cookie_consent', 'true')
+            ->withUnencryptedCookie(MarketingAttribution::COOKIE_NAME, $cookie)
             ->get('/_attribution-order-test')
             ->assertOk();
 
