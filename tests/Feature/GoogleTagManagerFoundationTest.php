@@ -33,7 +33,7 @@ class GoogleTagManagerFoundationTest extends TestCase
         $response
             ->assertOk()
             ->assertSee('window.mtdLoadGtm', escape: false)
-            ->assertSee("var containerId = 'GTM-TEST123'", escape: false)
+            ->assertSee('var containerId = "GTM-TEST123"', escape: false)
             ->assertSee('hasOptionalConsent(readConsent())', escape: false)
             ->assertSee('window.setTimeout(function()', escape: false)
             ->assertSee('}, 5000);', escape: false)
