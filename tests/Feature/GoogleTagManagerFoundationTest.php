@@ -49,6 +49,7 @@ class GoogleTagManagerFoundationTest extends TestCase
         $this->assertStringContainsString('https://connect.facebook.net', $csp);
         $this->assertStringContainsString('https://www.facebook.com', $csp);
         $this->assertStringContainsString('https://analytics.tiktok.com', $csp);
+        $this->assertStringContainsString('https://analytics-ipv6.tiktokw.us', $csp);
     }
 
     public function test_google_marketing_csp_sources_are_absent_when_tracking_is_disabled(): void
@@ -65,6 +66,7 @@ class GoogleTagManagerFoundationTest extends TestCase
         $this->assertStringNotContainsString('https://connect.facebook.net', $csp);
         $this->assertStringNotContainsString('https://www.facebook.com', $csp);
         $this->assertStringNotContainsString('https://analytics.tiktok.com', $csp);
+        $this->assertStringNotContainsString('https://analytics-ipv6.tiktokw.us', $csp);
     }
 
     public function test_invalid_gtm_container_id_is_never_injected(): void
