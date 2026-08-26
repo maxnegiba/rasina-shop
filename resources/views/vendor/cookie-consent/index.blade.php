@@ -1,5 +1,9 @@
 @php
     $locale = $app->getLocale();
+    $privacyPreferencesScript = public_path('js/privacy-preferences.js');
+    $privacyPreferencesVersion = is_file($privacyPreferencesScript)
+        ? filemtime($privacyPreferencesScript)
+        : time();
 @endphp
 
 <div
@@ -82,4 +86,4 @@
 </div>
 
 <div class="lcc-backdrop js-lcc-backdrop" style="display: none"></div>
-<script src="{{ asset('js/privacy-preferences.js') }}" defer></script>
+<script src="{{ asset('js/privacy-preferences.js') }}?v={{ $privacyPreferencesVersion }}" defer></script>
