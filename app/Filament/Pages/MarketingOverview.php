@@ -29,8 +29,15 @@ class MarketingOverview extends Page
             try {
                 $totals = Analytics::fetchTotalVisitorsAndPageViews($period);
                 $gaTotals = [
-                    'visitors' => (int) $totals->sum(fn (array $row): int => (int) ($row['visitors'] ?? 0)),
-                    'pageViews' => (int) $totals->sum(fn (array $row): int => (int) ($row['pageViews'] ?? 0)),
+                    // spatie/laravel-analytics 5.7 returns activeUsers and
+                    // screenPageViews. Keep the old keys as fallbacks so the
+                    // dashboard also remains compatible with older responses.
+                    'visitors' => (int) $totals->sum(
+                        fn (array $row): int => (int) ($row['activeUsers'] ?? $row['visitors'] ?? 0),
+                    ),
+                    'pageViews' => (int) $totals->sum(
+                        fn (array $row): int => (int) ($row['screenPageViews'] ?? $row['pageViews'] ?? 0),
+                    ),
                 ];
                 $topPages = Analytics::fetchMostVisitedPages($period, 10);
                 $topReferrers = Analytics::fetchTopReferrers($period, 10);
