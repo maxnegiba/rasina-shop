@@ -33,7 +33,7 @@ class InjectGoogleTagManager
             return $response;
         }
 
-        $escapedContainerId = htmlspecialchars($containerId, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $encodedContainerId = $this->encodeForJavaScript($containerId);
         $cookieKey = $this->encodeForJavaScript((string) config('cookie-consent.cookie_key', '__cookie_consent'));
         $analyticsValue = $this->encodeForJavaScript((string) config('cookie-consent.cookie_value_analytics', '2'));
         $marketingValue = $this->encodeForJavaScript((string) config('cookie-consent.cookie_value_marketing', '3'));
@@ -41,52 +41,102 @@ class InjectGoogleTagManager
         $serverDataLayer = $this->renderServerDataLayer();
 
         $headSnippet = <<<HTML
-<!-- Google Consent Mode defaults -->
+<!-- Google Consent Mode + consent-aware GTM loader -->
 <script>
 window.dataLayer = window.dataLayer || [];
 window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
 (function(){
+    var containerId = {$encodedContainerId};
     var cookieKey = {$cookieKey};
     var values = {
         analytics: {$analyticsValue},
         marketing: {$marketingValue},
         both: {$bothValue}
     };
-    var prefix = encodeURIComponent(cookieKey) + '=';
-    var cookieEntry = document.cookie.split(';').map(function(item){ return item.trim(); }).find(function(item){ return item.indexOf(prefix) === 0; });
-    var current = cookieEntry ? decodeURIComponent(cookieEntry.slice(prefix.length)) : null;
-    var analyticsGranted = current === values.analytics || current === values.both;
-    var marketingGranted = current === values.marketing || current === values.both;
+    var loaded = false;
+    var scheduled = false;
 
-    window.gtag('consent', 'default', {
-        analytics_storage: analyticsGranted ? 'granted' : 'denied',
-        ad_storage: marketingGranted ? 'granted' : 'denied',
-        ad_user_data: marketingGranted ? 'granted' : 'denied',
-        ad_personalization: marketingGranted ? 'granted' : 'denied'
-    });
+    function readConsent(){
+        var prefix = encodeURIComponent(cookieKey) + '=';
+        var parts = document.cookie ? document.cookie.split(';') : [];
+
+        for (var i = 0; i < parts.length; i++) {
+            var item = parts[i].trim();
+            if (item.indexOf(prefix) === 0) {
+                return decodeURIComponent(item.slice(prefix.length));
+            }
+        }
+
+        return null;
+    }
+
+    function consentState(value){
+        var analyticsGranted = value === values.analytics || value === values.both;
+        var marketingGranted = value === values.marketing || value === values.both;
+
+        return {
+            analytics_storage: analyticsGranted ? 'granted' : 'denied',
+            ad_storage: marketingGranted ? 'granted' : 'denied',
+            ad_user_data: marketingGranted ? 'granted' : 'denied',
+            ad_personalization: marketingGranted ? 'granted' : 'denied'
+        };
+    }
+
+    function hasOptionalConsent(value){
+        return value === values.analytics || value === values.marketing || value === values.both;
+    }
+
+    var current = readConsent();
+    window.gtag('consent', 'default', consentState(current));
+
+    window.mtdLoadGtm = function(){
+        if (loaded || !hasOptionalConsent(readConsent())) {
+            return;
+        }
+
+        loaded = true;
+        window.dataLayer.push({'gtm.start': new Date().getTime(), event: 'gtm.js'});
+
+        var firstScript = document.getElementsByTagName('script')[0];
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtm.js?id=' + encodeURIComponent(containerId);
+        firstScript.parentNode.insertBefore(script, firstScript);
+    };
+
+    function scheduleDeferredLoad(){
+        if (scheduled || !hasOptionalConsent(readConsent())) {
+            return;
+        }
+
+        scheduled = true;
+        window.setTimeout(function(){
+            window.mtdLoadGtm();
+        }, 5000);
+    }
+
+    if (hasOptionalConsent(current)) {
+        var loadOnInteraction = function(){
+            window.mtdLoadGtm();
+        };
+
+        ['pointerdown', 'keydown', 'touchstart', 'scroll'].forEach(function(eventName){
+            window.addEventListener(eventName, loadOnInteraction, {once: true, passive: true});
+        });
+
+        if (document.readyState === 'complete') {
+            scheduleDeferredLoad();
+        } else {
+            window.addEventListener('load', scheduleDeferredLoad, {once: true});
+        }
+    }
 })();
 {$serverDataLayer}
 </script>
-<!-- End Google Consent Mode defaults -->
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','{$escapedContainerId}');</script>
-<!-- End Google Tag Manager -->
-HTML;
-
-        $bodySnippet = <<<HTML
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={$escapedContainerId}"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
+<!-- End Google Consent Mode + consent-aware GTM loader -->
 HTML;
 
         $content = preg_replace('/<head(\s[^>]*)?>/i', '$0'."\n".$headSnippet, $content, 1) ?? $content;
-        $content = preg_replace('/<body(\s[^>]*)?>/i', '$0'."\n".$bodySnippet, $content, 1) ?? $content;
-
         $response->setContent($content);
 
         return $response;
