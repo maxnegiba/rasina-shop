@@ -11,6 +11,16 @@ class MarketingAttribution
     /** @return array<string, mixed> */
     public function orderAttributes(Request $request): array
     {
+        $marketingConsent = in_array(
+            (string) $request->cookie('__cookie_consent', 'false'),
+            ['3', 'true'],
+            true,
+        );
+
+        if (! $marketingConsent) {
+            return [];
+        }
+
         $payload = $this->decodeCookie($request->cookie(self::COOKIE_NAME));
 
         if ($payload === null) {
