@@ -18,11 +18,12 @@ class GoogleTagManagerFoundationTest extends TestCase
 
         $response
             ->assertOk()
+            ->assertDontSee('window.mtdLoadGtm', escape: false)
             ->assertDontSee('googletagmanager.com/gtm.js', escape: false)
             ->assertDontSee('googletagmanager.com/ns.html', escape: false);
     }
 
-    public function test_gtm_is_injected_when_tracking_is_enabled_and_container_id_is_valid(): void
+    public function test_tracking_enabled_renders_a_consent_aware_deferred_gtm_loader(): void
     {
         config()->set('marketing.tracking_enabled', true);
         config()->set('marketing.gtm.container_id', 'GTM-TEST123');
@@ -31,9 +32,13 @@ class GoogleTagManagerFoundationTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSee("'GTM-TEST123'", escape: false)
+            ->assertSee('window.mtdLoadGtm', escape: false)
+            ->assertSee("var containerId = 'GTM-TEST123'", escape: false)
+            ->assertSee('hasOptionalConsent(readConsent())', escape: false)
+            ->assertSee('window.setTimeout(function()', escape: false)
+            ->assertSee('}, 5000);', escape: false)
             ->assertSee('https://www.googletagmanager.com/gtm.js?id=', escape: false)
-            ->assertSee('https://www.googletagmanager.com/ns.html?id=GTM-TEST123', escape: false);
+            ->assertDontSee('https://www.googletagmanager.com/ns.html', escape: false);
 
         $csp = (string) $response->headers->get('Content-Security-Policy');
 
@@ -71,6 +76,7 @@ class GoogleTagManagerFoundationTest extends TestCase
 
         $response
             ->assertOk()
+            ->assertDontSee('window.mtdLoadGtm', escape: false)
             ->assertDontSee('googletagmanager.com/gtm.js', escape: false)
             ->assertDontSee('googletagmanager.com/ns.html', escape: false);
     }
