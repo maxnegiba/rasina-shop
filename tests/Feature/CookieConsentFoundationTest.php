@@ -22,7 +22,12 @@ class CookieConsentFoundationTest extends TestCase
             ->assertSee('Necesare')
             ->assertSee('Analiză')
             ->assertSee('Marketing')
-            ->assertSee('js/privacy-preferences.js', escape: false);
+            ->assertDontSee('js/privacy-preferences.js', escape: false);
+
+        $appEntry = file_get_contents(resource_path('js/app.js'));
+
+        $this->assertIsString($appEntry);
+        $this->assertStringContainsString("import './privacy-preferences';", $appEntry);
     }
 
     public function test_tracking_stays_disabled_in_the_example_environment(): void
