@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\MarketingAttribution;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,10 +23,13 @@ class Order extends Model
         'confirmation_queued_at', 'confirmation_failed_at',
         'admin_notification_queued_at', 'admin_notification_sent_at',
         'admin_notification_failed_at', 'cancelled_at', 'cancellation_reason',
+        'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
+        'marketing_attribution',
     ];
 
     protected $casts = [
         'customer_details' => 'array',
+        'marketing_attribution' => 'array',
         'subtotal_amount' => 'decimal:2',
         'shipping_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
@@ -47,6 +51,18 @@ class Order extends Model
     {
         static::creating(function (Order $order): void {
             $order->public_token ??= (string) Str::uuid();
+
+            if (! app()->bound('request')) {
+                return;
+            }
+
+            $attributes = app(MarketingAttribution::class)->orderAttributes(request());
+
+            foreach ($attributes as $key => $value) {
+                if ($order->getAttribute($key) === null) {
+                    $order->setAttribute($key, $value);
+                }
+            }
         });
     }
 

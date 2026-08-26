@@ -39,11 +39,13 @@ class StorefrontRenderingTest extends TestCase
             'stripeKey' => 'pk_test_example',
             'orderToken' => '00000000-0000-4000-8000-000000000000',
             'totalAmount' => 123.45,
+            'totalAmountCents' => 12345,
             'order' => $order,
         ])->render();
 
         $this->assertStringContainsString('Plătește 123,45 RON', $html);
-        $this->assertStringContainsString('const paymentButtonLabel = ', $html);
+        $this->assertStringContainsString('const onlinePaymentButtonLabel = ', $html);
+        $this->assertStringContainsString('const cashOnDeliveryButtonLabel = ', $html);
         $this->assertStringNotContainsString('@json(', $html);
     }
 }

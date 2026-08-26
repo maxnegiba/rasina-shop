@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\MarketingDataLayer;
 
 class ShopController extends Controller
 {
@@ -52,11 +53,11 @@ class ShopController extends Controller
     /**
      * Afișează pagina unui singur produs.
      */
-    public function show($slug)
+    public function show($slug, MarketingDataLayer $dataLayer)
     {
         $product = Product::where('slug', $slug)
             ->where('status', 'published')
-            ->with(['images', 'relatedPost']) // MTD_ART_FINAL_RELATED_EAGER_LOAD
+            ->with(['images', 'relatedPost', 'category']) // MTD_ART_FINAL_RELATED_EAGER_LOAD
             ->firstOrFail();
 
         $featuredImage = $product->images->where('is_featured', true)->first()
@@ -70,6 +71,8 @@ class ShopController extends Controller
             ->inRandomOrder()
             ->take(4)
             ->get();
+
+        $dataLayer->viewProduct($product);
 
         return view('shop.show', compact('product', 'featuredImage', 'relatedProducts'));
     }

@@ -326,6 +326,7 @@
                         <li><a href="{{ route('page.show', 'termeni-si-conditii') }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Termeni și Condiții</a></li>
                         <li><a href="{{ route('page.show', 'politica-de-confidentialitate') }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Politica de Confidențialitate</a></li>
                         <li><a href="{{ route('page.show', 'politica-de-retur') }}" class="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Livrare și Retur</a></li>
+                        <li><button type="button" class="js-lcc-settings-toggle hover:text-white hover:translate-x-1 transition-all duration-300 inline-block">Preferințe cookie</button></li>
                     </ul>
                 </div>
 

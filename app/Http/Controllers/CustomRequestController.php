@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CustomRequest;
 use App\Services\CustomRequestMailService;
+use App\Services\MarketingDataLayer;
 use App\Services\PrivateImageUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,6 +20,7 @@ class CustomRequestController extends Controller
         Request $request,
         PrivateImageUploadService $images,
         CustomRequestMailService $mail,
+        MarketingDataLayer $dataLayer,
     ): RedirectResponse {
         $validatedData = $request->validate([
             'product_id' => ['nullable', 'exists:products,id'],
@@ -63,6 +65,15 @@ class CustomRequestController extends Controller
         ]);
 
         $mail->queueNotifications($customRequest);
+
+        $dataLayer->flashPush('custom_order_sent', [
+            'custom_order' => [
+                'source' => 'contact_form',
+                ...($customRequest->product_id
+                    ? ['product_id' => (string) $customRequest->product_id]
+                    : []),
+            ],
+        ]);
 
         return redirect()->back()->with('success', 'Cererea ta a fost trimisă cu succes! Te vom contacta în cel mai scurt timp pentru a discuta detaliile și oferta de preț.');
     }

@@ -61,16 +61,23 @@ class CustomOrderModal extends Component
             return;
         }
 
+        $productId = $this->product_id;
+
         $customRequest = CustomRequest::create([
             'customer_name' => $this->name,
             'customer_email' => $this->email,
             'customer_phone' => $this->phone,
             'special_message' => $this->message,
-            'product_id' => $this->product_id,
+            'product_id' => $productId,
             'status' => 'new',
         ]);
 
         app(CustomRequestMailService::class)->queueNotifications($customRequest);
+
+        $this->dispatch('custom-order-sent',
+            source: $productId ? 'product' : 'general',
+            productId: $productId,
+        );
 
         $this->successMessage = 'Cererea a fost trimisă cu succes! Te vom contacta în curând.';
         $this->reset(['name', 'email', 'phone', 'message']);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Services\MarketingDataLayer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -37,7 +38,7 @@ class CartController extends Controller
     /**
      * Adaugă un produs în coșul de cumpărături.
      */
-    public function add(Request $request): JsonResponse|RedirectResponse
+    public function add(Request $request, MarketingDataLayer $dataLayer): JsonResponse|RedirectResponse
     {
         $validated = $request->validate([
             'product_id' => ['required', 'integer', 'exists:products,id'],
@@ -71,7 +72,7 @@ class CartController extends Controller
                 : redirect()->back()->with('success', 'Produsul este deja în coș.');
         }
 
-        $product = Product::with('images')->findOrFail($validated['product_id']);
+        $product = Product::with(['images', 'category'])->findOrFail($validated['product_id']);
 
         if ($product->status !== 'published' || ! $product->isPurchasable()) {
             $message = $product->price === null || (float) $product->price <= 0
@@ -116,15 +117,24 @@ class CartController extends Controller
         session()->put('cart', $cart);
         $this->rememberAddToken($requestToken);
 
+        $redirectToCheckout = $request->boolean('redirect_to_checkout');
+
         if ($this->expectsJson($request)) {
+            if ($redirectToCheckout) {
+                $dataLayer->flashAddToCart($product, $quantity);
+            }
+
             return response()->json($this->cartPayload(
                 $cart,
                 'Produsul a fost adăugat în coș.',
-                $request->boolean('redirect_to_checkout') ? route('checkout.index') : null,
+                $redirectToCheckout ? route('checkout.index') : null,
+                $redirectToCheckout ? null : $dataLayer->addToCartEvent($product, $quantity),
             ));
         }
 
-        if ($request->boolean('redirect_to_checkout')) {
+        $dataLayer->flashAddToCart($product, $quantity);
+
+        if ($redirectToCheckout) {
             return redirect()->route('checkout.index');
         }
 
@@ -225,8 +235,12 @@ class CartController extends Controller
         return $request->ajax() || $request->expectsJson() || $request->wantsJson();
     }
 
-    private function cartPayload(array $cart, string $message, ?string $redirectUrl = null): array
-    {
+    private function cartPayload(
+        array $cart,
+        string $message,
+        ?string $redirectUrl = null,
+        ?array $marketingEvent = null,
+    ): array {
         $summary = $this->summary($cart);
 
         return [
@@ -235,6 +249,7 @@ class CartController extends Controller
             'cart_count' => $summary['item_count'],
             'summary' => $summary,
             'redirect_url' => $redirectUrl,
+            'marketing_event' => $marketingEvent,
             'html' => view('cart._sidebar_content', compact('cart', 'summary'))->render(),
         ];
     }
