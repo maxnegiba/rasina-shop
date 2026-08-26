@@ -167,14 +167,14 @@
             hide(alertModal);
             show(settingsModal);
             showBackdrop();
-            settingsModal.querySelector('button, input')?.focus();
+            settingsModal.querySelector('button, input')?.focus({ preventScroll: true });
         };
 
         const openAlert = () => {
             hide(settingsModal);
+            hide(backdrop);
+            document.documentElement.classList.remove('js-lcc-active');
             show(alertModal);
-            showBackdrop();
-            alertModal.querySelector('button')?.focus();
         };
 
         const writeConsent = (value) => {
@@ -249,43 +249,63 @@
         };
 
         document.addEventListener('click', (event) => {
-            const settingsToggle = event.target.closest('.js-lcc-settings-toggle');
+            const target = event.target instanceof Element ? event.target : null;
+
+            if (!target) {
+                return;
+            }
+
+            const settingsToggle = target.closest('.js-lcc-settings-toggle');
             if (settingsToggle) {
                 event.preventDefault();
 
                 if (settingsModal.style.display !== 'none') {
-                    closeAll();
+                    if (readCookie() === null) {
+                        openAlert();
+                    } else {
+                        closeAll();
+                    }
                 } else {
                     openSettings();
                 }
                 return;
             }
 
-            if (event.target.closest('.js-lcc-accept')) {
+            if (target.closest('.js-lcc-accept')) {
                 writeConsent(values.both);
                 closeAll();
                 return;
             }
 
-            if (event.target.closest('.js-lcc-essentials')) {
+            if (target.closest('.js-lcc-essentials')) {
                 writeConsent(values.none);
                 closeAll();
                 return;
             }
 
-            if (event.target.closest('.js-lcc-settings-save')) {
+            if (target.closest('.js-lcc-settings-save')) {
                 saveSelection();
             }
         });
 
         backdrop.addEventListener('click', () => {
-            if (settingsModal.style.display !== 'none' && readCookie() !== null) {
-                closeAll();
+            if (settingsModal.style.display !== 'none') {
+                if (readCookie() === null) {
+                    openAlert();
+                } else {
+                    closeAll();
+                }
             }
         });
 
         document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && settingsModal.style.display !== 'none' && readCookie() !== null) {
+            if (event.key !== 'Escape' || settingsModal.style.display === 'none') {
+                return;
+            }
+
+            if (readCookie() === null) {
+                openAlert();
+            } else {
                 closeAll();
             }
         });
