@@ -31,6 +31,14 @@ class SecurityHeaders
                 'https://fonts.googleapis.com',
             ];
 
+            $imgSources = [
+                "'self'",
+                'data:',
+                'blob:',
+                'https:',
+                'https://*.stripe.com',
+            ];
+
             $connectSources = [
                 "'self'",
                 'https://api.stripe.com',
@@ -52,9 +60,12 @@ class SecurityHeaders
                 $scriptSources[] = 'https://www.googletagmanager.com';
                 $scriptSources[] = 'https://connect.facebook.net';
                 $scriptSources[] = 'https://analytics.tiktok.com';
+                $scriptSources[] = 'https://analytics-ipv6.tiktokw.us';
 
                 $styleSources[] = 'https://www.googletagmanager.com';
                 $styleSources[] = 'https://tagmanager.google.com';
+
+                $imgSources[] = 'https://analytics-ipv6.tiktokw.us';
 
                 $connectSources[] = 'https://www.googletagmanager.com';
                 $connectSources[] = 'https://*.google-analytics.com';
@@ -62,6 +73,7 @@ class SecurityHeaders
                 $connectSources[] = 'https://connect.facebook.net';
                 $connectSources[] = 'https://www.facebook.com';
                 $connectSources[] = 'https://analytics.tiktok.com';
+                $connectSources[] = 'https://analytics-ipv6.tiktokw.us';
 
                 $frameSources[] = 'https://www.googletagmanager.com';
             }
@@ -88,7 +100,7 @@ class SecurityHeaders
                 'script-src '.implode(' ', $scriptSources),
                 'style-src '.implode(' ', $styleSources),
                 "font-src 'self' data: https://fonts.gstatic.com",
-                "img-src 'self' data: blob: https: https://*.stripe.com",
+                'img-src '.implode(' ', $imgSources),
                 'connect-src '.implode(' ', $connectSources),
                 'frame-src '.implode(' ', $frameSources),
                 "worker-src 'self' blob:",
