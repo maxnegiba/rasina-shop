@@ -88,6 +88,7 @@ window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
 
     var current = readConsent();
     window.gtag('consent', 'default', consentState(current));
+{$serverDataLayer}
 
     window.mtdLoadGtm = function(){
         if (loaded || !hasOptionalConsent(readConsent())) {
@@ -131,7 +132,6 @@ window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
         }
     }
 })();
-{$serverDataLayer}
 </script>
 <!-- End Google Consent Mode + consent-aware GTM loader -->
 HTML;
