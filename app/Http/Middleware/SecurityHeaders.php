@@ -66,7 +66,16 @@ class SecurityHeaders
                 $frameSources[] = 'https://www.googletagmanager.com';
             }
 
-            if ($request->is('admin*') || $request->is('admin-security*')) {
+            // Filament and the storefront custom-order Livewire UI use Alpine's
+            // runtime expression evaluator. Scope unsafe-eval narrowly to the
+            // routes that actually render those components instead of enabling
+            // it site-wide.
+            if (
+                $request->is('admin*')
+                || $request->is('admin-security*')
+                || $request->is('magazin*')
+                || $request->is('custom-orders')
+            ) {
                 $scriptSources[] = "'unsafe-eval'";
             }
 
