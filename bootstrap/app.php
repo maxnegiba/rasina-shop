@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\CaptureMarketingAttribution;
 use App\Http\Middleware\InjectGoogleTagManager;
+use App\Http\Middleware\InjectUmamiAnalytics;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -30,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
             CaptureMarketingAttribution::class,
             GoogleTagManagerMiddleware::class,
             InjectGoogleTagManager::class,
+            InjectUmamiAnalytics::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [
