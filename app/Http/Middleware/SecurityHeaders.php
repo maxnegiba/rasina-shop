@@ -78,6 +78,11 @@ class SecurityHeaders
                 $frameSources[] = 'https://www.googletagmanager.com';
             }
 
+            if (config('marketing.umami.enabled', false)) {
+                $scriptSources[] = 'https://analytics.mtdart.ro';
+                $connectSources[] = 'https://analytics.mtdart.ro';
+            }
+
             // Filament and the storefront custom-order Livewire UI use Alpine's
             // runtime expression evaluator. Scope unsafe-eval narrowly to the
             // routes that actually render those components instead of enabling
