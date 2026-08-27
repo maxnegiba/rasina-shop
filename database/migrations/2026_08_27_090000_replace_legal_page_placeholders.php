@@ -2,18 +2,26 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 
 return new class extends Migration
 {
     /**
-     * Replace only the original placeholder tokens that may have been persisted
-     * when the legal pages were first seeded. Existing editorial changes remain
-     * untouched.
+     * Repair legal-page content that may have persisted the original seed
+     * placeholders. The company identity below is public legal information and
+     * matches the production template committed with the application.
+     *
+     * Only the exact placeholder tokens are replaced, so later editorial edits
+     * made from Filament remain untouched.
      */
     public function up(): void
     {
-        $replacements = $this->legalReplacements();
+        $replacements = [
+            '[DENUMIREA LEGALĂ A OPERATORULUI]' => 'MTD STUDIO PROFESSIONAL SRL',
+            '[CUI/CIF]' => '52534613',
+            '[NR. REGISTRUL COMERȚULUI]' => 'J2025071368008',
+            '[ADRESA SEDIULUI SOCIAL]' => 'Str. Piscului 14, Loc. Vulcan, Jud. Hunedoara, Cod 336200, România',
+            '[TELEFON]' => '+40 771 768 582',
+        ];
 
         DB::table('pages')
             ->whereIn('slug', [
@@ -64,32 +72,11 @@ return new class extends Migration
     }
 
     /**
-     * This migration repairs production data and is intentionally irreversible:
-     * rolling it back must not reintroduce invalid public placeholders.
+     * This is a production-data repair. Rolling back must not reintroduce
+     * invalid public placeholders.
      */
     public function down(): void
     {
         // No-op by design.
-    }
-
-    private function legalReplacements(): array
-    {
-        $values = [
-            '[DENUMIREA LEGALĂ A OPERATORULUI]' => trim((string) config('shop.legal.business_name')),
-            '[CUI/CIF]' => trim((string) config('shop.legal.tax_id')),
-            '[NR. REGISTRUL COMERȚULUI]' => trim((string) config('shop.legal.trade_register')),
-            '[ADRESA SEDIULUI SOCIAL]' => trim((string) config('shop.legal.address')),
-            '[TELEFON]' => trim((string) config('shop.legal.phone')),
-        ];
-
-        foreach ($values as $placeholder => $value) {
-            if ($value === '' || $value === $placeholder || str_starts_with($value, '[')) {
-                throw new RuntimeException(
-                    "Cannot repair legal pages: configure a real value for {$placeholder} before running migrations.",
-                );
-            }
-        }
-
-        return $values;
     }
 };
