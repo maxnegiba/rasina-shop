@@ -84,18 +84,29 @@ class UmamiAnalyticsTest extends TestCase
             'marketing.umami.enabled' => true,
         ]);
 
-        $request = Request::create('/', 'GET');
-        $middleware = app(SecurityHeaders::class);
+        // SecurityHeaders intentionally skips CSP in the local environment.
+        // Force a non-local environment for this isolated middleware test so
+        // the assertion tests the production CSP branch deterministically,
+        // regardless of the runner's inherited APP_ENV value.
+        $originalEnvironment = app()->environment();
+        app()->detectEnvironment(fn (): string => 'testing');
 
-        $response = $middleware->handle(
-            $request,
-            fn (): Response => new Response('ok', 200),
-        );
+        try {
+            $request = Request::create('/', 'GET');
+            $middleware = app(SecurityHeaders::class);
 
-        $csp = (string) $response->headers->get('Content-Security-Policy');
+            $response = $middleware->handle(
+                $request,
+                fn (): Response => new Response('ok', 200),
+            );
 
-        $this->assertStringContainsString('script-src', $csp);
-        $this->assertStringContainsString('connect-src', $csp);
-        $this->assertSame(2, substr_count($csp, 'https://analytics.mtdart.ro'));
+            $csp = (string) $response->headers->get('Content-Security-Policy');
+
+            $this->assertStringContainsString('script-src', $csp);
+            $this->assertStringContainsString('connect-src', $csp);
+            $this->assertSame(2, substr_count($csp, 'https://analytics.mtdart.ro'));
+        } finally {
+            app()->detectEnvironment(fn (): string => $originalEnvironment);
+        }
     }
 }
