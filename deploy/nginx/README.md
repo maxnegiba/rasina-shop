@@ -68,3 +68,23 @@ Cache-Control: public, max-age=31536000, immutable
 ```
 
 The `/img/` and `/storage/` paths intentionally retain a shorter 30-day cache because those files may be replaced without a fingerprinted filename.
+
+## Canonical WWW migration (SEO-01–03)
+
+See `mtdart-canonical-redirect.conf.example` for a **manual** apex-only
+redirect example. This is not a drop-in snippet for the canonical www block.
+
+1. Inventory the active Nginx/Plesk/CDN rules and certs on apex + www.
+2. Update all webhook endpoints, signed-link producers and external integrations
+   to the intended host; test Stripe and signed proforma URLs before redirecting.
+3. Change the production `APP_URL` to `https://www.mtdart.ro`, clear/config-cache
+   Laravel, and ensure forwarded HTTPS headers are trusted as appropriate.
+4. Apply apex redirects only after `nginx -t` passes and the configuration
+   has been reviewed. Avoid double redirects from upstream CDN rules.
+5. Confirm HTTP 200 self-canonical on www; apex GET/HEAD 301; POST methods
+   are not coerced to GET; no redirect loops. Check `/sitemap.xml` and
+   `/robots.txt` on www, then submit sitemap in Search Console.
+6. Rollback: restore prior Nginx/CDN config and prior production APP_URL,
+   clear/cache Laravel config and retest checkout + webhooks.
+
+The application code in this branch does **not** enable any edge redirects.
