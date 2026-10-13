@@ -10,6 +10,12 @@
     @else
         {!! seo() !!}
     @endif
+    @if(\App\Support\CanonicalUrl::isPublicSeoRoute(request()))
+        <link rel="canonical" href="{{ \App\Support\CanonicalUrl::forRequest(request()) }}">
+    @endif
+    @if(app()->environment('staging'))
+        <meta name="robots" content="noindex, nofollow">
+    @endif
 
     @php
         $isHomePage = request()->routeIs('home');

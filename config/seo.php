@@ -23,7 +23,20 @@ return [
     /**
      * Add self-referencing canonical tags to storefront pages.
      */
-    'canonical_link' => true,
+    'canonical_link' => false,
+
+    // Stable HTTPS origin for canonical tags and all sitemap entries.
+    'canonical_origin' => 'https://www.mtdart.ro',
+
+    // Deliberate allowlist for indexable legal/informational CMS pages.
+    // Editors can extend this after verifying that pages contain substantive content.
+    'sitemap_cms_slugs' => [
+        'termeni-si-conditii',
+        'politica-de-confidentialitate',
+        'politica-de-retur',
+    ],
+    // Pages on this list are also excluded from the sitemap even if allowlisted.
+    'noindex_cms_slugs' => [],
 
     'robots' => [
         'default' => 'max-snippet:-1,max-image-preview:large,max-video-preview:-1',
