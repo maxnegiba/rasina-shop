@@ -1,0 +1,24 @@
+# SEO-01: EXAMPLE ONLY. This file is NOT loaded by deploying the repository.
+#
+# Add this in the HTTP/HTTPS *apex-only* server blocks after verifying DNS,
+# TLS on both hosts, current proxy rules, and Stripe/webhook integrations.
+# Do not use it on www or analytics.mtdart.ro.
+#
+# For GET/HEAD, a permanent 301 is appropriate. Preserve exact path+query.
+# For all other methods, use a method-preserving 308. For signed proforma
+# links, coordinate existing URL signing and consumer changes before enabling
+# this host redirect: host-bound signatures can become invalid after redirect.
+#
+# Place in server { server_name mtdart.ro; ... }:
+#   if ($request_method ~ ^(GET|HEAD)$) {
+#       return 301 https://www.mtdart.ro$request_uri;
+#   }
+#   return 308 https://www.mtdart.ro$request_uri;
+#
+# IMPORTANT: Nginx "if ... return" is allowed, but never add this to a www
+# server block and never install while a CDN already implements an apex redirect.
+# For POST webhooks, prefer migrating the external integration to the www URL
+# before activating; 308 is a fallback, not a replacement for that migration.
+#
+# HTTP may separately redirect directly to HTTPS WWW. Preserve /?query.
+# Verify TLS certs, CDN rules, nginx -t, login, cart, signed URLs and Stripe.
