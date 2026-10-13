@@ -10,6 +10,9 @@
     @else
         {!! seo() !!}
     @endif
+    @if(\App\Support\CanonicalUrl::isPublicSeoRoute(request()))
+        <link rel="canonical" href="{{ \App\Support\CanonicalUrl::forRequest(request()) }}">
+    @endif
 
     @php
         $isHomePage = request()->routeIs('home');
