@@ -38,7 +38,7 @@ class SitemapTest extends TestCase
         $this->get(route('sitemap'))
             ->assertOk()
             ->assertHeader('Content-Type', 'application/xml; charset=UTF-8')
-            ->assertSee(route('shop.show', $published->slug), false)
-            ->assertDontSee(route('shop.show', $draft->slug), false);
+            ->assertSee('https://www.mtdart.ro/magazin/produs/'.$published->slug, false)
+            ->assertDontSee('https://www.mtdart.ro/magazin/produs/'.$draft->slug, false);
     }
 }
